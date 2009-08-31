@@ -6,14 +6,20 @@ Created on Aug 28, 2009
 '''
 import numpy
 import input
+import geometry
+import sphere
 
-c=input.read_ini('convex_polyeder_input.ini')
+c=input.read_ini('sphere_input.ini')
 
 d=input.ini2dict(c)
 
-(lattice_vectors, basis, basis_names, basis_name_idx) = input.geometry_from_dict(d)
+geo = geometry.geometry.from_dict(d)
 
-print lattice_vectors
-print basis
-print basis_names
-print basis_name_idx
+sph = sphere.sphere.from_dict(geo, d)
+
+print geo._lattice_vectors
+print geo._basis
+print geo._basis_names
+print geo._basis_names_idx
+print sph._radius
+print sph._shift_vector
