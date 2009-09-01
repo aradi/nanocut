@@ -1,4 +1,4 @@
-from numpy import array, dot
+from numpy import array, dot, matrix, asarray
 
 class geometry:
   '''Self-defined class for handling crystal structure,
@@ -29,6 +29,7 @@ class geometry:
     self._basis_names = basis_names
     self._basis_coordsys = basis_coordsys
     self._basis = self.coord_transform(basis, basis_coordsys)
+    self._basis = self.mv_basis_to_prim(self._basis)
 
   
   @classmethod
@@ -93,3 +94,9 @@ class geometry:
       exit('Error:\n'+
            'Supplied string "' + array_coordsys + '" for coordsys not valid, check configuration.'
            +'\nExiting...')
+      
+  def mv_basis_to_prim(self, basis):
+    '''moves basis vectors into primitive cell'''
+    basis = dot(asarray(matrix(self._lattice_vectors.T).I),basis.T).T
+    basis %= 1
+    return self.coord_transform(basis, "lattice")
