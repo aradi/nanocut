@@ -1,4 +1,5 @@
 from numpy import array, dot, matrix, asarray
+import numpy
 
 class geometry:
   '''Self-defined class for handling crystal structure,
@@ -100,3 +101,61 @@ class geometry:
     basis = dot(asarray(matrix(self._lattice_vectors.T).I),basis.T).T
     basis %= 1
     return self.coord_transform(basis, "lattice")
+  
+  def gen_cuboid_from_body(self, body):
+    return self.gen_cuboid(body.containing_cuboid())
+    
+  def gen_cuboid(self, cuboid):
+    m = 0.5*array([cuboid[0]+cuboid[1]])
+    n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
+    coords = numpy.array([[0,0,0]])
+    
+    
+    
+    
+    n_intsec = (cuboid - dot(self._lattice_vectors[1:3,:].T,n[1:3]).T)\
+     / self._lattice_vectors[0]
+     
+     
+    n_min_idx = abs(n_intsec[0]-n[0]).argmin()
+    n_max_idx = abs(n_intsec[1]-n[0]).argmin()
+    
+    if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
+      n_min_idx,n_max_idx=n_max_idx,n_min_idx
+      a,b=1,0
+    else:
+      a,b=0,1
+    n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
+    
+    for n0 in n_range:
+      n_intsec = (cuboid - dot(self._lattice_vectors[0:3:2,:].T,n[0:3:2]).T)\
+      / self._lattice_vectors[1]
+      
+      n_min_idx = abs(n_intsec[0]-n0).argmin()
+      n_max_idx = abs(n_intsec[1]-n0).argmin()
+    
+      if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
+        n_min_idx,n_max_idx=n_max_idx,n_min_idx
+        a,b=1,0
+      else:
+        a,b=0,1
+      n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
+      
+      for n1 in n_range:
+        n_intsec = (cuboid - dot(self._lattice_vectors[0:2,:].T,n[0:2]).T)\
+        / self._lattice_vectors[2]
+        n_min_idx = abs(n_intsec[0]-n1).argmin()
+        n_max_idx = abs(n_intsec[1]-n1).argmin()
+    
+        if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
+          n_min_idx,n_max_idx=n_max_idx,n_min_idx
+          a,b=1,0
+        else:
+          a,b=0,1
+        n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
+        
+        for n2 in n_range:
+          coords = numpy.vstack((coords, n0*self._lattice_vectors[0]+n1*\
+                                         self._lattice_vectors[1]+n2*self._lattice_vectors[2]))
+          print n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]+n2*self._lattice_vectors[2]
+    return numpy

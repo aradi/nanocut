@@ -4,7 +4,7 @@ Created on Aug 31, 2009
 @author: sebastian
 '''
 import numpy
-# import geometry
+
 class sphere:
   
   def __init__(self,geometry,radius_vector,shift_vector,
@@ -27,7 +27,6 @@ class sphere:
     self._radius = numpy.linalg.norm(geometry.coord_transform(radius_vector, radius_vector_coordsys))
     
     self._shift_vector = geometry.coord_transform(shift_vector, shift_vector_coordsys)
-    
     
   @classmethod  
   def from_dict(cls,geometry,d):
@@ -56,3 +55,6 @@ class sphere:
     shift_vector_coordsys = d["sphere"].get("shift_vector_coordsys","lattice")
 
     return cls(geometry,radius_vector,shift_vector,radius_vector_coordsys,shift_vector_coordsys)
+  
+  def containing_cuboid(self):
+    return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector

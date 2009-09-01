@@ -9,6 +9,8 @@ import input
 import geometry
 import sphere
 
+numpy.seterr(divide='ignore',invalid='ignore')
+
 c=input.read_ini('sphere_input.ini')
 
 d=input.ini2dict(c)
@@ -23,3 +25,6 @@ print geo._basis_names
 print geo._basis_names_idx
 print sph._radius
 print sph._shift_vector
+print sph.containing_cuboid()
+
+geo.gen_cuboid_from_body(sph)
