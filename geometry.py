@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from numpy import array, dot, matrix, asarray
 import numpy
 
@@ -110,7 +111,7 @@ class geometry:
     n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
     coords = numpy.array([[0,0,0]])
     
-    
+    temporary_list=[]
     
     
     n_intsec = (cuboid - dot(self._lattice_vectors[1:3,:].T,n[1:3]).T)\
@@ -157,5 +158,5 @@ class geometry:
         for n2 in n_range:
           coords = numpy.vstack((coords, n0*self._lattice_vectors[0]+n1*\
                                          self._lattice_vectors[1]+n2*self._lattice_vectors[2]))
-          print n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]+n2*self._lattice_vectors[2]
-    return numpy
+          temporary_list.append(n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]+n2*self._lattice_vectors[2])
+    return temporary_list

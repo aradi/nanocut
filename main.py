@@ -19,12 +19,17 @@ geo = geometry.geometry.from_dict(d)
 
 sph = sphere.sphere.from_dict(geo, d)
 
-print geo._lattice_vectors
-print geo._basis
-print geo._basis_names
-print geo._basis_names_idx
-print sph._radius
-print sph._shift_vector
-print sph.containing_cuboid()
+#print geo._lattice_vectors
+#print geo._basis
+#print geo._basis_names
+#print geo._basis_names_idx
+#print sph._radius
+#print sph._shift_vector
+#print sph.containing_cuboid()
 
-geo.gen_cuboid_from_body(sph)
+liste = geo.gen_cuboid_from_body(sph)
+
+print len(liste)+2
+print ""
+for el in liste:
+  print "H", el[0], el[1], el[2]
