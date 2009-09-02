@@ -8,6 +8,7 @@ import numpy
 import input
 import geometry
 import sphere
+import output
 
 numpy.seterr(divide='ignore',invalid='ignore')
 
@@ -19,12 +20,18 @@ geo = geometry.geometry.from_dict(d)
 
 sph = sphere.sphere.from_dict(geo, d)
 
-print geo._lattice_vectors
-print geo._basis
-print geo._basis_names
-print geo._basis_names_idx
-print sph._radius
-print sph._shift_vector
-print sph.containing_cuboid()
+atoms = geo.gen_cuboid_from_body(sph)
+#atoms = []
+#for el in geo.gen_atoms(numpy.array([0,0,0])):
+#  atoms.append(el)
+#for el in geo.gen_atoms(numpy.array([5,0,0])):
+#  atoms.append(el)
+#for el in geo.gen_atoms(numpy.array([2.5,2.5,0])):
+#  atoms.append(el)
+#for el in geo.gen_atoms(numpy.array([2.5,0,2.5])):
+#  atoms.append(el)
+  
+#atoms=numpy.array(atoms)
+in_out_array = sph.sorting(atoms)
 
-geo.gen_cuboid_from_body(sph)
+output.write_structure_to_file(geo, atoms, in_out_array)

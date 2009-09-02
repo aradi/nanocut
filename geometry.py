@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from numpy import array, dot, matrix, asarray
 import numpy
 
@@ -71,13 +72,13 @@ class geometry:
            +'\nExiting...')
     
     basis_names=[basis.pop(ind) for ind in range(0,len(basis)*3/4,3)]
-    '''#TODO: do not create dublicate entries, related to #TODO in l.88'''
+    '''#TODO: do not create double entries, related to #TODO in l.88'''
   
     try:
       basis = array([float(el) for el in basis])
     except ValueError:
       exit('Error:\n'+
-           'Supplied string for basis not convertable to number, check configuration.'
+           'Supplied string for basis not convertible to number, check configuration.'
            +'\nExiting...')
 
     basis_names_idx=range(basis.size/3) #TODO: generate real idx, related to #TODO in l.71
@@ -103,15 +104,14 @@ class geometry:
     return self.coord_transform(basis, "lattice")
   
   def gen_cuboid_from_body(self, body):
-    return self.gen_cuboid(body.containing_cuboid())
+    return self.gen_cuboid1(body.containing_cuboid())
     
-  def gen_cuboid(self, cuboid):
+  def gen_cuboid1(self, cuboid):
+
+    atoms = []
+    
     m = 0.5*array([cuboid[0]+cuboid[1]])
     n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
-    coords = numpy.array([[0,0,0]])
-    
-    
-    
     
     n_intsec = (cuboid - dot(self._lattice_vectors[1:3,:].T,n[1:3]).T)\
      / self._lattice_vectors[0]
@@ -125,6 +125,7 @@ class geometry:
       a,b=1,0
     else:
       a,b=0,1
+      
     n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
     
     for n0 in n_range:
@@ -155,7 +156,18 @@ class geometry:
         n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
         
         for n2 in n_range:
-          coords = numpy.vstack((coords, n0*self._lattice_vectors[0]+n1*\
-                                         self._lattice_vectors[1]+n2*self._lattice_vectors[2]))
-          print n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]+n2*self._lattice_vectors[2]
-    return numpy
+          coords = n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]\
+          +n2*self._lattice_vectors[2]
+          
+          for item in self.gen_atoms(coords):
+            atoms.append(item)
+          
+    return numpy.array(atoms)
+  
+  def gen_atoms(self, lat_point):
+    '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
+    list = []
+    for idx in self._basis_names_idx:
+      atom = numpy.hstack((lat_point+self._basis[idx],idx))
+      list.append(atom)
+    return list
