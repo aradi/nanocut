@@ -34,4 +34,4 @@ atoms = geo.gen_cuboid_from_body(sph)
 #atoms=numpy.array(atoms)
 in_out_array = sph.sorting(atoms)
 
-output.write_structure_to_file(geo, atoms, in_out_array)
+output.write_structure_to_file(geo, atoms, in_out_array, 'file')
