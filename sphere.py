@@ -61,7 +61,7 @@ class sphere:
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
   
   def sorting(self,atoms):
-    '''Removes the atoms out of sphere bounds'''
+    '''Assigns True and False values towards points in and out of sphere boundaries respectively'''
 
     return numpy.array([numpy.linalg.norm(self._shift_vector-x[0:3])\
-                          for x in atoms]) < self._radius
+                          for x in atoms]) <= self._radius
