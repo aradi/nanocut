@@ -110,9 +110,9 @@ class geometry:
     print "cuboid:"
     print cuboid
     '''Calculate center of cuboid'''
-    print "center:"
-    center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
-    print center
+    print "abc_center:"
+    abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
+    print abc_center
     '''Calculate boundaries for a,b,c. Equation for cuboid is: x=(a,b,c).T+center using
     cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
     abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
@@ -128,17 +128,23 @@ class geometry:
     coeff_abc_boundaries = (coeff.T*abc_boundaries).T
     nmo_boundaries=abs(numpy.dot(trafo.T,coeff_abc_boundaries.T))
     nmo_boundaries=nmo_boundaries.max(axis=1)
+    '''Calculate n,m,o of center'''
+    nmo_center=numpy.dot(trafo.T,abc_center.T)
+    print "nmo_center:\n", nmo_center
     print "nmo_boundaries:\n",nmo_boundaries
     
     '''Generating list of n,m,o which are dedicated to the points inside the cuboid
     (or parallelepiped)'''
 
     nmo = array([[n,m,o]\
-	      for n in range(int(-nmo_boundaries[0]),int(nmo_boundaries[0])+1)\
-	      for m in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1)\
-	      for o in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1)\
+	      for n in range(int(-nmo_boundaries[0]-nmo_center[0]),
+	                      int(nmo_boundaries[0]-nmo_center[0])+1)\
+	      for m in range(int(-nmo_boundaries[1]-nmo_center[1]),
+	                      int(nmo_boundaries[1]-nmo_center[1])+1)\
+	      for o in range(int(-nmo_boundaries[2]-nmo_center[2]),
+	                      int(nmo_boundaries[2]-nmo_center[2])+1)\
 	      if 1==1])
-    points = dot(nmo,self._lattice_vectors)+center
+    points = dot(nmo,self._lattice_vectors)
     return self.gen_atoms(points)
     #print array(self.gen_atoms(point) for point in points)
 
@@ -146,7 +152,7 @@ class geometry:
   def gen_cuboid_from_body(self, body):
     return self.gen_cuboid0(body.containing_cuboid())
     
-  def gen_cuboid1(self, cuboid):
+    '''  def gen_cuboid1(self, cuboid):
     atoms = []
     
 
@@ -202,7 +208,7 @@ class geometry:
           for item in self.gen_atoms(coords):
             atoms.append(item)
           
-    return numpy.array(atoms)
+    return numpy.array(atoms)'''
   
   def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
