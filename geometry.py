@@ -104,9 +104,46 @@ class geometry:
     return self.coord_transform(basis, "lattice")
   
   def gen_cuboid_from_body(self, body):
-    return self.gen_cuboid(body.containing_cuboid())
+    return self.gen_cuboid0(body.containing_cuboid())
     
-  def gen_cuboid(self, cuboid):
+  def gen_cuboid0(self, cuboid):
+    print "cuboid:"
+    print cuboid
+    '''Calculate center of cuboid'''
+    print "center:"
+    center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
+    print center
+    '''Calculate boundaries for a,b,c. Equation for cuboid is: x=(a,b,c).T+center using
+    cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
+    abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
+    print "abc_boundaries:\n", abc_boundaries
+    '''Calculate inverse of lattice_vectors matrix. Result transforms any vector (d,e,f)
+    to lattice coordinates: dot((d,e,f).T , trafo)'''
+    trafo=numpy.asarray(numpy.matrix(self._lattice_vectors).I)
+    #print "trafo:\n", trafo
+    '''Calculate "worst case"-boundaries for n, m, o. Equation for cuboid is:
+    x=dot((a,b,c).T,trafo)+center = (n,m,o).T+center using lattice coordinates.'''
+    coeff=array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
+    #print "abc_boundaries:\n", abc_boundaries
+    coeff_abc_boundaries = (coeff.T*abc_boundaries).T
+    nmo_boundaries=abs(numpy.dot(trafo.T,coeff_abc_boundaries.T))
+    nmo_boundaries=nmo_boundaries.max(axis=1)
+    print "nmo_boundaries:\n",nmo_boundaries
+    
+    for n in range(int(-nmo_boundaries[0]),int(nmo_boundaries[0])+1):
+      for m in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1):
+	for o in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1):
+	  print (n,m,o)
+	  
+    
+    
+    
+    
+
+
+
+
+  def gen_cuboid1(self, cuboid):
     m = 0.5*array([cuboid[0]+cuboid[1]])
     n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
     coords = numpy.array([[0,0,0]])

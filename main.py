@@ -27,9 +27,11 @@ sph = sphere.sphere.from_dict(geo, d)
 #print sph._shift_vector
 #print sph.containing_cuboid()
 
-liste = geo.gen_cuboid_from_body(sph)
+geo.gen_cuboid0(numpy.array([[0,0,0],[4,6,11]]))
 
-print len(liste)+2
-print ""
-for el in liste:
-  print "H", el[0], el[1], el[2]
+#liste=geo.gen_cuboid_from_body(sph)
+
+#print len(liste)+2
+#print ""
+#for el in liste:
+  #print "H", el[0], el[1], el[2]
