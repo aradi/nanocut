@@ -40,7 +40,7 @@ class sphere:
       radius_vector = numpy.array([float(el) for el in d["sphere"]["radius_vector"].split()])
     except ValueError:
       exit('Error:\n'+
-           'Supplied string for radius_vector not convertable to number, check configuration.'
+           'Supplied string for radius_vector not convertible to number, check configuration.'
            +'\nExiting...')
     
   
@@ -48,7 +48,7 @@ class sphere:
       shift_vector = numpy.array([float(el) for el in d["sphere"].get("shift_vector","0 0 0").split()])
     except ValueError:
       exit('Error:\n'+
-         'Supplied string for shift_vector not convertable to number, check configuration.'
+         'Supplied string for shift_vector not convertible to number, check configuration.'
          +'\nExiting...')
 
     radius_vector_coordsys = d["sphere"].get("radius_vector_coordsys","lattice")
@@ -57,4 +57,11 @@ class sphere:
     return cls(geometry,radius_vector,shift_vector,radius_vector_coordsys,shift_vector_coordsys)
   
   def containing_cuboid(self):
+    '''Calculates the boundaries of the cuboid containing the sphere'''
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
+  
+  def sorting(self,atoms):
+    '''Removes the atoms out of sphere bounds'''
+
+    return numpy.array([numpy.linalg.norm(self._shift_vector-x[0:3])\
+                          for x in atoms]) < self._radius
