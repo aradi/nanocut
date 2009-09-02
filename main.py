@@ -20,9 +20,9 @@ geo = geometry.geometry.from_dict(d)
 
 sph = sphere.sphere.from_dict(geo, d)
 
-#geo.gen_cuboid0(numpy.array([[0,0,0],[4,6,11]]))
-
 atoms = geo.gen_cuboid_from_body(sph)
+
+#in_out_array = numpy.array([1 for x in atoms == 1])
 
 in_out_array = sph.sorting(atoms)
 

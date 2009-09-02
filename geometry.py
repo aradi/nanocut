@@ -138,15 +138,9 @@ class geometry:
 	      for m in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1)\
 	      for o in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1)\
 	      if 1==1])
-    points = dot(nmo,self._lattice_vectors)
-    print points
-  #initial_point=array([n,m,o])
-  #print self._lattice_vectors[0]
-  #print self._lattice_vectors
-    
-    
-    
-    
+    points = dot(nmo,self._lattice_vectors)+center
+    return self.gen_atoms(points)
+    #print array(self.gen_atoms(point) for point in points)
 
 
   def gen_cuboid_from_body(self, body):
@@ -210,10 +204,7 @@ class geometry:
           
     return numpy.array(atoms)
   
-  def gen_atoms(self, lat_point):
+  def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
-    list = []
-    for idx in self._basis_names_idx:
-      atom = numpy.hstack((lat_point+self._basis[idx],idx))
-      list.append(atom)
-    return list
+    atoms = array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
+    return atoms
