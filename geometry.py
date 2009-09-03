@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from numpy import array, dot, matrix, asarray
 import numpy
 
 class geometry:
@@ -54,15 +53,12 @@ class geometry:
            'basis not defined, check configuration.'
            +'\nExiting...')
   
-  
-  
     try:
       lattice_vectors = array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
     except ValueError:
       exit('Error:\n'+
            'Supplied string for lattice_vectors not convertable to number, check configuration.'
            +'\nExiting...')
-    
   
     basis=d["geometry"]["basis"].split()
   
@@ -103,13 +99,53 @@ class geometry:
     basis %= 1
     return self.coord_transform(basis, "lattice")
   
+
+    return self.gen_cuboid0(body.containing_cuboid())
+    
+  def gen_cuboid0(self, cuboid):
+    print "cuboid:"
+    print cuboid
+    '''Calculate center of cuboid'''
+    print "center:"
+    center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
+    print center
+    '''Calculate boundaries for a,b,c. Equation for cuboid is: x=(a,b,c).T+center using
+    cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
+    abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
+    print "abc_boundaries:\n", abc_boundaries
+    '''Calculate inverse of lattice_vectors matrix. Result transforms any vector (d,e,f)
+    to lattice coordinates: dot((d,e,f).T , trafo)'''
+    trafo=numpy.asarray(numpy.matrix(self._lattice_vectors).I)
+    #print "trafo:\n", trafo
+    '''Calculate "worst case"-boundaries for n, m, o. Equation for cuboid is:
+    x=dot((a,b,c).T,trafo)+center = (n,m,o).T+center using lattice coordinates.'''
+    coeff=array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
+    #print "abc_boundaries:\n", abc_boundaries
+    coeff_abc_boundaries = (coeff.T*abc_boundaries).T
+    nmo_boundaries=abs(numpy.dot(trafo.T,coeff_abc_boundaries.T))
+    nmo_boundaries=nmo_boundaries.max(axis=1)
+    print "nmo_boundaries:\n",nmo_boundaries
+    
+    '''Generating list of n,m,o which are dedicated to the points inside the cuboid
+    (or parallelepiped)'''
+
+    nmo = array([[n,m,o]\
+	      for n in range(int(-nmo_boundaries[0]),int(nmo_boundaries[0])+1)\
+	      for m in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1)\
+	      for o in range(int(-nmo_boundaries[1]),int(nmo_boundaries[1])+1)\
+	      if 1==1])
+    points = dot(nmo,self._lattice_vectors)+center
+    return self.gen_atoms(points)
+    #print array(self.gen_atoms(point) for point in points)
+
+
   def gen_cuboid_from_body(self, body):
-    return self.gen_cuboid1(body.containing_cuboid())
+    return self.gen_cuboid0(body.containing_cuboid())
     
   def gen_cuboid1(self, cuboid):
-
     atoms = []
     
+
     m = 0.5*array([cuboid[0]+cuboid[1]])
     n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
     
@@ -164,10 +200,7 @@ class geometry:
           
     return numpy.array(atoms)
   
-  def gen_atoms(self, lat_point):
+  def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
-    list = []
-    for idx in self._basis_names_idx:
-      atom = numpy.hstack((lat_point+self._basis[idx],idx))
-      list.append(atom)
-    return list
+    atoms = array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
+    return atoms
