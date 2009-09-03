@@ -6,6 +6,8 @@ Created on Aug 31, 2009
 import numpy
 
 class sphere:
+  '''Self-defined body class, arbitrary sphere which radius and center\
+   can be determined in lattice and cartesian coordinates'''
   
   def __init__(self,geometry,radius_vector,shift_vector,
                radius_vector_coordsys="lattice",shift_vector_coordsys="lattice"):
@@ -30,7 +32,8 @@ class sphere:
     
   @classmethod  
   def from_dict(cls,geometry,d):
-
+    '''Reads the necessary data from input.ini to calculate a proper sphere'''
+    
     if "sphere" not in d.keys():
       exit('Error:\n'+
       'sphere not defined, check configuration.'
@@ -42,7 +45,6 @@ class sphere:
       exit('Error:\n'+
            'Supplied string for radius_vector not convertible to number, check configuration.'
            +'\nExiting...')
-    
   
     try:
       shift_vector = numpy.array([float(el) for el in d["sphere"].get("shift_vector","0 0 0").split()])
@@ -56,9 +58,12 @@ class sphere:
 
     return cls(geometry,radius_vector,shift_vector,radius_vector_coordsys,shift_vector_coordsys)
   
+  
   def containing_cuboid(self):
     '''Calculates the boundaries of the cuboid containing the sphere'''
+    
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
+  
   
   def sorting(self,atoms):
     '''Assigns True and False values towards points in and out of sphere boundaries respectively'''

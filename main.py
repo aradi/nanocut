@@ -12,13 +12,16 @@ import output
 
 numpy.seterr(divide='ignore',invalid='ignore')
 
+
 c=input.read_ini('sphere_input.ini')
-
 d=input.ini2dict(c)
-
 geo = geometry.geometry.from_dict(d)
 
 sph = sphere.sphere.from_dict(geo, d)
+
+#poly = planes.planes.from_dict(geo, d)
+
+#print poly._planes_normal
 
 atoms = geo.gen_cuboid_from_body(sph)
 
