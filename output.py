@@ -6,12 +6,15 @@ Created on Sep 2, 2009
 '''
 import numpy
 
-def write_structure_to_file(geometry, atoms, test, file):
+def write_structure_to_file(geometry, atoms, atoms_inside_bodies, file):
   fi = open(file, 'w')
+
+  fi.write(repr(sum(atoms_inside_bodies)) + '\n\n')
   
-  fi.write(repr(sum(test)) + '\n\n')
-  for idx in range(len(atoms)):
-    if test[idx] == True:
-      fi.write(geometry._basis_names[int(atoms[idx][3])] +' '+repr(atoms[idx][0])\
-               +' '+ repr(atoms[idx][1])+' '+ repr(atoms[idx][2])+'\n')
+  '''print atoms to file'''
+  [fi.write(\
+    geometry._basis_names[geometry._basis_names_idx[int(atom[3])]]+' '\
+    +repr(atom[0])+' '+ repr(atom[1])+' '+ repr(atom[2])+'\n')\
+  for atom in atoms[atoms_inside_bodies]]
+
   fi.close()

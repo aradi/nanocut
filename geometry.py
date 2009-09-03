@@ -106,17 +106,16 @@ class geometry:
 
     return self.gen_cuboid0(body.containing_cuboid())
     
-  def gen_cuboid0(self, cuboid):
-    print "cuboid:"
-    print cuboid
+  def gen_cuboid(self, cuboid):
+    
     '''Calculate center of cuboid'''
-    print "abc_center:"
+    
     abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
-    print abc_center
+    
     '''Calculate boundaries for a,b,c. Equation for cuboid is: x=(a,b,c).T+center using
     cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
     abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
-    print "abc_boundaries:\n", abc_boundaries
+    
     '''Calculate inverse of lattice_vectors matrix. Result transforms any vector (d,e,f)
     to lattice coordinates: dot((d,e,f).T , trafo)'''
     trafo=numpy.asarray(numpy.matrix(self._lattice_vectors).I)
@@ -130,8 +129,7 @@ class geometry:
     nmo_boundaries=nmo_boundaries.max(axis=1)
     '''Calculate n,m,o of center'''
     nmo_center=numpy.dot(trafo.T,abc_center.T)
-    print "nmo_center:\n", nmo_center
-    print "nmo_boundaries:\n",nmo_boundaries
+    
     
     '''Generating list of n,m,o which are dedicated to the points inside the cuboid
     (or parallelepiped)'''
@@ -144,15 +142,15 @@ class geometry:
 	      for o in range(int(-nmo_boundaries[2]-nmo_center[2]),
 	                      int(nmo_boundaries[2]-nmo_center[2])+1)\
 	      if 1==1])
-    points = numpy.dot(nmo,self._lattice_vectors)
-    return self.gen_atoms(points)
+    return numpy.dot(nmo,self._lattice_vectors)
+    
     #print array(self.gen_atoms(point) for point in points)
 
 
-  def gen_cuboid_from_body(self, body):
-    return self.gen_cuboid0(body.containing_cuboid())
+  '''def gen_cuboid_from_body(self, body):
+    return self.gen_cuboid0(body.containing_cuboid())'''
     
-    '''  def gen_cuboid1(self, cuboid):
+  '''  def gen_cuboid1(self, cuboid):
     atoms = []
     
 
