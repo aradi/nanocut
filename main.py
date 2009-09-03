@@ -18,7 +18,7 @@ d=input.ini2dict(c)
 
 geo = geometry.geometry.from_dict(d)
 
-sph = sphere.sphere.from_dict(geo, d)
+sph = sphere.sphere.from_dict(geo, d['sphere'])
 
 atoms = geo.gen_cuboid_from_body(sph)
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from numpy import array, dot, matrix, asarray
+
 import numpy
 
 class geometry:
@@ -57,7 +57,7 @@ class geometry:
   
   
     try:
-      lattice_vectors = array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
+      lattice_vectors = numpy.array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
     except ValueError:
       exit('Error:\n'+
            'Supplied string for lattice_vectors not convertable to number, check configuration.'
@@ -75,7 +75,7 @@ class geometry:
     '''#TODO: do not create double entries, related to #TODO in l.88'''
   
     try:
-      basis = array([float(el) for el in basis])
+      basis = numpy.array([float(el) for el in basis])
     except ValueError:
       exit('Error:\n'+
            'Supplied string for basis not convertible to number, check configuration.'
@@ -89,7 +89,7 @@ class geometry:
     
   def coord_transform(self, array, array_coordsys):
     if array_coordsys == "lattice":
-      return  dot(self._lattice_vectors.T,array.T).T
+      return  numpy.dot(self._lattice_vectors.T,array.T).T
     elif array_coordsys == "cartesian":
       return array
     else:
@@ -99,7 +99,7 @@ class geometry:
       
   def mv_basis_to_prim(self, basis):
     '''moves basis vectors into primitive cell'''
-    basis = dot(asarray(matrix(self._lattice_vectors.T).I),basis.T).T
+    basis = numpy.dot(numpy.asarray(numpy.matrix(self._lattice_vectors.T).I),basis.T).T
     basis %= 1
     return self.coord_transform(basis, "lattice")
   
@@ -123,7 +123,7 @@ class geometry:
     #print "trafo:\n", trafo
     '''Calculate "worst case"-boundaries for n, m, o. Equation for cuboid is:
     x=dot((a,b,c).T,trafo)+center = (n,m,o).T+center using lattice coordinates.'''
-    coeff=array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
+    coeff=numpy.array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
     #print "abc_boundaries:\n", abc_boundaries
     coeff_abc_boundaries = (coeff.T*abc_boundaries).T
     nmo_boundaries=abs(numpy.dot(trafo.T,coeff_abc_boundaries.T))
@@ -136,7 +136,7 @@ class geometry:
     '''Generating list of n,m,o which are dedicated to the points inside the cuboid
     (or parallelepiped)'''
 
-    nmo = array([[n,m,o]\
+    nmo = numpy.array([[n,m,o]\
 	      for n in range(int(-nmo_boundaries[0]-nmo_center[0]),
 	                      int(nmo_boundaries[0]-nmo_center[0])+1)\
 	      for m in range(int(-nmo_boundaries[1]-nmo_center[1]),
@@ -144,7 +144,7 @@ class geometry:
 	      for o in range(int(-nmo_boundaries[2]-nmo_center[2]),
 	                      int(nmo_boundaries[2]-nmo_center[2])+1)\
 	      if 1==1])
-    points = dot(nmo,self._lattice_vectors)
+    points = numpy.dot(nmo,self._lattice_vectors)
     return self.gen_atoms(points)
     #print array(self.gen_atoms(point) for point in points)
 
@@ -212,5 +212,5 @@ class geometry:
   
   def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
-    atoms = array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
+    atoms = numpy.array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
     return atoms
