@@ -111,37 +111,46 @@ class geometry:
     '''Calculate center of cuboid'''
     
     abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
-    
+
     '''Calculate boundaries for a,b,c. Equation for cuboid is: x=(a,b,c).T+center using
     cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
     abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
+
     
     '''Calculate inverse of lattice_vectors matrix. Result transforms any vector (d,e,f)
     to lattice coordinates: dot((d,e,f).T , trafo)'''
     trafo=numpy.asarray(numpy.matrix(self._lattice_vectors).I)
-    #print "trafo:\n", trafo
+    
+    
     '''Calculate "worst case"-boundaries for n, m, o. Equation for cuboid is:
     x=dot((a,b,c).T,trafo)+center = (n,m,o).T+center using lattice coordinates.'''
     coeff=numpy.array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
-    #print "abc_boundaries:\n", abc_boundaries
+    
+    
     coeff_abc_boundaries = (coeff.T*abc_boundaries).T
     nmo_boundaries=abs(numpy.dot(trafo.T,coeff_abc_boundaries.T))
+    
     nmo_boundaries=nmo_boundaries.max(axis=1)
+    
+
+    
     '''Calculate n,m,o of center'''
     nmo_center=numpy.dot(trafo.T,abc_center.T)
+
     
     
     '''Generating list of n,m,o which are dedicated to the points inside the cuboid
     (or parallelepiped)'''
 
     nmo = numpy.array([[n,m,o]\
-	      for n in range(int(-nmo_boundaries[0]-nmo_center[0]),
-	                      int(nmo_boundaries[0]-nmo_center[0])+1)\
-	      for m in range(int(-nmo_boundaries[1]-nmo_center[1]),
-	                      int(nmo_boundaries[1]-nmo_center[1])+1)\
-	      for o in range(int(-nmo_boundaries[2]-nmo_center[2]),
-	                      int(nmo_boundaries[2]-nmo_center[2])+1)\
+	      for n in range(int(-nmo_boundaries[0]+nmo_center[0]),
+	                      int(nmo_boundaries[0]+nmo_center[0])+1)\
+	      for m in range(int(-nmo_boundaries[1]+nmo_center[1]),
+	                      int(nmo_boundaries[1]+nmo_center[1])+1)\
+	      for o in range(int(-nmo_boundaries[2]+nmo_center[2]),
+	                      int(nmo_boundaries[2]+nmo_center[2])+1)\
 	      if 1==1])
+
     return numpy.dot(nmo,self._lattice_vectors)
     
     #print array(self.gen_atoms(point) for point in points)

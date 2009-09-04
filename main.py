@@ -12,7 +12,7 @@ import output
 import convex_polyeder
 
 '''Parse configuration from ini-file and store it in a config_ini-object.'''
-config_ini=input.read_ini('convex_polyeder_input.ini')
+config_ini=input.read_ini('adamantine_snowman.ini')
 
 '''Read configuration from config_ini and write it into a (dict) config_dict.'''
 config_dict=input.ini2dict(config_ini)
@@ -41,20 +41,24 @@ for body in config_dict.keys():
 cuboid_boundaries = numpy.vstack([body.containing_cuboid() for body in bodies if body.is_additive()])
 cuboid_boundaries = numpy.vstack([cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
 
+
 '''Generate lattice-cuboid'''
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
 
+
 '''Generate cuboid containig all atoms'''
 atoms_cuboid = geo.gen_atoms(lattice_cuboid)
+
+
 
 '''Decide which atoms really are inside the specified set of body.'''
 #Find the highest order
 max_order = max([body.get_order() for body in bodies])
 
-atoms_inside_bodies=numpy.zeros(atoms_cuboid[:,3].shape,bool)
 
 #Test for atoms inside bodies in the right order.
 
+atoms_inside_bodies=numpy.zeros(atoms_cuboid[:,3].shape,bool)
 
 for order in range(1,max_order+1):
   
@@ -70,21 +74,5 @@ for order in range(1,max_order+1):
 	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies) - tmp_atoms_inside_bodies
 	
 
-
-
-
-
-
 '''Write final crystal to xyz-file'''
 output.write_structure_to_file(geo, atoms_cuboid, atoms_inside_bodies, 'out.xyz')
-
-
-#sph = sphere.sphere.from_dict(geo, d['sphere'])
-
-#atoms = geo.gen_cuboid_from_body(sph)
-
-#in_out_array = numpy.array([1 for x in atoms == 1])
-
-#in_out_array = sph.sorting(atoms)
-
-#output.write_structure_to_file(geo, atoms, in_out_array, 'out.xyz')
