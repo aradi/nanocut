@@ -53,12 +53,16 @@ atoms_cuboid = geo.gen_atoms(lattice_cuboid)
 
 '''Decide which atoms really are inside the specified set of body.'''
 #Find the highest order
+
 max_order = max([body.get_order() for body in bodies])
 
 
 #Test for atoms inside bodies in the right order.
 
 atoms_inside_bodies=numpy.zeros(atoms_cuboid[:,3].shape,bool)
+
+
+#Test for atoms inside bodies in the right order.
 
 for order in range(1,max_order+1):
   
@@ -75,4 +79,6 @@ for order in range(1,max_order+1):
 	
 
 '''Write final crystal to xyz-file'''
+
 output.write_structure_to_file(geo, atoms_cuboid, atoms_inside_bodies, 'out.xyz')
+
