@@ -12,7 +12,7 @@ import output
 import convex_polyeder
 
 '''Parse configuration from ini-file and store it in a config_ini-object.'''
-config_ini=input.read_ini('convex_polyeder_input.ini')
+config_ini=input.read_ini('planes_input.ini')
 
 '''Read configuration from config_ini and write it into a (dict) config_dict.'''
 config_dict=input.ini2dict(config_ini)
@@ -40,6 +40,8 @@ for body in config_dict.keys():
 
 cuboid_boundaries = numpy.vstack([body.containing_cuboid() for body in bodies if body.is_additive()])
 cuboid_boundaries = numpy.vstack([cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
+
+#cuboid_boundaries=numpy.array([[20,20,20],[-1,-1,-1]])
 
 '''Generate lattice-cuboid'''
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
@@ -69,10 +71,6 @@ for order in range(1,max_order+1):
 	
 	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies) - tmp_atoms_inside_bodies
 	
-
-
-
-
 
 
 '''Write final crystal to xyz-file'''
