@@ -9,9 +9,10 @@ import input
 import geometry
 import sphere
 import output
+import convex_polyeder
 
 '''Parse configuration from ini-file and store it in a config_ini-object.'''
-config_ini=input.read_ini('sphere_input.ini')
+config_ini=input.read_ini('convex_polyeder_input.ini')
 
 '''Read configuration from config_ini and write it into a (dict) config_dict.'''
 config_dict=input.ini2dict(config_ini)
@@ -26,6 +27,9 @@ bodies=[]
 for body in config_dict.keys():
   if body[0:7]=="sphere:":
     body = sphere.sphere.from_dict(geo, config_dict[body])
+    bodies.append(body)
+  elif body[0:16]=="convex_polyeder:":
+    body = convex_polyeder.convex_polyeder.from_dict(geo, config_dict[body])
     bodies.append(body)
   else:
     print ('Warning:\n'+
