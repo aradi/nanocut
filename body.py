@@ -50,6 +50,4 @@ class body:
       return False
 
   def containing_cuboid(self):
-    pass
-  
-  
+    pass  

@@ -9,19 +9,19 @@ import input
 import geometry
 import sphere
 import output
-import convex_polyeder
+import convex_polyhedron
 
 '''Parse configuration from ini-file and store it in a config_ini-object.'''
-config_ini=input.read_ini('adamantine_snowman.ini')
+config_ini=input.read_ini('planes_input.ini')
 
 '''Read configuration from config_ini and write it into a (dict) config_dict.'''
 config_dict=input.ini2dict(config_ini)
 
-'''Initialise geometry-object from config_dict'''
+'''Initialize geometry-object from config_dict'''
 geo = geometry.geometry.from_dict(config_dict)
 
 
-'''Initialise body objects and store references in bodies list'''
+'''Initialize body objects and store references in bodies list'''
 bodies=[]
 
 for body in config_dict.keys():
@@ -29,7 +29,7 @@ for body in config_dict.keys():
     body = sphere.sphere.from_dict(geo, config_dict[body])
     bodies.append(body)
   elif body[0:16]=="convex_polyeder:":
-    body = convex_polyeder.convex_polyeder.from_dict(geo, config_dict[body])
+    body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[body])
     bodies.append(body)
   else:
     print ('Warning:\n'+
@@ -60,7 +60,6 @@ max_order = max([body.get_order() for body in bodies])
 #Test for atoms inside bodies in the right order.
 
 atoms_inside_bodies=numpy.zeros(atoms_cuboid[:,3].shape,bool)
-
 
 #Test for atoms inside bodies in the right order.
 
