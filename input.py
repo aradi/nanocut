@@ -63,7 +63,6 @@ def geometry_from_dict(d):
   lattice_vectors.shape=(3,3)
   
   
-  
   basis=d["geometry"]["basis"].split()
   
   if len(basis) % 4 != 0:
