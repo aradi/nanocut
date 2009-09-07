@@ -12,8 +12,8 @@ class convex_polyhedron(body.body):
   #arguments of class defined in the following format:
   #[default, type, shape, is_coord_sys_definable]
   _arguments={
-    "planes_normal":[None, "array", (-1,4), True],
-    "planes_miller":[None, "array", (-1,4), True],
+    "planes_normal":["0 0 0 0", "array", (-1,4), True],
+    "planes_miller":["0 0 0 0", "array", (-1,4), True],
     "point_inside_body":["0 0 0", "array", (1,3), True],
     "shift_vector":["0 0 0", "array", (1,3), True],
     "order":[1,"integer", None, False]

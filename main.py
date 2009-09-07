@@ -43,12 +43,11 @@ for body in config_dict.keys():
 
 '''Get boundaries of the cuboid containing all bodies'''
 
-print config_dict.keys()
-print bodies
+#print config_dict.keys()
+#print bodies
 
 cuboid_boundaries = numpy.vstack([body.containing_cuboid() for body in bodies if body.is_additive()])
 cuboid_boundaries = numpy.vstack([cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
-
 
 '''Generate lattice-cuboid'''
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
