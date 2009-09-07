@@ -8,6 +8,16 @@ import numpy
 import body
 
 class sphere(body.body):
+
+  #arguments of class defined in the following format:
+  #[default, type, shape, is_coord_sys_definable]
+  _arguments={
+    "radius_vector":[None, "array", (1,3), True],
+    "shift_vector":["0 0 0", "array", (1,3), True],
+    "order":[1,"integer", None, False]
+    }
+  #_init_arguments=['radius_vector','shift_vector','order','radius_vector_coordsys','shift_vector_coordsys']
+  
   
   def __init__(self,geometry,radius_vector,shift_vector=numpy.array([0,0,0]),order=1,
                radius_vector_coordsys="lattice",shift_vector_coordsys="lattice"):
@@ -22,42 +32,16 @@ class sphere(body.body):
       exit('Error:\n'+
       'Wrong number of elements supplied for radius_vector, check configuration.'
       +'\nExiting...')
-      
-
 
     self._radius = numpy.linalg.norm(geometry.coord_transform(radius_vector, radius_vector_coordsys))
-    
-    
-    
-  @classmethod  
-  def from_dict(cls,geometry,d):
-      
-    try:
-      radius_vector = numpy.array([float(el) for el in d["radius_vector"].split()])
-    except ValueError:
-      exit('Error:\n'+
-           'Supplied string for radius_vector not convertible to number, check configuration.'
-           +'\nExiting...')
+  
+  @classmethod
+  def _from_dict_helper(cls,geometry,args):
+    return cls(geometry,args["radius_vector"],args["shift_vector"],args["order"],
+               args["radius_vector_coordsys"],args["shift_vector_coordsys"])
     
   
-    try:
-      shift_vector = numpy.array([float(el) for el in d.get("shift_vector","0 0 0").split()])
-    except ValueError:
-      exit('Error:\n'+
-         'Supplied string for shift_vector not convertible to number, check configuration.'
-         +'\nExiting...')
-
-    radius_vector_coordsys = d.get("radius_vector_coordsys","lattice")
-    shift_vector_coordsys = d.get("shift_vector_coordsys","lattice")
-
-    try:
-      order = int(d.get("order","1"))
-    except ValueError:
-      exit('Error:\n'+
-         'Supplied string for order not convertible to integer'
-         +'\nExiting...')
-    
-    return cls(geometry,radius_vector,shift_vector,order,radius_vector_coordsys,shift_vector_coordsys)
+  
   
   def containing_cuboid(self):
     '''Calculates the boundaries of the cuboid containing the sphere'''

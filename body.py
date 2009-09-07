@@ -5,6 +5,8 @@ Created on Aug 31, 2009
 @author: sebastian
 '''
 
+import numpy
+
 class body:
   '''Metaclass; all body-classes regardless of shape should be derived from this one.'''
   def __init__(self,geometry,shift_vector,order,shift_vector_coordsys):
@@ -49,7 +51,66 @@ class body:
     else:
       return False
 
-  def containing_cuboid(self):
-    pass
+  @classmethod  
+  def from_dict(cls,geometry,configdict):
+    
+    init_args={}
+    
+    for arg, spec in cls._arguments.items():
+      
+      init_args[arg]=configdict.get(arg,spec[0])
+      
+      if init_args[arg]==None:
+	exit('Error:\n'+
+           arg+' not specified, but needed.'
+           +'\nExiting...\n')
+      
+      if spec[1]=='array':
+	try:
+	  init_args[arg]=numpy.array([el for el in init_args[arg].split()],dtype='float64')
+	except ValueError:
+	  exit('Error:\n'+
+           'Supplied string for '+arg+' not convertible to float-array.'
+           +'\nExiting...\n')
+	
+	try:
+	  init_args[arg].shape=spec[2]
+	except ValueError:
+	  exit('Error:\n'+
+           'Wrong number of elements supplied for '+arg+'.'
+           +'\nExiting...\n')
+	
+      elif spec[1]=='integer':
+	try:
+	  init_args[arg]=int(init_args[arg])
+	except ValueError:
+	  exit('Error:\n'+
+           'Supplied string for '+arg+' not convertible to integer.'
+           +'\nExiting...\n')
+      
+      else:
+	#Todo: raise exception!
+	exit('InternalError:\n'+
+           'There is no argument type '+spec[1]+' can\'t use from_dict() with this class.'
+           +'\nExiting...\n')
+
+
+      if spec[3]==True:
+	init_args[arg+'_coordsys']=configdict.get(arg+'_coordsys','lattice')
+	if init_args[arg+'_coordsys'] not in ['lattice','cartesian']:
+	  exit('Error:\n'+
+           'Supplied string "'+init_args[arg+'_coordsys']+'"for '+arg+'_coordsys is invalid.'
+           +'\nExiting...\n')
+    
+    
+    
+    
+      
+    return cls._from_dict_helper(geometry,init_args)
+    ##return cls(geometry,
+    #init_args['radius_vector']#init_args['shift_vector'],
+#init_args['order'],
+#init_args['radius_vector_coordsys'],
+#init_args['shift_vector_coordsys'])
   
   
