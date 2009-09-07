@@ -153,64 +153,64 @@ class geometry:
 	      if 1==1])
 
     return numpy.dot(nmo,self._lattice_vectors)
-    
-  '''  def gen_cuboid1(self, cuboid):
-    atoms = []
-    
 
-    m = 0.5*array([cuboid[0]+cuboid[1]])
-    n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
-    
-    n_intsec = (cuboid - dot(self._lattice_vectors[1:3,:].T,n[1:3]).T)\
-     / self._lattice_vectors[0]
-     
-     
-    n_min_idx = abs(n_intsec[0]-n[0]).argmin()
-    n_max_idx = abs(n_intsec[1]-n[0]).argmin()
-    
-    if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
-      n_min_idx,n_max_idx=n_max_idx,n_min_idx
-      a,b=1,0
-    else:
-      a,b=0,1
-      
-    n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
-    
-    for n0 in n_range:
-      n_intsec = (cuboid - dot(self._lattice_vectors[0:3:2,:].T,n[0:3:2]).T)\
-      / self._lattice_vectors[1]
-      
-      n_min_idx = abs(n_intsec[0]-n0).argmin()
-      n_max_idx = abs(n_intsec[1]-n0).argmin()
-    
-      if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
-        n_min_idx,n_max_idx=n_max_idx,n_min_idx
-        a,b=1,0
-      else:
-        a,b=0,1
-      n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
-      
-      for n1 in n_range:
-        n_intsec = (cuboid - dot(self._lattice_vectors[0:2,:].T,n[0:2]).T)\
-        / self._lattice_vectors[2]
-        n_min_idx = abs(n_intsec[0]-n1).argmin()
-        n_max_idx = abs(n_intsec[1]-n1).argmin()
-    
-        if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
-          n_min_idx,n_max_idx=n_max_idx,n_min_idx
-          a,b=1,0
-        else:
-          a,b=0,1
-        n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
-        
-        for n2 in n_range:
-          coords = n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]\
-          +n2*self._lattice_vectors[2]
-          
-          for item in self.gen_atoms(coords):
-            atoms.append(item)
-          
-    return numpy.array(atoms)'''
+#  def gen_cuboid1(self, cuboid):
+#    atoms = []
+#    
+#
+#    m = 0.5*array([cuboid[0]+cuboid[1]])
+#    n = numpy.linalg.solve(self._lattice_vectors.T,m.T)
+#    
+#    n_intsec = (cuboid - dot(self._lattice_vectors[1:3,:].T,n[1:3]).T)\
+#     / self._lattice_vectors[0]
+#     
+#     
+#    n_min_idx = abs(n_intsec[0]-n[0]).argmin()
+#    n_max_idx = abs(n_intsec[1]-n[0]).argmin()
+#    
+#    if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
+#      n_min_idx,n_max_idx=n_max_idx,n_min_idx
+#      a,b=1,0
+#    else:
+#      a,b=0,1
+#      
+#    n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
+#    
+#    for n0 in n_range:
+#      n_intsec = (cuboid - dot(self._lattice_vectors[0:3:2,:].T,n[0:3:2]).T)\
+#      / self._lattice_vectors[1]
+#      
+#      n_min_idx = abs(n_intsec[0]-n0).argmin()
+#      n_max_idx = abs(n_intsec[1]-n0).argmin()
+#    
+#      if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
+#        n_min_idx,n_max_idx=n_max_idx,n_min_idx
+#        a,b=1,0
+#      else:
+#        a,b=0,1
+#      n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
+#      
+#      for n1 in n_range:
+#        n_intsec = (cuboid - dot(self._lattice_vectors[0:2,:].T,n[0:2]).T)\
+#        / self._lattice_vectors[2]
+#        n_min_idx = abs(n_intsec[0]-n1).argmin()
+#        n_max_idx = abs(n_intsec[1]-n1).argmin()
+#    
+#        if int(n_intsec[0,n_min_idx]) > int(n_intsec[1,n_max_idx]):
+#          n_min_idx,n_max_idx=n_max_idx,n_min_idx
+#          a,b=1,0
+#        else:
+#          a,b=0,1
+#        n_range=range(int(n_intsec[a,n_min_idx]),int(n_intsec[b,n_max_idx])+1)
+#        
+#        for n2 in n_range:
+#          coords = n0*self._lattice_vectors[0]+n1*self._lattice_vectors[1]\
+#          +n2*self._lattice_vectors[2]
+#          
+#          for item in self.gen_atoms(coords):
+#            atoms.append(item)
+#          
+#    return numpy.array(atoms)
   
   def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
