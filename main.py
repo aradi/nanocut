@@ -1,21 +1,24 @@
+#!usr/bin/python
 # -*- coding: utf-8 -*-
 '''
 Created on Aug 28, 2009
 
 @author: sebastian
 '''
-import numpy
-import input
-import geometry
-import sphere
-import output
-import convex_polyhedron
+#Import public modules
+import sys, numpy
 
-'''Parse configuration from ini-file and store it in a config_ini-object.'''
-config_ini=input.read_ini('input_conventions.ini')
+#Import own modules
+import inout, geometry, sphere, convex_polyhedron
+
+try:
+  config_ini=inout.read_ini(sys.argv[1])
+except IndexError:
+  exit('Error! Please assign an input file!')
+
 
 '''Read configuration from config_ini and write it into a (dict) config_dict.'''
-config_dict=input.ini2dict(config_ini)
+config_dict=inout.ini2dict(config_ini)
 
 '''Initialise geometry-object from config_dict'''
 geo = geometry.geometry.from_dict(config_dict)
@@ -76,6 +79,9 @@ for order in range(1,max_order+1):
 	
 	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies) - tmp_atoms_inside_bodies
 	
-
-'''Write final crystal to xyz-file'''
-output.write_structure_to_file(geo, atoms_cuboid, atoms_inside_bodies, 'out.xyz')
+'''Write final crystal to file'''
+try:
+  inout.write_structure_to_file(geo, atoms_cuboid, atoms_inside_bodies, sys.argv[2])
+except IndexError:
+  exit('Error! Please assign an output file name!')
+  

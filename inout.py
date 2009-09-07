@@ -2,8 +2,7 @@
 
 
 import ConfigParser
-from numpy import array
-
+import numpy
 
 def read_ini(configfile):
   '''Reads ini-file. Returns content as ConfigParser-object'''
@@ -49,7 +48,7 @@ def geometry_from_dict(d):
     +'\nExiting...')
   
   try:
-    lattice_vectors = array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
+    lattice_vectors = numpy.array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
   except ValueError:
     exit('Error:\n'+
     'Supplied string for lattice_vectors not convertible to number, check configuration.'
@@ -74,7 +73,7 @@ def geometry_from_dict(d):
   '''#TODO: do not create double entries, related to #TODO in l.88'''
   
   try:
-    basis = array([float(el) for el in basis])
+    basis = numpy.array([float(el) for el in basis])
   except ValueError:
     exit('Error:\n'+
     'Supplied string for basis not convertible to number, check configuration.'
@@ -84,4 +83,17 @@ def geometry_from_dict(d):
   
   basis_name_idx=range(basis.size/3) #TODO: generate real idx, related to #TODO in l.71
   
-  return (lattice_vectors, basis, basis_names, basis_name_idx)  
+  return (lattice_vectors, basis, basis_names, basis_name_idx)
+
+def write_structure_to_file(geometry, atoms, atoms_inside_bodies, file):
+  fi = open(file, 'w')
+
+  fi.write(repr(sum(atoms_inside_bodies)) + '\n\n')
+  
+  '''print atoms to file'''
+  [fi.write(\
+    geometry._basis_names[geometry._basis_names_idx[int(atom[3])]]+' '\
+    +repr(atom[0])+' '+ repr(atom[1])+' '+ repr(atom[2])+'\n')\
+  for atom in atoms[atoms_inside_bodies]]
+
+  fi.close()
