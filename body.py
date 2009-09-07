@@ -67,7 +67,7 @@ class body:
       
       if spec[1]=='array':
         try:
-          init_args[arg]=numpy.array([el for el in init_args[arg].split()],dtype='float64')
+          init_args[arg]=numpy.array([float(el) for el in init_args[arg].split()],dtype='float64')
         except ValueError:
           exit('Error:\n'+
            'Supplied string for '+arg+' not convertible to float-array.'

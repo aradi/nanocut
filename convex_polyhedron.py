@@ -82,65 +82,66 @@ class convex_polyhedron(body.body):
   def _from_dict_helper(cls,geometry,args):
     return cls(geometry,args["planes_normal"],args["planes_miller"],\
                args["shift_vector"],args["point_inside_body"],args["order"],\
-               args["radius_vector_coordsys"],args["shift_vector_coordsys"])
+               args["shift_vector_coordsys"],args["planes_normal_coordsys"],\
+               args["planes_miller_coordsys"],args["point_inside_body_coordsys"])
 
   
-  def from_dict(cls,geometry,d):
-    '''Reads necessary data from dictionary to create proper polyhedron'''
-    
-    '''Searches for planes determined by miller indices'''
-    try:
-      planes_miller = numpy.array\
-      ([float(el) for el in d.get("planes_miller","").split()])
-    except ValueError:
-      exit('Error:\n'+
-           'Supplied string for planes_miller not convertible to number, check configuration.'
-           +'\nExiting...')
-      
-    '''Searches for planes given in normal form'''
-    try:
-      planes_normal = numpy.array\
-      ([float(el) for el in d.get("planes_normal","").split()])
-    except ValueError:
-      exit('Error:\n'+
-           'Supplied string for planes_normal not convertible to number, check configuration.'
-           +'\nExiting...')
-
-    '''Searches for shift_vector'''
-    try:
-      shift_vector = numpy.array\
-      ([float(el) for el in d.get("shift_vector","0 0 0").split()])
-    except ValueError:
-      exit('Error:\n'+
-         'Supplied string for shift_vector not convertible to number, check configuration.'
-         +'\nExiting...')
-
-    '''Searches for point_inside_body'''
-    try:
-      point_inside_body = numpy.array\
-      ([float(el) for el in d.get("point_inside_body","0 0 0").split()])
-    except ValueError:
-      exit('Error:\n'+
-         'Supplied string for point_inside_body not convertible to number, check configuration.'
-         +'\nExiting...')
-
-    '''Gathers each attribute's coordinate system'''
-    shift_vector_coordsys = d.get("shift_vector_coordsys","lattice")
-    point_inside_body_coordsys = d.get("point_inside_body_coordsys", "lattice")
-    planes_miller_coordsys = d.get("planes_miller_coordsys", "lattice")
-    planes_normal_coordsys = d.get("planes_normal_coordsys", "lattice")
-    
-    '''Searches for shape's order attribute'''
-    try:
-      order = int(d.get("order","1"))
-    except ValueError:
-      exit('Error:\n'+
-         'Supplied string for order not convertible to integer'
-         +'\nExiting...')
-    
-    return cls(geometry,planes_normal,planes_miller,shift_vector,point_inside_body,\
-               order,shift_vector_coordsys, planes_normal_coordsys,\
-               planes_miller_coordsys,point_inside_body_coordsys)
+#  def from_dict(cls,geometry,d):
+#    '''Reads necessary data from dictionary to create proper polyhedron'''
+#    
+#    '''Searches for planes determined by miller indices'''
+#    try:
+#      planes_miller = numpy.array\
+#      ([float(el) for el in d.get("planes_miller","").split()])
+#    except ValueError:
+#      exit('Error:\n'+
+#           'Supplied string for planes_miller not convertible to number, check configuration.'
+#           +'\nExiting...')
+#      
+#    '''Searches for planes given in normal form'''
+#    try:
+#      planes_normal = numpy.array\
+#      ([float(el) for el in d.get("planes_normal","").split()])
+#    except ValueError:
+#      exit('Error:\n'+
+#           'Supplied string for planes_normal not convertible to number, check configuration.'
+#           +'\nExiting...')
+#
+#    '''Searches for shift_vector'''
+#    try:
+#      shift_vector = numpy.array\
+#      ([float(el) for el in d.get("shift_vector","0 0 0").split()])
+#    except ValueError:
+#      exit('Error:\n'+
+#         'Supplied string for shift_vector not convertible to number, check configuration.'
+#         +'\nExiting...')
+#
+#    '''Searches for point_inside_body'''
+#    try:
+#      point_inside_body = numpy.array\
+#      ([float(el) for el in d.get("point_inside_body","0 0 0").split()])
+#    except ValueError:
+#      exit('Error:\n'+
+#         'Supplied string for point_inside_body not convertible to number, check configuration.'
+#         +'\nExiting...')
+#
+#    '''Gathers each attribute's coordinate system'''
+#    shift_vector_coordsys = d.get("shift_vector_coordsys","lattice")
+#    point_inside_body_coordsys = d.get("point_inside_body_coordsys", "lattice")
+#    planes_miller_coordsys = d.get("planes_miller_coordsys", "lattice")
+#    planes_normal_coordsys = d.get("planes_normal_coordsys", "lattice")
+#    
+#    '''Searches for shape's order attribute'''
+#    try:
+#      order = int(d.get("order","1"))
+#    except ValueError:
+#      exit('Error:\n'+
+#         'Supplied string for order not convertible to integer'
+#         +'\nExiting...')
+#    
+#    return cls(geometry,planes_normal,planes_miller,shift_vector,point_inside_body,\
+#               order,shift_vector_coordsys, planes_normal_coordsys,\
+#               planes_miller_coordsys,point_inside_body_coordsys)
   
   def containing_cuboid(self):
     '''Calculates the boundaries of the cuboid containing the polyhedron'''
