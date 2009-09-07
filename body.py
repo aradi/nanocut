@@ -10,18 +10,12 @@ import numpy
 class body:
   '''Metaclass; all body-classes regardless of shape should be derived from this one.'''
   def __init__(self,geometry,shift_vector,order,shift_vector_coordsys):
-
+    
+    shift_vector=numpy.array(shift_vector,dtype='float64')
+    shift_vector.shape=(1,3)
+    order=int(order)
+    
     self._order=order
-        
-    try:
-      shift_vector.shape=(1,3)
-    except ValueError:
-      exit('Error:\n'+
-      'Wrong number of elements supplied for shift_vector, check configuration.'
-      +'\nExiting...')
-
-
-
     self._shift_vector = geometry.coord_transform(shift_vector, shift_vector_coordsys)
 
   def get_order(self):
@@ -89,8 +83,9 @@ class body:
            +'\nExiting...\n')
       
       else:
+	#TODO: Raise Exeption
         exit('InternalError:\n'+
-           'There is no argument type '+spec[1]+' can\'t use from_dict() with this class.'
+           'There is no valid argument type '+spec[1]+' can\'t use from_dict() with this class.'
            +'\nExiting...\n')
 
 

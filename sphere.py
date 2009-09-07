@@ -22,18 +22,13 @@ class sphere(body.body):
   def __init__(self,geometry,radius_vector,shift_vector=numpy.array([0,0,0]),order=1,
                radius_vector_coordsys="lattice",shift_vector_coordsys="lattice"):
 
-
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
     
-    
-    try:
-      radius_vector.shape=(1,3)
-    except ValueError:
-      exit('Error:\n'+
-      'Wrong number of elements supplied for radius_vector, check configuration.'
-      +'\nExiting...')
+    radius_vector=numpy.array(radius_vector,dtype='float64')
+    radius_vector.shape=(1,3)
+    radius_vector=geometry.coord_transform(radius_vector, radius_vector_coordsys)
 
-    self._radius = numpy.linalg.norm(geometry.coord_transform(radius_vector, radius_vector_coordsys))
+    self._radius = numpy.linalg.norm(radius_vector)
   
   @classmethod
   def _from_dict_helper(cls,geometry,args):
