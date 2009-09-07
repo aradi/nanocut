@@ -25,7 +25,6 @@ class sphere(body.body):
 
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
     
-    
     try:
       radius_vector.shape=(1,3)
     except ValueError:
@@ -34,15 +33,14 @@ class sphere(body.body):
       +'\nExiting...')
 
     self._radius = numpy.linalg.norm(geometry.coord_transform(radius_vector, radius_vector_coordsys))
+
   
   @classmethod
   def _from_dict_helper(cls,geometry,args):
     return cls(geometry,args["radius_vector"],args["shift_vector"],args["order"],
                args["radius_vector_coordsys"],args["shift_vector_coordsys"])
     
-  
-  
-  
+
   def containing_cuboid(self):
     '''Calculates the boundaries of the cuboid containing the sphere'''
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector

@@ -48,13 +48,11 @@ def geometry_from_dict(d):
     'basis not defined, check configuration.'
     +'\nExiting...')
   
-  
-  
   try:
     lattice_vectors = array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
   except ValueError:
     exit('Error:\n'+
-    'Supplied string for lattice_vectors not convertable to number, check configuration.'
+    'Supplied string for lattice_vectors not convertible to number, check configuration.'
     +'\nExiting...')
     
   if lattice_vectors.size != 9:
@@ -65,7 +63,6 @@ def geometry_from_dict(d):
   lattice_vectors.shape=(3,3)
   
   
-  
   basis=d["geometry"]["basis"].split()
   
   if len(basis) % 4 != 0:
@@ -74,19 +71,17 @@ def geometry_from_dict(d):
     +'\nExiting...')
     
   basis_names=[basis.pop(ind) for ind in range(0,len(basis)*3/4,3)]
-  '''#TODO: do not create dublicate entries, related to #TODO in l.88'''
+  '''#TODO: do not create double entries, related to #TODO in l.88'''
   
   try:
     basis = array([float(el) for el in basis])
   except ValueError:
     exit('Error:\n'+
-    'Supplied string for basis not convertable to number, check configuration.'
+    'Supplied string for basis not convertible to number, check configuration.'
     +'\nExiting...')
   
   basis.shape=(basis.size/3,3)
   
   basis_name_idx=range(basis.size/3) #TODO: generate real idx, related to #TODO in l.71
   
-  return (lattice_vectors, basis, basis_names, basis_name_idx)
-  
-  
+  return (lattice_vectors, basis, basis_names, basis_name_idx)  

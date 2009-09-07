@@ -9,24 +9,24 @@ class geometry:
   def __init__(self,lattice_vectors,basis,basis_names_idx,basis_names,
                basis_coordsys="lattice"):
 
-#TODO check data types
-
+    '''Shapes lattice_vectors into 3x3 array and assigns them to object'''
     try:
       lattice_vectors.shape=(3,3)
     except ValueError:
             exit('Error:\n'+
            'Wrong number of elements supplied for lattice_vectors, check configuration.'
            +'\nExiting...')
-
     self._lattice_vectors = lattice_vectors
 
+    '''Reshapes given basis to proper vectors'''
     try:
-      basis.shape=(basis.size/3,3)
+      basis.shape=(-1,3)
     except ValueError:
       exit('Error:\n'+
            'Wrong number of elements supplied for basis_vectors, check configuration.'
            +'\nExiting...')
 
+    '''Initiates basis attributes'''
     self._basis_names_idx = basis_names_idx
     self._basis_names = basis_names
     self._basis_coordsys = basis_coordsys
@@ -55,7 +55,7 @@ class geometry:
            +'\nExiting...')
   
   
-  
+    '''Reads lattice_vectors from input file'''
     try:
       lattice_vectors = numpy.array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
     except ValueError:
@@ -63,17 +63,20 @@ class geometry:
            'Supplied string for lattice_vectors not convertable to number, check configuration.'
            +'\nExiting...')
     
-  
+    '''Reads basis string from input file and checks if proper amount\
+    elements has been distributed'''
     basis=d["geometry"]["basis"].split()
-  
     if len(basis) % 4 != 0:
       exit('Error:\n'+
            'Wrong number of elements supplied for basis, check configuration.'
            +'\nExiting...')
     
+    '''Removes element names/ kinds of atoms from basis string and gathers them\
+    in basis_names'''
     basis_names=[basis.pop(ind) for ind in range(0,len(basis)*3/4,3)]
-    '''#TODO: do not create double entries, related to #TODO in l.88'''
+    #TODO: do not create double entries, related to #TODO in l.88
   
+    '''Reshapes basis to proper vectors'''
     try:
       basis = numpy.array([float(el) for el in basis])
     except ValueError:
@@ -81,13 +84,17 @@ class geometry:
            'Supplied string for basis not convertible to number, check configuration.'
            +'\nExiting...')
 
-    basis_names_idx=range(basis.size/3) #TODO: generate real idx, related to #TODO in l.71
+    '''Creates an index for the amount of different atoms in basis'''
+    basis_names_idx=range(len(basis))
+    #TODO: generate real idx, related to #TODO in l.71
 
+    '''Searches for coordinate system used for basis'''
     basis_coordsys = d["geometry"].get("basis_coordsys","lattice")
     return cls(lattice_vectors,basis,basis_names_idx,basis_names,basis_coordsys)
     
     
   def coord_transform(self, array, array_coordsys):
+    '''Transforms given array if necessary and returns array in cartesian system'''
     if array_coordsys == "lattice":
       return  numpy.dot(self._lattice_vectors.T,array.T).T
     elif array_coordsys == "cartesian":
@@ -96,24 +103,22 @@ class geometry:
       exit('Error:\n'+
            'Supplied string "' + array_coordsys + '" for coordsys not valid, check configuration.'
            +'\nExiting...')
-      
+  
+
   def mv_basis_to_prim(self, basis):
-    '''moves basis vectors into primitive cell'''
+    '''Moves basis vectors into primitive cell'''
     basis = numpy.dot(numpy.asarray(numpy.matrix(self._lattice_vectors.T).I),basis.T).T
     basis %= 1
     return self.coord_transform(basis, "lattice")
   
 
-    return self.gen_cuboid0(body.containing_cuboid())
-    
   def gen_cuboid(self, cuboid):
     
     '''Calculate center of cuboid'''
-    
     abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
 
     '''Calculate boundaries for a,b,c. Equation for cuboid is: x=(a,b,c).T+center using
-    cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
+    cartesian coordinates. Boundaries are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
     abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
 
     
@@ -132,12 +137,8 @@ class geometry:
     
     nmo_boundaries=nmo_boundaries.max(axis=1)
     
-
-    
     '''Calculate n,m,o of center'''
     nmo_center=numpy.dot(trafo.T,abc_center.T)
-
-    
     
     '''Generating list of n,m,o which are dedicated to the points inside the cuboid
     (or parallelepiped)'''
@@ -152,12 +153,6 @@ class geometry:
 	      if 1==1])
 
     return numpy.dot(nmo,self._lattice_vectors)
-    
-    #print array(self.gen_atoms(point) for point in points)
-
-
-  '''def gen_cuboid_from_body(self, body):
-    return self.gen_cuboid0(body.containing_cuboid())'''
     
   '''  def gen_cuboid1(self, cuboid):
     atoms = []
@@ -219,5 +214,6 @@ class geometry:
   
   def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
-    atoms = numpy.array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
+    atoms = numpy.array([numpy.hstack((point+self._basis[atom_idx], atom_idx))\
+          for point in lattice_points for atom_idx in range(len(self._basis))])
     return atoms
