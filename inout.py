@@ -3,19 +3,66 @@
 
 import ConfigParser
 import numpy
+import getopt
 
-def read_ini(configfile):
+def print_usage(shouldexit=True):
+  raise
+  print 'Usage: nanocut [OPTIONS] INFILE [OPTIONS]\n\
+         \n\
+         Option\t Meaning\n\
+         -a OUTFILE\t appends created structure to OUTFILE\n\
+         -h \t prints help\n\
+         --help\t print help\n\
+         -w OUTFILE\t creates or overwrites OUTFILE'
+  if shouldexit:
+    exit()
+
+def print_help(shouldexit=True):
+  print 'helptext:\n\n'
+  print_usage(shouldexit)
+  
+def parse_args(argv):
+
+  try:
+    opts, input = getopt.gnu_getopt(argv, 'a:hw:', ['help'])
+  except getopt.GetoptError, exc:
+    print 'Error:\n\
+           Invalid argument. ',exc.opt,'\n\n'
+    print_usage()
+  if len(input) != 2:
+    print 'Error:\n\
+           No or multiple INFILEs specified.\n\n'
+    print_usage()
+  
+  if '-h' in opts or '--help' in opts:
+    print_help()
+
+  write = [a for o,a in opts if o== '-w']
+  append = [a for o,a in opts if o== '-a']
+
+  return (input[1], write, append)
+
+
+def read_ini(file):
   '''Reads ini-file. Returns content as ConfigParser-object'''
   ini=ConfigParser.ConfigParser()
+  
   try:
-    ini.read(configfile)
+    configfile = open(file, 'r')
+  except IOError:
+    exit('Error:\n'+
+    "Can't open "+file.name+'.'
+    +'\nExiting...')
+  
+  try:
+    ini.readfp(configfile)
   except ConfigParser.MissingSectionHeaderError, exc:
     exit('Error:\n'+
-    'Malformed ini-file, '+configfile+'. Section Header missing.'
+    'Malformed ini-file, '+configfile.name+'. Section Header missing.'
     +'\nExiting...')
   except ConfigParser.ParsingError, exc:
     exit('Error:\n'+
-    'Malformed ini-file, '+configfile+'. Parsing error at:\n'+
+    'Malformed ini-file, '+configfile.name+'. Parsing error at:\n'+
     repr(exc.append).split("\n")[1][:-1]+
     '\nExiting...')
   return ini
@@ -23,77 +70,54 @@ def read_ini(configfile):
 
 
 def ini2dict(ini):
-  '''Converts ConfigParser-object (generated from ini) to 2D dict (d[section][item]->value).'''
+  '''Converts ConfigParser-object (generated from ini) to 2D dict\
+   (d[section][item]->value).'''
   return dict([(section,dict(ini.items(section))) for section in ini.sections()])
 
+def write_crystal(geometry,atoms_cuboid, atoms_inside_bodies, writefilenames, appendfilenames):
 
+  number_atoms = sum(atoms_inside_bodies)
+  if len(writefilenames)==0 and len(appendfilenames)==0:
+    write_to_stdout=True
+  else:
+    write_to_stdout=False
+  
+  files = []
+  for filename in appendfilenames:
+    try:
+      file = open(filename, 'r+')
+    except IOError:
+      exit('Error:\n'+
+           "Can't open "+file.name+'.'
+           +'\nExiting...')
+      
+    try:
+      old_file_number_atoms = int(file.readline())
+    except ValueError:
+      exit('Error:\n'+
+           +file.name+' not in xyz-format.'
+           +'\nExiting...')
 
-def geometry_from_dict(d):
-  '''Reads geometry from dict. Returns (lattice, basis, basis_names, basis_ids)
-  (3x3-array, ?x3-array, list, list)'''
-  
-  if "geometry" not in d.keys():
-    exit('Error:\n'+
-    'geometry not defined, check configuration.'
-    +'\nExiting...')
+    old_file = [repr(old_file_number_atoms + number_atoms)+'\n']\
+                    + file.readlines()[:old_file_number_atoms+1]
+    file.seek(0)
+    file.writelines(old_file)
+    files.append(file)
     
-  if "lattice_vectors" not in d["geometry"].keys():
-    exit('Error:\n'+
-    'lattice_vectors not defined, check configuration.'
-    +'\nExiting...')
+  for filename in writefilenames:
+    try:
+      file = open(filename, 'w')
+    except IOError:
+      exit('Error:\n'+
+           "Can't open "+file.name+'.'
+           +'\nExiting...')
+    file.write(repr(number_atoms)+'\n\n')
+    files.append(file)
     
-  if "basis" not in d["geometry"].keys():
-    exit('Error:\n'+
-    'basis not defined, check configuration.'
-    +'\nExiting...')
-  
-  try:
-    lattice_vectors = numpy.array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
-  except ValueError:
-    exit('Error:\n'+
-    'Supplied string for lattice_vectors not convertible to number, check configuration.'
-    +'\nExiting...')
+  for atom in atoms_cuboid[atoms_inside_bodies]:
+    atomsstring = geometry._basis_names[geometry._basis_names_idx[int(atom[3])]]+' '\
+            +repr(atom[0])+' '+ repr(atom[1])+' '+ repr(atom[2])+'\n'
+    [file.write(atomsstring) for file in files]
+    if write_to_stdout:
+      print atomstring
     
-  if lattice_vectors.size != 9:
-    exit('Error:\n'+
-    'Wrong number of elements supplied for lattice_vectors, check configuration.'
-    +'\nExiting...')
-    
-  lattice_vectors.shape=(3,3)
-  
-  
-  basis=d["geometry"]["basis"].split()
-  
-  if len(basis) % 4 != 0:
-    exit('Error:\n'+
-    'Wrong number of elements supplied for basis, check configuration.'
-    +'\nExiting...')
-    
-  basis_names=[basis.pop(ind) for ind in range(0,len(basis)*3/4,3)]
-  '''#TODO: do not create double entries, related to #TODO in l.88'''
-  
-  try:
-    basis = numpy.array([float(el) for el in basis])
-  except ValueError:
-    exit('Error:\n'+
-    'Supplied string for basis not convertible to number, check configuration.'
-    +'\nExiting...')
-  
-  basis.shape=(basis.size/3,3)
-  
-  basis_name_idx=range(basis.size/3) #TODO: generate real idx, related to #TODO in l.71
-  
-  return (lattice_vectors, basis, basis_names, basis_name_idx)
-
-def write_structure_to_file(geometry, atoms, atoms_inside_bodies, file):
-  fi = open(file, 'w')
-
-  fi.write(repr(sum(atoms_inside_bodies)) + '\n\n')
-  
-  '''print atoms to file'''
-  [fi.write(\
-    geometry._basis_names[geometry._basis_names_idx[int(atom[3])]]+' '\
-    +repr(atom[0])+' '+ repr(atom[1])+' '+ repr(atom[2])+'\n')\
-  for atom in atoms[atoms_inside_bodies]]
-
-  fi.close()

@@ -6,16 +6,15 @@ Created on Aug 28, 2009
 @author: sebastian
 '''
 #Import public modules
-import sys, numpy
+import sys, numpy, getopt
 
 #Import own modules
 import inout, geometry, sphere, convex_polyhedron
 
+inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
+
 '''Parse configuration from ini-file and store it in a config_ini-object.'''
-try:
-  config_ini=inout.read_ini(sys.argv[1])
-except IndexError:
-  exit('Error! Please assign an input file!')
+config_ini=inout.read_ini(inputfilename)
 
 '''Read configuration from config_ini and write it into a (dict) config_dict.'''
 config_dict=inout.ini2dict(config_ini)
@@ -34,6 +33,8 @@ for body in config_dict.keys():
   elif body[0:18]=="convex_polyhedron:":
     body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[body])
     bodies.append(body)
+  elif body[0:8]=="geometry":
+    pass
   else:
     print ('Warning:\n'+
       '"'+body+'"'+' is not a valid name for a body and will be ignored.'
@@ -41,8 +42,6 @@ for body in config_dict.keys():
 
 '''Get boundaries of the cuboid containing all bodies'''
 
-print config_dict.keys()
-print bodies
 
 cuboid_boundaries = numpy.vstack([body.containing_cuboid() for body in bodies if body.is_additive()])
 cuboid_boundaries = numpy.vstack([cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
@@ -77,11 +76,9 @@ for order in range(1,max_order+1):
 	atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
       else:
 	
-	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies) - tmp_atoms_inside_bodies
+	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies)\
+  - tmp_atoms_inside_bodies
 	
 
 '''Write final crystal to file'''
-try:
-  inout.write_structure_to_file(geo, atoms_cuboid, atoms_inside_bodies, sys.argv[2])
-except IndexError:
-  exit('Error! Please assign an output file name!')
+inout.write_crystal(geo,atoms_cuboid, atoms_inside_bodies, writefilenames, appendfilenames)
