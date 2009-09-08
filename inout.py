@@ -119,5 +119,5 @@ def write_crystal(geometry,atoms_cuboid, atoms_inside_bodies, writefilenames, ap
             +repr(atom[0])+' '+ repr(atom[1])+' '+ repr(atom[2])+'\n'
     [file.write(atomsstring) for file in files]
     if write_to_stdout:
-      print atomstring
+      print atomsstring
     
