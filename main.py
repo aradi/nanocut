@@ -54,10 +54,10 @@ cuboid_boundaries = numpy.vstack(\
 '''Generate lattice-cuboid'''
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
 
-'''Generate cuboid containig all atoms'''
+'''Generate cuboid containing all atoms'''
 atoms_cuboid = geo.gen_atoms(lattice_cuboid)
 
-'''Decide which atoms really are inside the specified set of body.'''
+'''Decide which atoms really are inside the specified set of bodies.'''
 #Find the highest order
 max_order = max([body.get_order() for body in bodies])
 

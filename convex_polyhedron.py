@@ -106,17 +106,17 @@ class convex_polyhedron(body.body):
     '''Creates array assigning True and False values to points in and out of\
     plane/s boundaries respectively'''
     
-    in_out_array = []
+    atoms_inside_body=numpy.zeros(atoms[:,3].shape,bool)
     '''Determines for each point given if it shares the same position related\
     to each plane as the point_in_body'''
-    for atom in atoms:
+    for index in range(len(atoms)):
       TF_value = numpy.array([(self._planes_normal[plane_idx,3]-\
-          sum((atom[:3]-self._shift_vector)[0]*self._planes_normal[plane_idx,:3]))/\
+          sum((atoms[index,:3]-self._shift_vector)[0]*self._planes_normal[plane_idx,:3]))/\
           sum(self._planes_normal[plane_idx,:3]**2) <= 0\
           for plane_idx in range(len(self._planes_normal))])
-      in_out_array.append((TF_value==self._parameter).all())
+      atoms_inside_body[index]=(TF_value==self._parameter).all()
     
-    return in_out_array
+    return atoms_inside_body
                         
   def miller_to_normal(self,geometry,plane_miller):
     '''Calculates the normal form of a plane defined by Miller indices'''

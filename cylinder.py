@@ -30,12 +30,8 @@ class cylinder(body.body):
     self._radius_2 = radius_2
     self._point_1 = geometry.coord_transform(point_1,point_1_coordsys)
     self._point_2 = geometry.coord_transform(point_2,point_2_coordsys)
-    self._vector = self._point_1 - self._point_2
-    self._plane_1 = numpy.hstack((self._vector,sum(self._vector*self._point_1)))
-    self._plane_2 = numpy.hstack((self._vector,sum(self._vector*self._point_2)))
-    self._norm = numpy.linalg.norm(self._vector)
-    self._norm_1 = numpy.linalg.norm(self._plane_1[:3])
-    self._norm_2 = numpy.linalg.norm(self._plane_2[:3])
+    self._dir_vector = self._point_2 - self._point_1
+    self._norm = numpy.linalg.norm(self._dir_vector)
   
 
   @classmethod
@@ -61,19 +57,15 @@ class cylinder(body.body):
   def atoms_inside(self,atoms):
     '''Assigns True and False values towards points in and out of sphere\
      boundaries respectively'''
-    in_out_array = []
 
-    for atom in atoms:
-      if numpy.linalg.norm(numpy.cross((atom[:3]-self._point_1+self._shift_vector[0]),\
-         self._vector))/self._norm\
-         <= self._radius -(self._radius-self._radius_2)*\
-         abs(sum((atom[:3]-self._point_1+self._shift_vector[0])*self._vector))\
-         /self._norm**2\
-      and (self._plane_1[3]-sum(self._plane_1[:3]*(atom[:3]+self._shift_vector)[0]))\
-      /self._norm_1 >= 0\
-      and (self._plane_2[3]-sum(self._plane_2[:3]*(atom[:3]+self._shift_vector)[0]))\
-      /self._norm_2 <= 0:
-        in_out_array.append(True)
-      else:
-        in_out_array.append(False)
-    return in_out_array
+    atoms_inside_body=numpy.zeros(atoms[:,3].shape,bool)
+    
+    for index in range(len(atoms)):
+
+      ap=(self._point_1+self._shift_vector[0])-atoms[index,:3]
+      dist=numpy.linalg.norm(numpy.cross(ap,self._dir_vector))/self._norm
+      ln=numpy.dot(ap,self._dir_vector)/self._norm**2
+      rad_at_l=ln*(self._radius_2-self._radius)+self._radius
+      atoms_inside_body[index] = rad_at_l>=dist and ln>=0 and ln<=1
+
+    return atoms_inside_body
