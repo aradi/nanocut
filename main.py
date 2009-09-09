@@ -42,6 +42,13 @@ for body in config_dict.keys():
       '"'+body+'"'+' is not a valid name for a body and will be ignored.'
       +'\nContinuing...')
 
+if len(bodies)==0:
+    print ('Warning:\n'+
+      'No bodies specified.'
+      +'\nExiting...')
+    exit()
+
+
 '''Get boundaries of the cuboid containing all bodies'''
 cuboid_boundaries = numpy.vstack(\
 	[body.containing_cuboid() for body in bodies if body.is_additive()])

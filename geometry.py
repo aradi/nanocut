@@ -116,6 +116,8 @@ class geometry:
     cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
     abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
 
+    '''Add buffer to abc_boudaries'''
+    abc_boundaries+=abs(self._lattice_vectors).max(axis=0).reshape((3,1))
     
     '''Calculate inverse of lattice_vectors matrix. Result transforms any vector (d,e,f)
     to lattice coordinates: dot((d,e,f).T , trafo)'''
