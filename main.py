@@ -11,7 +11,7 @@ import sys, numpy, getopt
 
 
 #Import own modules
-import inout, geometry, sphere, convex_polyhedron
+import inout, geometry, sphere, convex_polyhedron, cylinder
 
 
 inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
@@ -34,6 +34,9 @@ for body in config_dict.keys():
     bodies.append(body)
   elif body[0:18]=="convex_polyhedron:":
     body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[body])
+    bodies.append(body)
+  elif body[0:9]=="cylinder:":
+    body = cylinder.cylinder.from_dict(geo, config_dict[body])
     bodies.append(body)
   elif body[0:8]=="geometry":
     pass
