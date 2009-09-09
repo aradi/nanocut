@@ -11,7 +11,7 @@ import sys, numpy, getopt
 
 
 #Import own modules
-import inout, geometry, sphere, convex_polyhedron
+import inout, geometry, sphere, convex_polyhedron, cylinder
 
 
 inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
@@ -34,6 +34,9 @@ for body in config_dict.keys():
     bodies.append(body)
   elif body[0:18]=="convex_polyhedron:":
     body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[body])
+    bodies.append(body)
+  elif body[0:9]=="cylinder:":
+    body = cylinder.cylinder.from_dict(geo, config_dict[body])
     bodies.append(body)
   elif body[0:8]=="geometry":
     pass
@@ -58,10 +61,10 @@ cuboid_boundaries = numpy.vstack(\
 '''Generate lattice-cuboid'''
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
 
-'''Generate cuboid containig all atoms'''
+'''Generate cuboid containing all atoms'''
 atoms_cuboid = geo.gen_atoms(lattice_cuboid)
 
-'''Decide which atoms really are inside the specified set of body.'''
+'''Decide which atoms really are inside the specified set of bodies.'''
 #Find the highest order
 max_order = max([body.get_order() for body in bodies])
 
