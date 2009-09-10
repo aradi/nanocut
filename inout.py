@@ -6,7 +6,6 @@ import numpy
 import getopt
 
 def print_usage(shouldexit=True):
-  raise
   print 'Usage: nanocut [OPTIONS] INFILE [OPTIONS]\n\
          \n\
          Option\t Meaning\n\
@@ -43,15 +42,15 @@ def parse_args(argv):
   return (input[1], write, append)
 
 
-def read_ini(file):
+def read_ini(filename):
   '''Reads ini-file. Returns content as ConfigParser-object'''
   ini=ConfigParser.ConfigParser()
   
   try:
-    configfile = open(file, 'r')
+    configfile = open(filename, 'r')
   except IOError:
     exit('Error:\n'+
-    "Can't open "+file.name+'.'
+    "Can't open "+filename+'.'
     +'\nExiting...')
   
   try:
@@ -65,6 +64,7 @@ def read_ini(file):
     'Malformed ini-file, '+configfile.name+'. Parsing error at:\n'+
     repr(exc.append).split("\n")[1][:-1]+
     '\nExiting...')
+  configfile.close()
   return ini
 
 
@@ -88,7 +88,7 @@ def write_crystal(geometry,atoms_cuboid, atoms_inside_bodies, writefilenames, ap
       file = open(filename, 'r+')
     except IOError:
       exit('Error:\n'+
-           "Can't open "+file.name+'.'
+           "Can't open "+filename+'.'
            +'\nExiting...')
       
     try:
@@ -109,7 +109,7 @@ def write_crystal(geometry,atoms_cuboid, atoms_inside_bodies, writefilenames, ap
       file = open(filename, 'w')
     except IOError:
       exit('Error:\n'+
-           "Can't open "+file.name+'.'
+           "Can't open "+filename+'.'
            +'\nExiting...')
     file.write(repr(number_atoms)+'\n\n')
     files.append(file)
@@ -121,3 +121,4 @@ def write_crystal(geometry,atoms_cuboid, atoms_inside_bodies, writefilenames, ap
     if write_to_stdout:
       print atomsstring
     
+  [file.close() for file in files]

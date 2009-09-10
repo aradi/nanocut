@@ -46,10 +46,6 @@ test-snowman: ./testoutput/snowman-nose.xyz
 	cp ./testoutput/snowman-body.xyz ./testoutput/snowman-nose.xyz
 	$(INT) $(MAIN) ./testinis/snowman-nose.ini -a ./testoutput/snowman-nose.xyz
 
-./testoutput/snowman-hat.xyz: ./testinis/snowman-hat.ini
-
-./testoutput/snowman-coal.xyz: ./testinis/snowman-coal.ini ./testoutput/snowman-body.xyz
-
 ./testoutput/snowman-body.xyz: ./testinis/snowman-body.ini
 	$(INT) $(MAIN) ./testinis/snowman-body.ini -w ./testoutput/snowman-body.xyz
 
