@@ -73,7 +73,7 @@ class convex_polyhedron(body.body):
                args["shift_vector_coordsys"],args["planes_normal_coordsys"],\
                args["point_inside_body_coordsys"])
 
-  def containing_cuboid(self):
+  def containing_cuboid(self,periodicity=None):
     '''Calculates the boundaries of the cuboid containing the polyhedron'''
     
     corners = numpy.array([0,0,0])

@@ -1,0 +1,51 @@
+# -*- coding: utf-8 -*-
+'''
+Created on Aug 31, 2009
+
+@author: sebastian
+'''
+import numpy
+import body
+
+class periodic_1D_cylinder(body.body):
+
+  #arguments of class defined in the following format:
+  #[default, type, shape, is_coord_sys_definable]
+  _arguments={
+    "radius":[None, "float", None, False],
+    "shift_vector":["0 0 0", "array", (1,3), True],
+    "order":[1,"integer", None, False]
+    }
+
+  def __init__(self,geometry,radius,shift_vector=numpy.array([0,0,0]),order=1,shift_vector_coordsys="lattice"):
+
+    body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
+    
+    self._radius=float(radius)
+    
+  @classmethod
+  def _from_dict_helper(cls,geometry,args):
+    return cls(geometry,args["radius"],args["shift_vector"],args["order"],
+               args["shift_vector_coordsys"])
+
+
+  
+  def containing_cuboid(self,axis):
+    '''Calculates the boundaries of the cuboid containing the sphere'''
+    
+
+    
+    bounds = numpy.vstack((
+            self._shift_vector + self._radius,
+            self._shift_vector - self._radius,
+            axis + self._shift_vector + self._radius,
+            axis + self._shift_vector - self._radius,
+            ))
+    return numpy.vstack((bounds.min(axis=0),bounds.max(axis=0)))
+
+
+  
+  def atoms_inside(self,atoms):
+    '''Assigns True and False values towards points in and out of sphere boundaries respectively'''
+
+    return numpy.ones(len(atoms),bool)

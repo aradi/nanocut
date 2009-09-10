@@ -74,6 +74,21 @@ class body:
           'Wrong number of elements supplied for '+arg+'.'
            +'\nExiting...\n')
 	
+      elif spec[1]=='intarray':
+        try:
+          init_args[arg]=numpy.array([int(el) for el in init_args[arg].split()])
+        except ValueError:
+          exit('Error:\n'+
+           'Supplied string for '+arg+' not convertible to integer-array.'
+           +'\nExiting...\n')
+	
+        try:
+          init_args[arg].shape=spec[2]
+        except ValueError:
+          exit('Error:\n'+
+          'Wrong number of elements supplied for '+arg+'.'
+           +'\nExiting...\n')
+	
       elif spec[1]=='integer':
         try:
 	         init_args[arg]=int(init_args[arg])

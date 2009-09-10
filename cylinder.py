@@ -48,7 +48,7 @@ class cylinder(body.body):
                args["shift_vector_coordsys"])
   
   
-  def containing_cuboid(self):
+  def containing_cuboid(self,periodicity=None):
     '''Calculates the boundaries of the cuboid containing the cylinder'''
     cuboid = numpy.zeros((2,3))
     bounds = numpy.vstack((\

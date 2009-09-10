@@ -38,7 +38,7 @@ class sphere(body.body):
   
   
   
-  def containing_cuboid(self):
+  def containing_cuboid(self,periodicity=None):
     '''Calculates the boundaries of the cuboid containing the sphere'''
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
   
