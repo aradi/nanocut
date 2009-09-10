@@ -37,6 +37,8 @@ class convex_polyhedron(body.body):
 
     planes_normal=numpy.array(planes_normal,dtype='float64')
     planes_normal.shape=(-1,4)
+    planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],\
+                                                 planes_normal_coordsys)
 
     planes_miller=numpy.array(planes_miller,dtype='float64')
     planes_miller.shape=(-1,4)
@@ -49,12 +51,9 @@ class convex_polyhedron(body.body):
 
 
     '''Appends planes calculated from miller indices to planes in normal form'''
-    planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],\
-                                                 planes_normal_coordsys)
     self._planes_normal = numpy.vstack((planes_normal,self._planes_miller))
 
 
-    
     '''Changes point_inside_body's coordinate system if necessary'''
     self._point_inside_body = geometry.coord_transform(point_inside_body,\
                                                   point_inside_body_coordsys)

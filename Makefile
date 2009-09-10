@@ -24,6 +24,7 @@ test-steps: ./testinis/steps.ini
 
 
 test-house: ./testoutput/house-roof.xyz
+	cp ./testoutput/house-roof.xyz ./testoutput/house.xyz
 	echo "Built house"
 
 ./testoutput/house-base.xyz: ./testinis/house-base.ini
@@ -40,6 +41,7 @@ test-house: ./testoutput/house-roof.xyz
 
 
 test-snowman: ./testoutput/snowman-nose.xyz
+	cp ./testoutput/snowman-nose.xyz ./testoutput/snowman.xyz
 	echo "Built snowman"
 
 ./testoutput/snowman-nose.xyz: ./testinis/snowman-nose.ini ./testoutput/snowman-body.xyz

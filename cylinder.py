@@ -13,8 +13,8 @@ class cylinder(body.body):
   _arguments={
     "point_1":[None, "array", (1,3), True],
     "point_2":[None, "array", (1,3), True],
-    "radius_1":[None, "integer", None, False],
-    "radius_2":[None, "integer",None, False],
+    "radius_1":[None, "float", None, False],
+    "radius_2":[None, "float",None, False],
     "shift_vector":["0 0 0", "array", (1,3), True],
     "order":[1,"integer", None, False]
     }
@@ -26,9 +26,15 @@ class cylinder(body.body):
 
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
     
-    self._radius_1 = radius_1
-    self._radius_2 = radius_2
+    self._radius_1 = float(radius_1)
+    self._radius_2 = float(radius_2)
+
+    point_1=numpy.array(point_1,dtype='float64')
+    point_1.shape=(1,3)
     self._point_1 = geometry.coord_transform(point_1,point_1_coordsys)
+
+    point_2=numpy.array(point_2,dtype='float64')
+    point_2.shape=(1,3)
     self._point_2 = geometry.coord_transform(point_2,point_2_coordsys)
     self._dir_vector = self._point_2 - self._point_1
     self._norm = numpy.linalg.norm(self._dir_vector)
@@ -62,14 +68,11 @@ class cylinder(body.body):
     
     for index in range(len(atoms)):
 
-      ap=(self._point_1+self._shift_vector[0])-atoms[index,:3]
-      dist=numpy.linalg.norm(numpy.cross(ap,self._dir_vector))/self._norm
-      
-      l=numpy.dot(ap,self._dir_vector)/self._norm**2
-      ln=l
-      
-      rad_at_l=l*(self._radius_2-self._radius_1)+self._radius_1
-      
-      atoms_inside_body[index] = abs(rad_at_l)>=abs(dist) and ln>=0 and ln<=1
+      ap = -(self._point_1+self._shift_vector[0])+atoms[index,:3]
+      dist = numpy.linalg.norm(numpy.cross(ap,self._dir_vector))/self._norm
+      ln = numpy.dot(ap,self._dir_vector.T)/self._norm**2
+      rad_at_l = self._radius_1+ln*(self._radius_2-self._radius_1)
+      atoms_inside_body[index] = rad_at_l>=dist and ln>=0 and ln<=1
+
 
     return atoms_inside_body

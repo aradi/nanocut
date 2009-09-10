@@ -67,11 +67,11 @@ class body:
            'Supplied string for '+arg+' not convertible to float-array.'
            +'\nExiting...\n')
 	
-          try:
-            init_args[arg].shape=spec[2]
-          except ValueError:
-            exit('Error:\n'+
-           'Wrong number of elements supplied for '+arg+'.'
+        try:
+          init_args[arg].shape=spec[2]
+        except ValueError:
+          exit('Error:\n'+
+          'Wrong number of elements supplied for '+arg+'.'
            +'\nExiting...\n')
 	
       elif spec[1]=='integer':
@@ -81,11 +81,20 @@ class body:
 	         exit('Error:\n'+
            'Supplied string for '+arg+' not convertible to integer.'
            +'\nExiting...\n')
+
+      elif spec[1]=='float':
+        try:
+	         init_args[arg]=float(init_args[arg])
+        except ValueError:
+	         exit('Error:\n'+
+           'Supplied string for '+arg+' not convertible to float.'
+           +'\nExiting...\n')
       
       else:
 	#TODO: Raise Exeption
         exit('InternalError:\n'+
-           'There is no valid argument type '+spec[1]+' can\'t use from_dict() with this class.'
+           'There is no valid argument type '+spec[1]+
+           ' can\'t use from_dict() with this class.'
            +'\nExiting...\n')
 
 
