@@ -14,6 +14,7 @@ test-landscape: ./testinis/house-base.ini ./testinis/house-roof.ini ./testinis/s
 	$(INT) $(MAIN) ./testinis/house-roof.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/snowman-body.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/snowman-nose.ini -a ./testoutput/landscape.xyz
+	$(INT) $(MAIN) ./testinis/snowman-hat.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/circular-wire.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/steps.ini -a ./testoutput/landscape.xyz
 
@@ -42,9 +43,13 @@ test-house: ./testoutput/house-roof.xyz
 
 
 
-test-snowman: ./testoutput/snowman-nose.xyz
-	cp ./testoutput/snowman-nose.xyz ./testoutput/snowman.xyz
+test-snowman: ./testoutput/snowman-hat.xyz
+	cp ./testoutput/snowman-hat.xyz ./testoutput/snowman.xyz
 	echo "Built snowman"
+        
+./testoutput/snowman-hat.xyz: ./testinis/snowman-hat.ini ./testoutput/snowman-nose.xyz 
+	cp ./testoutput/snowman-nose.xyz ./testoutput/snowman-hat.xyz
+	$(INT) $(MAIN) ./testinis/snowman-hat.ini -a ./testoutput/snowman-hat.xyz
 
 ./testoutput/snowman-nose.xyz: ./testinis/snowman-nose.ini ./testoutput/snowman-body.xyz
 	cp ./testoutput/snowman-body.xyz ./testoutput/snowman-nose.xyz
