@@ -28,8 +28,17 @@ geo = geometry.geometry.from_dict(config_dict)
 
 
 '''TODO: AUSLAGERN ANFANG'''
+
+def gcd(a,b,c):
+  while b:
+    a, b = b, a % b
+  while c:
+    a, c = c, a % c
+  return a
+
 if "periodicity_1D" in config_dict.keys():
   axis=numpy.array([int(el) for el in config_dict["periodicity_1D"]["axis"].split()])
+  axis = axis/gcd(axis[0],axis[1],axis[2])
   axis_cart=geo.coord_transform(axis,"lattice")
   print "axis:", axis
   print "axiscart:", axis_cart
@@ -109,7 +118,7 @@ for order in range(1,max_order+1):
   for body in bodies:
     
     if body.order_is(order):
-      tmp_atoms_inside_bodies = body.atoms_inside(atoms_cuboid)
+      tmp_atoms_inside_bodies = body.atoms_inside(atoms_cuboid,axis_cart)
       #Add and substract them respectively
       if order%2!=0:
 	atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies

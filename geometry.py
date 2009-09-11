@@ -153,47 +153,20 @@ class geometry:
 	                      int(nmo_boundaries[2]+nmo_center[2])+1)\
 	      if 1==1])
 
+    def is_int_multiple():
+      diff=numpy.array((nmo[idx_1]-nmo[idx_2]))
+      factor=diff[axis_max_idx]/axis[axis_max_idx]
+      if (axis*factor==diff).all():
+        is_dub[idx_2]=True
 
-
-
-    
-    
-    '''If the problem is periodic test for dublicates.'''
     if axis!=None:
-      no_dub=numpy.ones(len(nmo),bool)
-      '''Iterate over every entry in nmo which aren't considered dublicates atm'''
-      for idx_1 in range(len(nmo)):
-        print "@ idx", idx_1, " of ", len(nmo)
-        if no_dub[idx_1]==True:
-
-          '''Test every following entry if it's a dublicate of the current'''
-          for idx_2 in range(idx_1+1,len(nmo)):
-            if no_dub[idx_2]==True:
-
-               '''Check if point at idx_2 is dublicate of point at idx_1'''
-               diff=numpy.array((nmo[idx_1]-nmo[idx_2]),dtype=float)
-
-               '''Check possible pairs of elements for equality and wath out for
-                  division by zero'''
-               could_be_dub=True
-               for num1 in range(3):
-                 num2=(num1+1)%2
-
-                 '''Check if elements num1 and num2 are equal or'''
-                 if diff[num1]==0==axis[num1] or diff[num2]==0==axis[num2] or\
-                        (axis[num1]!=0 and axis[num2]!=0 and\
-                        diff[num1]/axis[num1]==diff[num2]/axis[num2] and\
-                        diff[num1]/axis[num1]%1==0):
-                   pass
-                 else:
-                   could_be_dub=False
-
-
-               if could_be_dub==True:
-                 no_dub[idx_2]=False
-
-      return numpy.dot(nmo[no_dub],self._lattice_vectors)
-
+      axis_max_idx=axis.argmax()
+      is_dub=numpy.zeros(len(nmo),bool)
+      [is_int_multiple()\
+           for idx_1 in range(len(nmo)) if is_dub[idx_1]==False\
+           for idx_2 in range(idx_1+1,len(nmo)) if is_dub[idx_2]==False\
+      ]
+      return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
     return numpy.dot(nmo,self._lattice_vectors)
       
   

@@ -45,7 +45,17 @@ class periodic_1D_cylinder(body.body):
 
 
   
-  def atoms_inside(self,atoms):
-    '''Assigns True and False values towards points in and out of sphere boundaries respectively'''
+  def atoms_inside(self,atoms,axis=None):
+    '''Assigns True and False values towards points inside and out of cylinder
+       boundaries respectively'''
 
-    return numpy.ones(len(atoms),bool)
+    atoms_inside_body=numpy.zeros(atoms[:,3].shape,bool)
+    
+    for index in range(len(atoms)):
+
+      ap = -(self._shift_vector[0])+atoms[index,:3]
+      dist = numpy.linalg.norm(numpy.cross(ap,axis))/numpy.linalg.norm(axis)
+      
+      atoms_inside_body[index] = self._radius>=dist
+
+    return atoms_inside_body
