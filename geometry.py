@@ -102,11 +102,11 @@ class geometry:
     basis = numpy.dot(numpy.asarray(numpy.matrix(self._lattice_vectors.T).I),basis.T).T
     basis %= 1
     return self.coord_transform(basis, "lattice")
-  
 
-    return self.gen_cuboid0(body.containing_cuboid())
     
-  def gen_cuboid(self, cuboid, axis=None):
+  def gen_cuboid(self, cuboid, periodicity=None):
+    
+    
     
     '''Calculate center of cuboid'''
     
@@ -155,20 +155,26 @@ class geometry:
 
     def is_int_multiple():
       diff=numpy.array((nmo[idx_1]-nmo[idx_2]))
-      factor=diff[axis_max_idx]/axis[axis_max_idx]
+      factor=diff[axis_max_idx]/axis[0,axis_max_idx]
       if (axis*factor==diff).all():
         is_dub[idx_2]=True
 
-    if axis!=None:
-      axis_max_idx=axis.argmax()
+
+    if periodicity==None or periodicity.period_type_is("0D"):
+      return numpy.dot(nmo,self._lattice_vectors)
+
+    elif periodicity.period_type_is("1D"):
+      
+      axis = periodicity.get_axis("lattice")
+      axis_max_idx=axis[0].argmax()
       is_dub=numpy.zeros(len(nmo),bool)
       [is_int_multiple()\
            for idx_1 in range(len(nmo)) if is_dub[idx_1]==False\
            for idx_2 in range(idx_1+1,len(nmo)) if is_dub[idx_2]==False\
       ]
       return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
-    return numpy.dot(nmo,self._lattice_vectors)
-      
+
+
   
   def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''

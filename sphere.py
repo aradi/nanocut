@@ -31,7 +31,7 @@ class sphere(body.body):
     self._radius = numpy.linalg.norm(radius_vector)
   
   @classmethod
-  def _from_dict_helper(cls,geometry,args):
+  def _from_dict_helper(cls,geometry,args,periodicity=None):
     return cls(geometry,args["radius_vector"],args["shift_vector"],args["order"],
                args["radius_vector_coordsys"],args["shift_vector_coordsys"])
     
@@ -42,7 +42,7 @@ class sphere(body.body):
     '''Calculates the boundaries of the cuboid containing the sphere'''
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
   
-  def atoms_inside(self,atoms):
+  def atoms_inside(self,atoms,periodicity=None):
     '''Assigns True and False values towards points in and out of sphere boundaries respectively'''
 
     return numpy.array([numpy.linalg.norm(self._shift_vector-x[0:3])\

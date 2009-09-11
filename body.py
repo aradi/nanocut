@@ -46,7 +46,7 @@ class body:
       return False
 
   @classmethod  
-  def from_dict(cls,geometry,configdict):
+  def from_dict(cls,geometry,configdict,periodicity=None):
     
     init_args={}
     
@@ -119,5 +119,5 @@ class body:
           exit('Error:\n'+
            'Supplied string "'+init_args[arg+'_coordsys']+'"for '+arg+'_coordsys is invalid.'
            +'\nExiting...\n')
-    
-    return cls._from_dict_helper(geometry,init_args)
+
+    return cls._from_dict_helper(geometry,init_args,periodicity)

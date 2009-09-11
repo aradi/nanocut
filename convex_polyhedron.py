@@ -67,7 +67,7 @@ class convex_polyhedron(body.body):
     
  
   @classmethod  
-  def _from_dict_helper(cls,geometry,args):
+  def _from_dict_helper(cls,geometry,args,periodicity=None):
     return cls(geometry,args["planes_normal"],args["planes_miller"],\
                args["shift_vector"],args["point_inside_body"],args["order"],\
                args["shift_vector_coordsys"],args["planes_normal_coordsys"],\
@@ -101,7 +101,7 @@ class convex_polyhedron(body.body):
     return cuboid
           
   
-  def atoms_inside(self,atoms):
+  def atoms_inside(self,atoms,periodicity=None):
     '''Creates array assigning True and False values to points in and out of\
     plane/s boundaries respectively'''
     

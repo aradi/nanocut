@@ -41,7 +41,7 @@ class cylinder(body.body):
   
 
   @classmethod
-  def _from_dict_helper(cls,geometry,args):
+  def _from_dict_helper(cls,geometry,args,periodicity=None):
     return cls(geometry,args["point_1"],args["point_2"],args["radius_1"],\
                args["radius_2"],args["shift_vector"],args["order"],\
                args["point_1_coordsys"],args["point_2_coordsys"],\
@@ -60,7 +60,7 @@ class cylinder(body.body):
     
     return cuboid
   
-  def atoms_inside(self,atoms):
+  def atoms_inside(self,atoms,periodicity=None):
     '''Assigns True and False values towards points in and out of sphere\
      boundaries respectively'''
 
