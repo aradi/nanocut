@@ -6,6 +6,10 @@ nothing:
 doc:
 	echo "Make doc (TODO)"
 
+test:
+	make test-clean
+	make test-house
+
 test-clean:
 	rm ./testoutput/*
 

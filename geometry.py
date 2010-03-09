@@ -3,7 +3,7 @@
 import numpy
 
 class geometry:
-  '''Self-defined class for handling crystal structure,
+  '''Class for handling crystal structure,
   containing unit-cell-vectors, atoms and kinds of atoms '''
 
   def __init__(self,lattice_vectors,basis,basis_names_idx,basis_names,
@@ -159,7 +159,6 @@ class geometry:
       if (axis*factor==diff).all():
         is_dub[idx_2]=True
 
-
     if periodicity==None or periodicity.period_type_is("0D"):
       return numpy.dot(nmo,self._lattice_vectors)
 
@@ -174,7 +173,8 @@ class geometry:
       ]
       return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
 
-
+  def get_name_of_atom(self, index):
+    return self._basis_names[self._basis_names_idx[index]]
   
   def gen_atoms(self, lattice_points):
     '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
