@@ -39,11 +39,11 @@ class sphere(body.body):
   
   
   def containing_cuboid(self,periodicity=None):
-    '''Calculates the boundaries of the cuboid containing the sphere'''
+    #Calculates the boundaries of the cuboid containing the sphere
     return self._radius*numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
   
   def atoms_inside(self,atoms,periodicity=None):
-    '''Assigns True and False values towards points in and out of sphere boundaries respectively'''
+    #Assigns True and False values towards points in and out of sphere boundaries respectively
 
     return numpy.array([numpy.linalg.norm(self._shift_vector-x[0:3])\
                           for x in atoms]) <= self._radius

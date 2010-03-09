@@ -31,7 +31,7 @@ class periodic_1D_cylinder(body.body):
 
   
   def containing_cuboid(self,periodicity):
-    '''Calculates the boundaries of the cuboid containing the sphere'''
+    #Calculates the boundaries of the cuboid containing the sphere
     axis=periodicity.get_axis("cartesian")
 
     

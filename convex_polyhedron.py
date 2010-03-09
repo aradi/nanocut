@@ -8,7 +8,7 @@ import numpy
 import body
 
 class convex_polyhedron(body.body):
-  '''Class for bodies determined by a group of planes describing it's surface'''
+  #Class for bodies determined by a group of planes describing it's surface
 
   #arguments of class defined in the following format:
   #[default, type, shape, is_coord_sys_definable]
@@ -29,7 +29,7 @@ class convex_polyhedron(body.body):
     and a possible shift_vector to determine it's distance from [0,0,0], as well\
     as each attribute's coordinate system'''
     
-    '''Type checking/conversion and initialisation of parent class'''
+    #Type checking/conversion and initialisation of parent class
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
 
     point_inside_body=numpy.array(point_inside_body,dtype='float64')
@@ -45,16 +45,16 @@ class convex_polyhedron(body.body):
 
 
 
-    '''Transforms planes determined by miller indices into normal shape'''
+    #Transforms planes determined by miller indices into normal shape
     self._planes_miller = numpy.array([numpy.hstack((self.miller_to_normal(geometry,\
           plane[:3]),plane[3])) for plane in planes_miller])
 
 
-    '''Appends planes calculated from miller indices to planes in normal form'''
+    #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack((planes_normal,self._planes_miller))
 
 
-    '''Changes point_inside_body's coordinate system if necessary'''
+    #Changes point_inside_body's coordinate system if necessary
     self._point_inside_body = geometry.coord_transform(point_inside_body,\
                                                   point_inside_body_coordsys)
 
@@ -74,7 +74,7 @@ class convex_polyhedron(body.body):
                args["point_inside_body_coordsys"])
 
   def containing_cuboid(self,periodicity=None):
-    '''Calculates the boundaries of the cuboid containing the polyhedron'''
+    #Calculates the boundaries of the cuboid containing the polyhedron
     
     corners = numpy.array([0,0,0])
     
@@ -93,7 +93,7 @@ class convex_polyhedron(body.body):
           except numpy.linalg.linalg.LinAlgError:
             print 'Pair of parallel planes found!'
     
-    '''Places extreme points in cuboid and returns cuboid'''
+    #Places extreme points in cuboid and returns cuboid
     corners = corners[1:]+self._shift_vector
     cuboid = numpy.zeros((2,3))
     cuboid[0]=corners.min(axis=0)
@@ -118,7 +118,7 @@ class convex_polyhedron(body.body):
     return atoms_inside_body
                         
   def miller_to_normal(self,geometry,plane_miller):
-    '''Calculates the normal form of a plane defined by Miller indices'''
+    #Calculates the normal form of a plane defined by Miller indices
     
     return plane_miller[0]*numpy.cross(geometry._lattice_vectors[1],geometry._lattice_vectors[2])\
     + plane_miller[1]*numpy.cross(geometry._lattice_vectors[2],geometry._lattice_vectors[0])\

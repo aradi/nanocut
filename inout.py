@@ -43,7 +43,7 @@ def parse_args(argv):
 
 
 def read_ini(filename):
-  '''Reads ini-file. Returns content as ConfigParser-object'''
+  #Reads ini-file. Returns content as ConfigParser-object
   ini=ConfigParser.ConfigParser()
   
   try:

@@ -72,7 +72,7 @@ class geometry:
            +'\nExiting...')
     
     basis_names=[basis.pop(ind) for ind in range(0,len(basis)*3/4,3)]
-    '''#TODO: do not create double entries, related to #TODO in l.88'''
+    ##TODO: do not create double entries, related to #TODO in l.88
   
     try:
       basis = numpy.array([float(el) for el in basis])
@@ -98,7 +98,7 @@ class geometry:
            +'\nExiting...')
       
   def mv_basis_to_prim(self, basis):
-    '''moves basis vectors into primitive cell'''
+    #moves basis vectors into primitive cell
     basis = numpy.dot(numpy.asarray(numpy.matrix(self._lattice_vectors.T).I),basis.T).T
     basis %= 1
     return self.coord_transform(basis, "lattice")
@@ -108,7 +108,7 @@ class geometry:
     
     
     
-    '''Calculate center of cuboid'''
+    #Calculate center of cuboid
     
     abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
 
@@ -116,7 +116,7 @@ class geometry:
     cartesian coordinates. Bounderies are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
     abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
 
-    '''Add buffer to abc_boudaries'''
+    #Add buffer to abc_boudaries
     abc_boundaries+=abs(self._lattice_vectors).max(axis=0).reshape((3,1))
     
     '''Calculate inverse of lattice_vectors matrix. Result transforms any vector (d,e,f)
@@ -136,7 +136,7 @@ class geometry:
     
 
     
-    '''Calculate n,m,o of center'''
+    #Calculate n,m,o of center
     nmo_center=numpy.dot(trafo.T,abc_center.T)
 
     
@@ -177,6 +177,6 @@ class geometry:
     return self._basis_names[self._basis_names_idx[index]]
   
   def gen_atoms(self, lattice_points):
-    '''Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])'''
+    #Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])
     atoms = numpy.array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
     return atoms

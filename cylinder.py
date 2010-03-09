@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Created on Sep 8, 2009
 
@@ -49,7 +50,7 @@ class cylinder(body.body):
   
   
   def containing_cuboid(self,periodicity=None):
-    '''Calculates the boundaries of the cuboid containing the cylinder'''
+    #Calculates the boundaries of the cuboid containing the cylinder
     cuboid = numpy.zeros((2,3))
     bounds = numpy.vstack((\
             self._point_1 + self._radius_1 , self._point_1 - self._radius_1,\

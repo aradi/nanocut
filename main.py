@@ -1,10 +1,6 @@
 #!usr/bin/python
 # -*- coding: utf-8 -*-
-'''
-Created on Aug 28, 2009
 
-@author: sebastian
-'''
 #Import public modules
 
 import sys, numpy, getopt
@@ -16,19 +12,19 @@ import inout, geometry, sphere, convex_polyhedron, cylinder, periodic_1D_cylinde
 
 inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
 
-'''Parse configuration from ini-file and store it in a config_ini-object.'''
+#Parse configuration from ini-file and store it in a config_ini-object.
 config_ini=inout.read_ini(inputfilename)
 
-'''Read configuration from config_ini and write it into a (dict) config_dict.'''
+#Read configuration from config_ini and write it into a (dict) config_dict.
 config_dict=inout.ini2dict(config_ini)
 
-'''Initialise geometry-object from config_dict'''
+#Initialise geometry-object from config_dict
 geo = geometry.geometry.from_dict(config_dict)
 
-'''Initialise periodicity-object form config_dict'''
+#Initialise periodicity-object form config_dict
 period = periodicity.periodicity.from_dict(geo,config_dict)
 
-'''Initialise body objects and store references in bodies list'''
+#Initialise body objects and store references in bodies list
 bodies=[]
 if period.period_type_is("0D"):
   for body in config_dict.keys():
@@ -61,19 +57,19 @@ if len(bodies)==0:
     exit()
 
 
-'''Get boundaries of the cuboid containing all bodies'''
+#Get boundaries of the cuboid containing all bodies
 cuboid_boundaries = numpy.vstack(\
 	[body.containing_cuboid(period) for body in bodies if body.is_additive()])
 cuboid_boundaries = numpy.vstack(\
 	 [cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
 
-'''Generate lattice-cuboid'''
+#Generate lattice-cuboid
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
 
-'''Generate cuboid containing all atoms'''
+#Generate cuboid containing all atoms
 atoms_cuboid = geo.gen_atoms(lattice_cuboid)
 
-'''Decide which atoms really are inside the specified set of bodies.'''
+#Decide which atoms really are inside the specified set of bodies.
 #Find the highest order
 max_order = max([body.get_order() for body in bodies])
 
@@ -93,6 +89,6 @@ for order in range(1,max_order+1):
 	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies)\
 	      - tmp_atoms_inside_bodies
 
-'''Write final crystal to file'''
+#Write final crystal to file
 inout.write_crystal(\
 	geo,atoms_cuboid, atoms_inside_bodies, writefilenames, appendfilenames)

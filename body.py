@@ -8,7 +8,7 @@ Created on Aug 31, 2009
 import numpy
 
 class body:
-  '''Metaclass; all body-classes regardless of shape should be derived from this one.'''
+  #Metaclass; all body-classes regardless of shape should be derived from this one.
   def __init__(self,geometry,shift_vector,order,shift_vector_coordsys):
     
     shift_vector=numpy.array(shift_vector,dtype='float64')

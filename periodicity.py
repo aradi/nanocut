@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy
 
 
@@ -60,7 +61,7 @@ class periodicity:
 
   @classmethod
   def from_dict(cls,geometry,d):
-    '''Reads periodicity from dict'''
+    #Reads periodicity from dict
     if "periodicity" not in d.keys():
       
       return cls(geometry,"0D")
