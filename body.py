@@ -22,28 +22,16 @@ class body:
     return self._order
   
   def order_is(self,test_order):
-    if self._order==test_order:
-      return True
-    else:
-      return False
+    return self._order==test_order
 
   def is_additive(self):
-    if self._order>0 and self._order%2!=0:
-      return True
-    else:
-      return False
+    return self._order>0 and self._order%2==1
     
   def is_substractive(self):
-    if self._order>0 and self._order%2==0:
-        return True
-    else:
-      return False
+    return self._order>0 and self._order%2==0
     
   def is_ignored(self):
-    if self._order<=0:
-        return True
-    else:
-      return False
+    return self._order<=0
 
   @classmethod  
   def from_dict(cls,geometry,configdict,periodicity=None):
