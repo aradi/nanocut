@@ -64,7 +64,7 @@ class cylinder(body.body):
     '''Assigns True and False values towards points in and out of sphere\
      boundaries respectively'''
 
-    atoms_inside_body=numpy.zeros(atoms[:,3].shape,bool)
+    atoms_inside_body=numpy.zeros(atoms.shape(0),bool)
     
     for index in range(len(atoms)):
 

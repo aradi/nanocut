@@ -32,19 +32,19 @@ period = periodicity.periodicity.from_dict(geo,config_dict)
 bodies=[]
 if period.period_type_is("0D"):
   for body in config_dict.keys():
-    if body[0:7]=="sphere:":
+    if body.startswith('sphere'):
       body = sphere.sphere.from_dict(geo, config_dict[body])
       bodies.append(body)
-    elif body[0:18]=="convex_polyhedron:":
+    elif body.startswith('convex_polyhedron'):
       body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[body])
       bodies.append(body)
-    elif body[0:9]=="cylinder:":
+    elif body.startswith('cylinder'):
       body = cylinder.cylinder.from_dict(geo, config_dict[body])
       bodies.append(body)
       
 elif period.period_type_is("1D"):
   for body in config_dict:
-    if body[0:21]=="periodic_1D_cylinder:":
+    if body.startswith('periodic_1D_cylinder'):
       body = periodic_1D_cylinder.periodic_1D_cylinder.from_dict(geo,config_dict[body],period)
       bodies.append(body)
 
