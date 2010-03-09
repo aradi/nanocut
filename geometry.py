@@ -177,6 +177,11 @@ class geometry:
     return self._basis_names[self._basis_names_idx[index]]
   
   def gen_atoms(self, lattice_points):
-    #Returns the atoms distributed to a given lattice point as array([x-coord, y-coord, z-coord, ID])
-    atoms = numpy.array([numpy.hstack((point+self._basis[atom_idx], atom_idx)) for point in lattice_points for atom_idx in range(len(self._basis))])
-    return atoms
+    #Returns the coordinates and index of each atom
+    atoms_coords = numpy.array([(point+self._basis[atom_idx])
+    for point in lattice_points for atom_idx in range(len(self._basis))])
+
+    atoms_idx = numpy.array([ atom_idx
+    for point in lattice_points for atom_idx in range(len(self._basis))])
+    
+    return atoms_coords, atoms_idx

@@ -67,21 +67,21 @@ cuboid_boundaries = numpy.vstack(\
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
 
 #Generate cuboid containing all atoms
-atoms_cuboid = geo.gen_atoms(lattice_cuboid)
+atoms_coords,atoms_idx = geo.gen_atoms(lattice_cuboid)
 
-#Decide which atoms really are inside the specified set of bodies.
+#Decide which atoms are inside the specified set of bodies.
 #Find the highest order
 max_order = max([body.get_order() for body in bodies])
 
 #Test for atoms inside bodies in the right order.
-atoms_inside_bodies=numpy.zeros(atoms_cuboid[:,3].shape,bool)
+atoms_inside_bodies=numpy.zeros(atoms_coords.shape[0],bool)
 
 for order in range(1,max_order+1):
   
   for body in bodies:
     
     if body.order_is(order):
-      tmp_atoms_inside_bodies = body.atoms_inside(atoms_cuboid,period)
+      tmp_atoms_inside_bodies = body.atoms_inside(atoms_coords,period)
       #Add and substract them respectively
       if order%2!=0:
 	atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
@@ -90,5 +90,5 @@ for order in range(1,max_order+1):
 	      - tmp_atoms_inside_bodies
 
 #Write final crystal to file
-inout.write_crystal(\
-	geo,atoms_cuboid, atoms_inside_bodies, writefilenames, appendfilenames)
+inout.write_crystal(geo,atoms_coords, atoms_idx, atoms_inside_bodies,
+writefilenames, appendfilenames)
