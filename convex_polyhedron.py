@@ -105,7 +105,7 @@ class convex_polyhedron(body.body):
     '''Creates array assigning True and False values to points in and out of\
     plane/s boundaries respectively'''
     
-    atoms_inside_body=numpy.zeros(atoms.shape(0),bool)
+    atoms_inside_body=numpy.zeros(atoms.shape[0],bool)
     '''Determines for each point given if it shares the same position related\
     to each plane as the point_in_body'''
     for index in range(len(atoms)):
