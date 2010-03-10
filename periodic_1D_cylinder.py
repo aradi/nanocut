@@ -46,8 +46,8 @@ class periodic_1D_cylinder(body.body):
 
   
   def atoms_inside(self,atoms,periodicity):
-    '''Assigns True and False values towards points inside and out of cylinder
-       boundaries respectively'''
+    #Assigns True and False values towards points inside and out of cylinder
+       boundaries respectively
 
     atoms_inside_body=numpy.zeros(atoms.shape[0],bool)
     

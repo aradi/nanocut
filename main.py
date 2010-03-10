@@ -7,7 +7,7 @@ import sys, numpy, getopt
 
 
 #Import own modules
-import inout, geometry, sphere, convex_polyhedron, cylinder, periodic_1D_cylinder, periodicity
+import inout, geometry, sphere, convex_polyhedron, cylinder, periodic_1D_cylinder, periodic_2D_plane, periodicity
 
 
 inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
@@ -45,7 +45,10 @@ elif period.period_type_is("1D"):
       bodies.append(body)
 
 elif period.period_type_is("2D"):
-  pass
+  for body in config_dict:
+    if body.startswith('periodic_2D_plane'):
+      body = periodic_2D_plane.periodic_2D_plane.from_dict(geo,config_dict[body],period)
+      bodies.append(body)
 
 else:
   exit("Could not determine type of periodicity. This should never happen.")
@@ -58,13 +61,14 @@ if len(bodies)==0:
 
 
 #Get boundaries of the cuboid containing all bodies
-cuboid_boundaries = numpy.vstack(\
-	[body.containing_cuboid(period) for body in bodies if body.is_additive()])
-cuboid_boundaries = numpy.vstack(\
-	 [cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
+cuboid_boundaries = numpy.vstack(
+    [body.containing_cuboid(period) for body in bodies if body.is_additive()])
+cuboid_boundaries = numpy.vstack(
+    [cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
 
 #Generate lattice-cuboid
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
+
 
 #Generate cuboid containing all atoms
 atoms_coords,atoms_idx = geo.gen_atoms(lattice_cuboid)
