@@ -74,9 +74,9 @@ def ini2dict(ini):
    (d[section][item]->value).'''
   return dict([(section,dict(ini.items(section))) for section in ini.sections()])
 
-def write_crystal(geometry, atoms_coords, atoms_idx, atoms_inside_bodies, writefilenames, appendfilenames):
+def write_crystal(geometry, atoms_coords, atoms_idx, writefilenames, appendfilenames):
 
-  number_atoms = sum(atoms_inside_bodies)
+  number_atoms = atoms_idx.shape[0]
   if len(writefilenames)==0 and len(appendfilenames)==0:
     write_to_stdout=True
   else:
@@ -115,12 +115,11 @@ def write_crystal(geometry, atoms_coords, atoms_idx, atoms_inside_bodies, writef
     files.append(file)
     
   for it in range(atoms_coords.shape[0]):
-    if atoms_inside_bodies[it]:
-      atomsstring = geometry.get_name_of_atom(atoms_idx[it])+' '\
-            +repr(atoms_coords[it,0])+' '+ repr(atoms_coords[it,1])+' '+ repr(atoms_coords[it,2])+'\n'
-      for file in files:
-	file.write(atomsstring)
-      if write_to_stdout:
-	print atomsstring
+    atomsstring = geometry.get_name_of_atom(atoms_idx[it])+' '\
+          +repr(atoms_coords[it,0])+' '+ repr(atoms_coords[it,1])+' '+ repr(atoms_coords[it,2])+'\n'
+    for file in files:
+      file.write(atomsstring)
+    if write_to_stdout:
+      print atomsstring
     
   [file.close() for file in files]

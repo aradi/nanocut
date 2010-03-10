@@ -61,7 +61,12 @@ class periodicity:
     '''Returns True if argument matches period_type.'''
     return self._period_type==testtype
 
-
+  def arrange_positions(self, atoms_coords, atoms_idx):
+    '''Put atoms in periodic structures in proper position'''
+    axis_norm=numpy.linalg.norm(self._axis)
+    for idx in range(atoms_idx.shape[0]):
+      ndist=int(numpy.dot(atoms_coords[idx], self._axis.T/axis_norm)/axis_norm)-1
+      atoms_coords[idx]=atoms_coords[idx]-ndist*self._axis
 
   @classmethod
   def from_dict(cls,geometry,d):
