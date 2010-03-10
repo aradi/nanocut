@@ -7,7 +7,7 @@ import sys, numpy, getopt
 
 
 #Import own modules
-import inout, geometry, sphere, convex_polyhedron, cylinder, periodic_1D_cylinder, periodic_2D_plane, periodicity
+import inout, geometry, sphere, convex_polyhedron, cylinder, periodic_1D_cylinder, periodic_1D_convex_prism, periodicity
 
 
 inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
@@ -43,6 +43,10 @@ elif period.period_type_is("1D"):
     if body.startswith('periodic_1D_cylinder'):
       body = periodic_1D_cylinder.periodic_1D_cylinder.from_dict(geo,config_dict[body],period)
       bodies.append(body)
+    elif body.startswith('periodic_1D_convex_prism'):
+      body = periodic_1D_convex_prism.periodic_1D_convex_prism.from_dict(geo,config_dict[body],period)
+      bodies.append(body)
+
 
 elif period.period_type_is("2D"):
   for body in config_dict:
@@ -69,12 +73,12 @@ cuboid_boundaries = numpy.vstack(
 #Generate lattice-cuboid
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
 
-
 #Generate cuboid containing all atoms
 atoms_coords,atoms_idx = geo.gen_atoms(lattice_cuboid)
 
 #Decide which atoms are inside the specified set of bodies.
 #Find the highest order
+
 max_order = max([body.get_order() for body in bodies])
 
 #Test for atoms inside bodies in the right order.
@@ -90,8 +94,8 @@ for order in range(1,max_order+1):
       if order%2!=0:
 	atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
       else:
-	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies)\
-	      - tmp_atoms_inside_bodies
+	atoms_inside_bodies = ((atoms_inside_bodies + tmp_atoms_inside_bodies)
+	      - tmp_atoms_inside_bodies)
 
 #Forget atoms outside bodies
 atoms_coords = atoms_coords[atoms_inside_bodies]

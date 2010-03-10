@@ -52,6 +52,7 @@ class convex_polyhedron(body.body):
 
     #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack((planes_normal,self._planes_miller))
+    print self._planes_normal
 
 
     #Changes point_inside_body's coordinate system if necessary
@@ -109,9 +110,9 @@ class convex_polyhedron(body.body):
     '''Determines for each point given if it shares the same position related\
     to each plane as the point_in_body'''
     for index in range(len(atoms)):
-      TF_value = numpy.array([(self._planes_normal[plane_idx,3]-\
-          sum((atoms[index,:3]-self._shift_vector)[0]*self._planes_normal[plane_idx,:3]))/\
-          sum(self._planes_normal[plane_idx,:3]**2) <= 0\
+      TF_value = numpy.array([(self._planes_normal[plane_idx,3]-
+          sum((atoms[index,:3]-self._shift_vector)[0]*self._planes_normal[plane_idx,:3]))/
+          sum(self._planes_normal[plane_idx,:3]**2) <= 0
           for plane_idx in range(len(self._planes_normal))])
       atoms_inside_body[index]=(TF_value==self._parameter).all()
     
