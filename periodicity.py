@@ -61,15 +61,29 @@ class periodicity:
     '''Returns True if argument matches period_type.'''
     return self._period_type==testtype
 
-  def arrange_positions(self, atoms_coords, atoms_idx):
+  def arrange_positions(self, geometry, atoms_coords, atoms_idx):
     '''Put atoms in periodic structures in proper position'''
-    
-    if self.period_type_is("1D"):
-      axis_norm=numpy.linalg.norm(self._axis)
-      for idx in range(atoms_idx.shape[0]):
-        ndist=numpy.floor(numpy.dot(atoms_coords[idx], self._axis.T/axis_norm)/axis_norm)-1
-        atoms_coords[idx]=atoms_coords[idx]-ndist*self._axis
 
+    if self.period_type_is("1D"):    
+      axis_norm=numpy.linalg.norm(self._axis_cart[0])
+      for idx in range(atoms_idx.shape[0]):
+        ndist=numpy.floor(
+            numpy.dot(atoms_coords[idx], self._axis_cart[0].T/axis_norm)
+            /axis_norm)
+        atoms_coords[idx]=atoms_coords[idx]-ndist*self._axis_cart[0]
+
+    elif self.period_type_is("2D"):
+
+      axis_basis_3D=numpy.vstack((
+            self._axis_cart,
+            numpy.cross(self._axis_cart[0],self._axis_cart[1])))
+      for idx in range(atoms_idx.shape[0]):
+        supercell = numpy.linalg.solve(axis_basis_3D.T,atoms_coords[idx].T)
+        supercell = numpy.floor(supercell)
+        supercell[2] = 0
+        atoms_coords[idx]=atoms_coords[idx]-numpy.dot(supercell,axis_basis_3D)
+
+  
   @classmethod
   def from_dict(cls,geometry,d):
     '''Reads periodicity from dict and checks data types'''
