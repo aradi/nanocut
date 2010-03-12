@@ -99,7 +99,9 @@ class geometry:
 
     
   def gen_cuboid(self, cuboid, periodicity=None):
-    '''Calculates necessary lattice points to distribute all atoms'''
+    '''Generates grid of lattice points containing at least every lattice point
+        corresponding to atoms inside the given cuboid boundaries. Eliminates
+        equivalent lattice points in case periodicities are present.'''
 
     #Calculate center of cuboid
     abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
@@ -138,36 +140,54 @@ class geometry:
               #TODO: exclude atoms inside parallelepiped but outside cuboid
 	      if 1==1])
 
-#########TODO: rewrite with sane variable names an comments    
-    def is_int_multiple(axis_n):
-      diff=numpy.array((nmo[idx_1]-nmo[idx_2]))
-      factor=diff[axis_max_idx]/axis[axis_n,axis_max_idx]
-      if (axis[axis_n]*factor==diff).all():
-        is_dub[idx_2]=True
-
+    #Test for equivalent points in case periodicities are present
     if periodicity==None or periodicity.period_type_is("0D"):
       return numpy.dot(nmo,self._lattice_vectors)
 
-    elif (periodicity.period_type_is("1D") or periodicity.period_type_is("2D")):
+    else:
+      axis = periodicity.get_axis("lattice")
+      is_dub=numpy.zeros(len(nmo),bool)
+
+      if periodicity.period_type_is("1D"):
+
+        #Identify of biggest entry of axis to prevent division with 0 later (*)
+        axis_max_idx=numpy.abs(axis[0]).argmax()
+
+        #Test if point at idx1 is dublicate of point at idx2 for every
+        #possible combination
+        for idx_1 in range(len(nmo)):
+          if is_dub[idx_1]==False:
+            for idx_2 in range(idx_1+1,len(nmo)):
+	      if is_dub[idx_2]==False:
+		#Calculate difference between points at idx1 and idx2
+		difference=numpy.array((nmo[idx_1]-nmo[idx_2]))
+		#Calculate if difference vector is integer multiple of axis (*)
+		factor=difference[axis_max_idx]/axis[0,axis_max_idx]
+		if (axis[0]*factor==difference).all():
+		  #Mark dublicate points
+                  is_dub[idx_2]=True
+        return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
+        
+      elif periodicity.period_type_is("2D"):
+
+	axis_basis_3D=numpy.vstack((axis,numpy.cross(axis[0],axis[1])))
+        for idx_1 in range(len(nmo)):
+	  if is_dub[idx_1]==False:
+            for idx_2 in range(idx_1+1,len(nmo)):
+	      if is_dub[idx_2]==False:
+		#Calculate difference between points at idx1 and idx2
+		difference=numpy.array((nmo[idx_1]-nmo[idx_2]))
+		#Calculate if difference vector is sum of integer multiples
+		#of axes (*)
+                factor = numpy.linalg.solve(axis_basis_3D.T,difference.T)
+                factor = factor.round().astype('int')
+                if (axis[0]*factor[0]+axis[1]*factor[1]==difference).all():
+		  #Mark dublicate points
+                  is_dub[idx_2]=True
+
+        return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
+
       
-      if periodicity.period_type_is("2D"):
-        number_of_axes=2
-      else:
-        number_of_axes=1
-
-
-      is_dub=numpy.zeros(len(nmo),bool)        
-
-      for axis_n in range(number_of_axes):
-        axis = periodicity.get_axis("lattice")
-        axis_max_idx=axis[axis_n].argmax()
-        [is_int_multiple(axis_n)
-           for idx_1 in range(len(nmo)) if is_dub[idx_1]==False
-           for idx_2 in range(idx_1+1,len(nmo)) if is_dub[idx_2]==False
-        ]
-      return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
-
-#########ENDTODO: rewrite with sane variable names an comments    
 
   def get_name_of_atom(self, index):
     '''Returns name corresponding to given index.'''
