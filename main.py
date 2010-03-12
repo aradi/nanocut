@@ -77,6 +77,7 @@ cuboid_boundaries = numpy.vstack(( [ body.containing_cuboid(period)
 cuboid_boundaries = numpy.vstack(( [ cuboid_boundaries.max(axis=0),
     cuboid_boundaries.min(axis=0) ] ))
 
+print cuboid_boundaries
 #Generate lattice-cuboid
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
 
