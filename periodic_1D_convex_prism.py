@@ -54,7 +54,15 @@ class periodic_1D_convex_prism(body.body):
     #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack(( planes_normal, self._planes_miller ))
 
-    print 'check1'
+    #Retrieve periodic axis from module periodicity
+    axis = periodicity.get_axis("cartesian")
+    
+    #Check for 
+    for plane in self._planes_normal:
+      if (plane[:3]!=0).any():
+        if ( numpy.cross( plane[:3], axis ) == 0 ).all():
+            raise ValueError, "Plane orthogonal to axis.\n\
+            Projection impossible."
     
     #Check if planes create closed space and warn if necessary
     for plane_idx1 in range( 0,len( self._planes_normal )):
@@ -78,15 +86,8 @@ class periodic_1D_convex_prism(body.body):
           except:
             pass
     
-    print 'check2'
-    
     NumError = 10**(-10) #TODO Define NumError
     
-    #Retrieve periodic axis from module periodicity
-    axis = periodicity.get_axis("cartesian")
-    
-    print self._planes_normal
-    print axis
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
       try:
@@ -99,17 +100,22 @@ class periodic_1D_convex_prism(body.body):
           pass
       except ZeroDivisionError:
           pass
-        
-    print 'check3'
-            
+    
+    #Calculates normal vectors if necessary
+    for plane in self._planes_normal:
+      try:
+         plane[:3] = plane[:3] / numpy.linalg.norm(plane[:3])
+      except ZeroDivisionError:
+        pass
+
+    
     #Computes intersection lines of planes if possible
     self._lines = numpy.array([0,0,0,0,0,0])
     for plane in self._planes_normal:
       try:
-         
         self._lines = numpy.vstack((
             self._lines, numpy.hstack((
-                numpy.cross( plane[:3],axis)[0], (numpy.dot(plane[:3],
+                numpy.cross( plane[:3], axis)[0], (numpy.dot(plane[:3],
                     self._shift_vector.T) + plane[3]) * plane[:3] /
                     numpy.linalg.norm(plane[:3]) - self._shift_vector[0]
                 ))
@@ -117,9 +123,16 @@ class periodic_1D_convex_prism(body.body):
       except ZeroDivisionError:
         pass 
       
-    print 'check4'
-    
+    #Properly shaping and norming self._lines
     self._lines = self._lines[1:]
+    
+    for line in self._lines:
+      try:
+        line[:3] = line[:3] / numpy.linalg.norm(line[:3])
+      except ZeroDivisionError:
+        pass 
+
+
     
     #Changes point_inside_body's coordinate system if necessary
     self._point_inside_body = geometry.coord_transform(point_inside_body,
@@ -135,9 +148,6 @@ class periodic_1D_convex_prism(body.body):
     except ZeroDivisionError:
          pass
 
-    print 'check5'
-    print self._planes_normal
-    print axis
 
   @classmethod  
   def _from_dict_helper(cls, geometry, args, periodicity):
@@ -152,16 +162,15 @@ class periodic_1D_convex_prism(body.body):
     
     axis = periodicity.get_axis("cartesian")
 
-    print 'check6'
     #Places extreme points in cuboid by projecting axis points on plane
     #intersection lines and returns cuboid
     corners = numpy.array([[0,0,0]])
+    
     for line in self._lines:
-      corner = numpy.dot( ( self._shift_vector - line[3:] ), ( line[:3] /
-          numpy.linalg.norm(line[:3]) ).T) * line[:3] + line[3:]
+      corner = numpy.dot( line[3:],  line[:3].T
+           ) * line[:3] + line[3:]
       corners = numpy.vstack((corners, corner))
     
-    print 'check7'
     #Removes possible bad values (NaN, Inf) from corners
     corners = corners[1:]
     for index in range( len( corners )):
@@ -169,10 +178,9 @@ class periodic_1D_convex_prism(body.body):
           ).any() or numpy.isneginf( corners[index] ).any() ):
         corners = numpy.delete(corners, index, 0)
     
-    print 'check8'
-    corners = numpy.vstack(( corners, corners + axis ))
+    corners = numpy.vstack(( corners + self._shift_vector, corners + axis +
+        self._shift_vector ))
     
-    print corners
     
     return numpy.vstack(( corners.min(axis=0), corners.max(axis=0) ))
   
@@ -189,9 +197,6 @@ class periodic_1D_convex_prism(body.body):
     #Determines for each point given if it shares the same position related to
     #each plane as the point_inside_body and if it's projection is within the
     #axis range
-    print 'check9'
-    
-    
     for idx in range( len( atoms )):
       TF_planes = numpy.array([
           (self._planes_normal[plane_idx,3]
@@ -202,7 +207,6 @@ class periodic_1D_convex_prism(body.body):
           ])
       atoms_inside_body[idx] = ( TF_planes==self._parameter ).all()
     
-    print 'check0'
     
     return atoms_inside_body
                         

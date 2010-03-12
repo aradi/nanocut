@@ -64,7 +64,6 @@ class periodic_1D_cylinder(body.body):
 
       ap = -self._shift_vector[0] + atoms[index,:3]
       dist = numpy.linalg.norm(numpy.cross(ap, axis)) / numpy.linalg.norm(axis)
-      ln = numpy.dot( ap, axis.T ) / numpy.linalg.norm(axis)**2
-      atoms_inside_body[index] = self._radius >= dist and 0 <= ln <= 1
+      atoms_inside_body[index] = self._radius >= dist
 
     return atoms_inside_body

@@ -13,14 +13,12 @@ import inout, geometry, sphere, convex_polyhedron, cylinder,\
 #Hands user's files to inout module
 inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
 
-print inputfilename
 #Parse configuration from ini-file and store it in a config_ini-object.
 config_ini = inout.read_ini(inputfilename)
 
 #Read configuration from config_ini and write it into a (dict) config_dict.
 config_dict = inout.ini2dict(config_ini)
 
-print config_dict
 
 #Initialise geometry-object from config_dict
 geo = geometry.geometry.from_dict(config_dict)
@@ -82,8 +80,10 @@ cuboid_boundaries = numpy.vstack(( [ cuboid_boundaries.max(axis=0),
 #Generate lattice-cuboid
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
 
+
 #Generate cuboid containing all atoms/ Distribute atoms to lattice points
 atoms_coords, atoms_idx = geo.gen_atoms(lattice_cuboid)
+
 
 #Decide which atoms are inside the specified set of bodies.
 
