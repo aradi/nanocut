@@ -53,7 +53,7 @@ class periodicity:
       elif coordsys=="cartesian":
         return self._axis_cart
       else:
-        raise ValueError, "Value of coorsys is invalid."
+        raise ValueError, "Value of coordsys is invalid."
     else:
       raise ValueError, "get_axis() called, but period_type is not 1D or 2D."
       
@@ -63,10 +63,12 @@ class periodicity:
 
   def arrange_positions(self, atoms_coords, atoms_idx):
     '''Put atoms in periodic structures in proper position'''
-    axis_norm=numpy.linalg.norm(self._axis)
-    for idx in range(atoms_idx.shape[0]):
-      ndist=int(numpy.dot(atoms_coords[idx], self._axis.T/axis_norm)/axis_norm)-1
-      atoms_coords[idx]=atoms_coords[idx]-ndist*self._axis
+    
+    if self.period_type_is("1D"):
+      axis_norm=numpy.linalg.norm(self._axis)
+      for idx in range(atoms_idx.shape[0]):
+        ndist=numpy.floor(numpy.dot(atoms_coords[idx], self._axis.T/axis_norm)/axis_norm)-1
+        atoms_coords[idx]=atoms_coords[idx]-ndist*self._axis
 
   @classmethod
   def from_dict(cls,geometry,d):

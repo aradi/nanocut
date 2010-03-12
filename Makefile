@@ -27,6 +27,9 @@ test-landscape: ./testinis/house-base.ini ./testinis/house-roof.ini ./testinis/s
 test-circular-wire: ./testinis/circular-wire.ini
 	$(INT) $(MAIN) ./testinis/circular-wire.ini -w ./testoutput/circular-wire.xyz
 
+test-prism-wire:  ./testinis/prism-wire.ini
+	$(INT) $(MAIN) ./testinis/prism-wire.ini -w ./testoutput/prism-wire.xyz
+
 test-plane: ./testinis/plane.ini
 	$(INT) $(MAIN) ./testinis/plane.ini -w ./testoutput/plane.xyz
 

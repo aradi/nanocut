@@ -83,6 +83,7 @@ class geometry:
     
     
   def coord_transform(self, array, array_coordsys):
+    '''Transforms given vector into lattice or cartesian coordinate system'''
     if array_coordsys == "lattice":
       return  numpy.dot(self._lattice_vectors.T,array.T).T
     elif array_coordsys == "cartesian":
@@ -91,13 +92,14 @@ class geometry:
       raise ValueError
       
   def mv_basis_to_prim(self, basis):
-    #moves basis vectors into primitive cell
+    '''Moves basis vectors into primitive cell'''
     basis = numpy.dot(numpy.asarray(numpy.matrix(self._lattice_vectors.T).I),basis.T).T
     basis %= 1
     return self.coord_transform(basis, "lattice")
 
     
   def gen_cuboid(self, cuboid, periodicity=None):
+    '''Calculates necessary lattice points to distribute all atoms'''
 
     #Calculate center of cuboid
     abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])

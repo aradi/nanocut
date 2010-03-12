@@ -8,55 +8,63 @@ import numpy
 import body
 
 class periodic_1D_cylinder(body.body):
+  '''Class for periodic cylinders determined by a central axis and radius'''
 
   #arguments of class defined in the following format:
   #[default, type, shape, is_coord_sys_definable]
   _arguments={
-    "radius":[None, "float", None, False],
-    "shift_vector":["0 0 0", "array", (1,3), True],
-    "order":[1,"integer", None, False]
-    }
+      "radius":[None, "float", None, False],
+      "shift_vector":["0 0 0", "array", (1,3), True],
+      "order":[1,"integer", None, False]
+      }
 
-  def __init__(self,geometry,periodicity,radius,shift_vector=numpy.array([0,0,0]),order=1,shift_vector_coordsys="lattice"):
+  def __init__(self, geometry, periodicity, radius, shift_vector=
+    numpy.array([0,0,0]), order=1, shift_vector_coordsys="lattice"):
 
-    body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
+    body.body.__init__(self, geometry, shift_vector, order, shift_vector_coordsys)
     
-    self._radius=float(radius)
+    self._radius = float(radius)
     
   @classmethod
-  def _from_dict_helper(cls,geometry,args,periodicity):
-    return cls(geometry,periodicity,args["radius"],args["shift_vector"],args["order"],
-               args["shift_vector_coordsys"])
+  def _from_dict_helper(cls, geometry, args, periodicity):
+    return cls(geometry, periodicity, args["radius"], args["shift_vector"],
+        args["order"], args["shift_vector_coordsys"])
 
 
   
   def containing_cuboid(self,periodicity):
-    '''Calculates the boundaries of the cuboid containing the sphere'''
-    axis=periodicity.get_axis("cartesian")
-
+    '''Calculates the boundaries of the cuboid containing the cylinder'''
     
+    #Retrieves periodic axis from periodicity
+    axis = periodicity.get_axis("cartesian")
+
+    #Creates cubes containing spheres with cylinder radius surrounding axis'
+    #beginning and ending 
     bounds = numpy.vstack((
             self._shift_vector + self._radius,
             self._shift_vector - self._radius,
             axis + self._shift_vector + self._radius,
             axis + self._shift_vector - self._radius,
             ))
-    return numpy.vstack((bounds.min(axis=0),bounds.max(axis=0)))
+    return numpy.vstack((bounds.min(axis=0), bounds.max(axis=0)))
 
 
   
-  def atoms_inside(self,atoms,periodicity):
+  def atoms_inside(self, atoms, periodicity):
     '''Assigns True and False values towards points inside and out of cylinder
        boundaries respectively'''
 
-    atoms_inside_body=numpy.zeros(atoms.shape[0],bool)
+    atoms_inside_body = numpy.zeros(atoms.shape[0], bool)
     
-    axis=periodicity.get_axis("cartesian")
+    #Retrieves periodic axis from periodicity
+    axis = periodicity.get_axis("cartesian")
     
+    #Checks if distance from axis is larger than radius for each given atom
     for index in range(len(atoms)):
 
-      ap = -(self._shift_vector[0])+atoms[index,:3]
-      dist = numpy.linalg.norm(numpy.cross(ap,axis))/numpy.linalg.norm(axis)
-      atoms_inside_body[index] = self._radius>=dist
+      ap = -self._shift_vector[0] + atoms[index,:3]
+      dist = numpy.linalg.norm(numpy.cross(ap, axis)) / numpy.linalg.norm(axis)
+      ln = numpy.dot( ap, axis.T ) / numpy.linalg.norm(axis)**2
+      atoms_inside_body[index] = self._radius >= dist and 0 <= ln <= 1
 
     return atoms_inside_body
