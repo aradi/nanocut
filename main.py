@@ -90,17 +90,15 @@ for order in range(1,max_order+1):
       if order%2!=0:
 	atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
       else:
-	atoms_inside_bodies = (atoms_inside_bodies + tmp_atoms_inside_bodies)\
-	      - tmp_atoms_inside_bodies
+	atoms_inside_bodies = ((atoms_inside_bodies + tmp_atoms_inside_bodies)
+	      - tmp_atoms_inside_bodies)
 
 #Forget atoms outside bodies
 atoms_coords = atoms_coords[atoms_inside_bodies]
 atoms_idx = atoms_idx[atoms_inside_bodies]
 
 #Put atoms in periodic structures in proper position
-period.arrange_positions(atoms_coords, atoms_idx)
-
-print period.get_axis("cartesian")
+period.arrange_positions(geo, atoms_coords, atoms_idx)
 
 #Write final crystal to file
 inout.write_crystal(geo,atoms_coords, atoms_idx,

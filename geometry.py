@@ -140,7 +140,7 @@ class geometry:
     def is_int_multiple(axis_n):
       diff=numpy.array((nmo[idx_1]-nmo[idx_2]))
       factor=diff[axis_max_idx]/axis[axis_n,axis_max_idx]
-      if (axis*factor==diff).all():
+      if (axis[axis_n]*factor==diff).all():
         is_dub[idx_2]=True
 
     if periodicity==None or periodicity.period_type_is("0D"):
@@ -153,10 +153,12 @@ class geometry:
       else:
         number_of_axes=1
 
+
+      is_dub=numpy.zeros(len(nmo),bool)        
+
       for axis_n in range(number_of_axes):
         axis = periodicity.get_axis("lattice")
         axis_max_idx=axis[axis_n].argmax()
-        is_dub=numpy.zeros(len(nmo),bool)
         [is_int_multiple(axis_n)
            for idx_1 in range(len(nmo)) if is_dub[idx_1]==False
            for idx_2 in range(idx_1+1,len(nmo)) if is_dub[idx_2]==False
