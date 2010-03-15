@@ -83,13 +83,10 @@ class periodic_1D_convex_prism(body.body):
     
     NumError = 10**(-10) #TODO Define NumError
     
-    print axis
-    print self._planes_normal
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
       try:
         if numpy.abs( numpy.dot(plane[:3],axis.T) )-NumError > 0: 
-            print numpy.abs( numpy.dot(plane[:3],axis.T) )-NumError
             print "Given plane appears not parallel to axis.\n\
             Possibly numerical error.\n\
             Plane will be projected to fit axis!"
