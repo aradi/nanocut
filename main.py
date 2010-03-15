@@ -72,7 +72,6 @@ cuboid_boundaries = numpy.vstack(
 #Generate lattice-cuboid
 lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
 
-
 #Generate cuboid containing all atoms
 atoms_coords,atoms_idx = geo.gen_atoms(lattice_cuboid)
 
@@ -102,6 +101,9 @@ atoms_idx = atoms_idx[atoms_inside_bodies]
 
 #Put atoms in periodic structures in proper position
 period.arrange_positions(geo, atoms_coords, atoms_idx)
+
+#Rotate coordinate system if desired
+atoms_coords = period.rotate_coordsys(atoms_coords)
 
 #Write final crystal to file
 inout.write_crystal(geo,atoms_coords, atoms_idx,
