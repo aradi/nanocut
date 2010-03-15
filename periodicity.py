@@ -33,8 +33,11 @@ class periodicity:
       elif period_type=="2D":
         self._period_type="2D"
 
-        if ((axis[0]==0).all() or axis[1]==0).all():
+        if (axis[0]==0).all() or (axis[1]==0).all():
           raise ValueError, "Value of axis is invalid."
+
+        if (numpy.cross(axis[0],axis[1])==0).all():
+          raise ValueError, "Axis are parallel."
 
         #shorten axes if possiple by division with gcd
         self._axis = numpy.vstack((axis[1]/gcd(axis[1,0],axis[1,1],axis[1,2]),
@@ -44,6 +47,46 @@ class periodicity:
         raise ValueError, "Value of period_type is invalid."
 
       self._axis_cart=geometry.coord_transform(self._axis, "lattice")
+
+  def rotate_coordsys(self, atoms_coords):
+    '''Rotates coordsys z-Axis to direction matching the axis defining
+        periodicity in case of 1D periodicity) or to direction orthogonal to
+        both axes in case of 2D periodicity. Returns axis/axes in new
+        coordinates'''
+
+    if self.period_type_is("1D"):
+      z_axis=self._axis_cart[0]
+    elif self.period_type_is("2D"):
+      z_axis=numpy.cross(self._axis_cart[0],self._axis_cart[1])
+    elif self.period_type_is("0D"):
+      return atoms_coords
+    z_axis=z_axis/numpy.linalg.norm(z_axis)
+
+    #Calculate rotation angle
+    angle = numpy.arccos(numpy.dot(z_axis,numpy.array([0,0,1])))
+
+    #Calculate rotation axis
+    rot = numpy.cross(z_axis,numpy.array([0,0,1]))
+    rot = rot/numpy.linalg.norm(rot)
+    sin=numpy.sin(angle)
+    cos=numpy.cos(angle)
+
+    #Calculate rotation matrix
+    rotation_matrix = numpy.array([
+        [cos+rot[0]*rot[0]*(1-cos),
+            rot[0]*rot[1]*(1-cos)-rot[2]*sin,
+            rot[0]*rot[2]*(1-cos)+rot[1]*sin],
+        [rot[1]*rot[0]*(1-cos)+rot[2]*sin,
+            cos+rot[1]*rot[1]*(1-cos),
+            rot[1]*rot[2]*(1-cos)-rot[0]*sin],
+        [rot[2]*rot[0]*(1-cos)-rot[1]*sin,
+            rot[2]*rot[1]*(1-cos)+rot[0]*sin,
+            cos+rot[2]*rot[2]*(1-cos)]])
+
+    #Rotate atoms
+    atoms_coords = numpy.dot(rotation_matrix,atoms_coords.T).T
+    return atoms_coords
+
 
   def get_axis(self,coordsys="lattice"):
     '''Returns axis'''
@@ -149,9 +192,14 @@ class periodicity:
           'Wrong number of elements supplied for axis.'
            +'\nExiting...\n')
         
-        if ((axis[0]==0).all() or axis[1]==0).all():
+        if (axis[0]==0).all() or (axis[1]==0).all():
           exit('Error:\n'+
           'Value of axis is invalid.'
+          +'\nExiting...\n')
+
+        if (numpy.cross(axis[0],axis[1])==0).all():
+          exit('Error:\n'+
+          'Axis are parallel.'
           +'\nExiting...\n')
 
         return cls(geometry,"2D",axis)

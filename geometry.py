@@ -79,6 +79,15 @@ class geometry:
            'Supplied string "' + array_coordsys + '" for coordsys not valid, check configuration.'
            +'\nExiting...')
 
+    if numpy.linalg.det(lattice_vectors)==0:
+      exit('Error:\n'+
+      'Value of lattice_vectors is invalid.'
+      +'\nExiting...\n')
+
+
+
+
+
     return cls(lattice_vectors,basis,basis_names_idx,basis_names,basis_coordsys)
     
     

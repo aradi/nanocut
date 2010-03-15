@@ -19,10 +19,7 @@ test-landscape: ./testinis/house-base.ini ./testinis/house-roof.ini ./testinis/s
 	$(INT) $(MAIN) ./testinis/snowman-body.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/snowman-nose.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/snowman-hat.ini -a ./testoutput/landscape.xyz
-	$(INT) $(MAIN) ./testinis/circular-wire.ini -a ./testoutput/landscape.xyz
-	$(INT) $(MAIN) ./testinis/prism-wire.ini -a ./testoutput/landscape.xyz
 	$(INT) $(MAIN) ./testinis/steps.ini -a ./testoutput/landscape.xyz
-	$(INT) $(MAIN) ./testinis/plane.ini -a ./testoutput/landscape.xyz
 
 
 test-circular-wire: ./testinis/circular-wire.ini

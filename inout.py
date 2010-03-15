@@ -9,11 +9,11 @@ def print_usage(shouldexit=True):
   '''Short Instructions'''
   print 'Usage: nanocut [OPTIONS] INFILE [OPTIONS]\n\
          \n\
-         Option\t Meaning\n\
-         -a OUTFILE\t appends created structure to OUTFILE\n\
-         -h \t prints help\n\
-         --help\t print help\n\
-         -w OUTFILE\t creates or overwrites OUTFILE'
+         Option    Meaning\n\
+         -a FILE   appends created structure to FILE\n\
+         -h        prints help\n\
+         --help    prints help\n\
+         -w FILE   creates or overwrites FILE'
   if shouldexit:
     exit()
 
