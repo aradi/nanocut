@@ -15,14 +15,13 @@ class convex_polyhedron(body.body):
   _arguments={
     "planes_normal":["0 0 0 0", "array", (-1,4), True],
     "planes_miller":["0 0 0 0", "array", (-1,4), False],
-    "point_inside_body":[None, "array", (1,3), True],
     "shift_vector":["0 0 0", "array", (1,3), True],
     "order":[1,"integer", None, False]
     }
 
   def __init__(self, geometry, planes_normal, planes_miller, shift_vector,
-      point_inside_body, order=1, shift_vector_coordsys="lattice",
-      planes_normal_coordsys="lattice", point_inside_body_coordsys="lattice"):
+      order=1, shift_vector_coordsys="lattice", planes_normal_coordsys="lattice"
+      ):
     '''Initiating body using the lattice determined by geometry-object,
         planes given by miller indices or normal shape, a point inside the
         polyhedron and a possible shift_vector to determine it's distance from
@@ -30,9 +29,6 @@ class convex_polyhedron(body.body):
     
     #Type checking/conversion and initialisation of parent class
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
-
-    point_inside_body = numpy.array(point_inside_body, dtype='float64')
-    point_inside_body.shape = (1,3)
 
     planes_normal = numpy.array(planes_normal, dtype='float64')
     planes_normal.shape = (-1,4)
@@ -51,31 +47,8 @@ class convex_polyhedron(body.body):
     #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack(( planes_normal, self._planes_miller ))
 
-    #Changes point_inside_body's coordinate system if necessary
-    self._point_inside_body = geometry.coord_transform(point_inside_body,
-        point_inside_body_coordsys)
-
-    #Distributes True and False values towards point_inside_body's respective
-    #position towards each plane
-    self._parameter = numpy.array([
-        (self._planes_normal[plane_idx,3] - sum( self._point_inside_body[0]
-            * self._planes_normal[plane_idx,:3] ) )
-            / sum( self._planes_normal[plane_idx,:3]**2) <= 0
-        for plane_idx in range( len( self._planes_normal ))
-        ])
-    
-  
-  @classmethod  
-  def _from_dict_helper(cls, geometry, args, periodicity=None):
-    return cls(geometry, args["planes_normal"], args["planes_miller"],
-        args["shift_vector"], args["point_inside_body"], args["order"],
-        args["shift_vector_coordsys"], args["planes_normal_coordsys"],
-        args["point_inside_body_coordsys"])
-
-  def containing_cuboid(self, periodicity=None):
-    '''Calculates the boundaries of the cuboid containing the polyhedron'''
-    
-    corners = numpy.array([0,0,0])
+    #Calculates and initalizes body's corners
+    self._corners = numpy.array([0,0,0])
     
     #Solves a linear equation for each triplet of planes returning their
     #vertex, warns at parallel planes'''
@@ -95,14 +68,41 @@ class convex_polyhedron(body.body):
                     self._planes_normal[plane_idx3,3]
                     ))
                 ).T
-            corners = numpy.vstack(( corners, corner ))
+            self._corners = numpy.vstack(( self._corners, corner ))
           except numpy.linalg.linalg.LinAlgError:
             print 'Pair of parallel planes found!'
     
     #Places extreme points in cuboid and returns cuboid
-    corners = corners[1:] + self._shift_vector
+    self._corners = self._corners[1:] + self._shift_vector
     
-    return numpy.vstack(( corners.min(axis=0), corners.max(axis=0) ))
+    #Finds center of body to determine point_inside_body
+    self._point_inside_body = numpy.array([0,0,0])
+    
+    for corner in self._corners:
+      self._point_inside_body = (self._point_inside_body + corner)
+    self._point_inside_body = (self._point_inside_body /
+         self._corners.shape[0])
+      
+    #Distributes True and False values towards point_inside_body's respective
+    #position towards each plane
+    self._parameter = numpy.array([
+        (self._planes_normal[plane_idx,3] - sum( self._point_inside_body[0]
+            * self._planes_normal[plane_idx,:3] ) )
+            / sum( self._planes_normal[plane_idx,:3]**2) <= 0
+        for plane_idx in range( len( self._planes_normal ))
+        ])
+    
+  
+  @classmethod  
+  def _from_dict_helper(cls, geometry, args, periodicity=None):
+    return cls(geometry, args["planes_normal"], args["planes_miller"],
+        args["shift_vector"], args["order"],
+        args["shift_vector_coordsys"], args["planes_normal_coordsys"])
+
+  def containing_cuboid(self, periodicity=None):
+    '''Calculates the boundaries of the cuboid containing the polyhedron'''
+    
+    return numpy.vstack(( self._corners.min(axis=0), self._corners.max(axis=0) ))
           
   
   def atoms_inside(self, atoms, periodicity=None):

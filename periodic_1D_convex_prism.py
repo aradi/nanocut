@@ -16,27 +16,21 @@ class periodic_1D_convex_prism(body.body):
   _arguments={
      "planes_normal":["0 0 0 0", "array", (-1,4), True],
      "planes_miller":["0 0 0 0", "array", (-1,4), False],
-     "point_inside_body":[None, "array", (1,3), True],
      "shift_vector":["0 0 0", "array", (1,3), True],
      "order":[1,"integer", None, False]
     }
 
-  def __init__(self,geometry,periodicity,planes_normal,planes_miller,
-               shift_vector, point_inside_body,order=1,shift_vector_coordsys=
-               "lattice", planes_normal_coordsys="lattice",
-               point_inside_body_coordsys="lattice"):
+  def __init__(self,geometry,periodicity, planes_normal,planes_miller,
+               shift_vector, order=1, shift_vector_coordsys="lattice",
+               planes_normal_coordsys="lattice"):
     #Initiating body using the lattice determined by geometry-object, planes
-    #given by miller indices or normal shape, a point inside the polyhedron and
-    #a possible shift_vector to determine it's distance from [0,0,0], as well
+    #given by miller indices or normal shape and a possible shift_vector to 
+    #determine it's distance from [0,0,0], as well
     #as each attribute's coordinate system
     
     #Type checking/conversion and initialisation of parent class
     body.body.__init__(self, geometry, shift_vector, order, 
         shift_vector_coordsys)
-
-    
-    point_inside_body = numpy.array(point_inside_body, dtype='float64')
-    point_inside_body.shape = (1,3)
     
     
     planes_normal = numpy.array(planes_normal, dtype='float64')
@@ -131,12 +125,36 @@ class periodic_1D_convex_prism(body.body):
         line[:3] = line[:3] / numpy.linalg.norm(line[:3])
       except ZeroDivisionError:
         pass 
-
-
     
-    #Changes point_inside_body's coordinate system if necessary
-    self._point_inside_body = geometry.coord_transform(point_inside_body,
-        point_inside_body_coordsys)
+    
+    #Places extreme points in cuboid by projecting axis points on plane
+    #intersection lines and returns cuboid
+    self._corners = numpy.array([[0,0,0]])
+    
+    for line in self._lines:
+      corner = numpy.dot( line[3:],  line[:3].T
+           ) * line[:3] + line[3:]
+      self._corners = numpy.vstack(( self._corners, corner))
+    
+    #Removes possible bad values (NaN, Inf) from corners
+    self._corners = self._corners[1:]
+    for index in range( len( self._corners )):
+      if ( numpy.isnan( self._corners[index] ).any()
+            or numpy.isinf( self._corners[index] ).any()
+            or numpy.isneginf( self._corners[index] ).any() ):
+        self._corners = numpy.delete(self._corners, index, 0)
+    
+    self._corners = numpy.vstack(( self._corners + self._shift_vector,
+        self._corners + axis + self._shift_vector ))
+    
+    
+    #Calculates and initializes point_inside_body
+    self._point_inside_body = numpy.array([0,0,0])
+
+    for corner in self._corners:
+      self._point_inside_body = (self._point_inside_body + corner)
+    self._point_inside_body = (self._point_inside_body /
+         self._corners.shape[0])
 
     #Distributes True and False values towards point_inside_body's respective
     #position towards each plane
@@ -152,37 +170,14 @@ class periodic_1D_convex_prism(body.body):
   @classmethod  
   def _from_dict_helper(cls, geometry, args, periodicity):
     return cls(geometry,periodicity, args["planes_normal"],
-      args["planes_miller"], args["shift_vector"],args["point_inside_body"], 
-      args["order"], args["shift_vector_coordsys"],args[
-      "planes_normal_coordsys"], args["point_inside_body_coordsys"])
+        args["planes_miller"], args["shift_vector"], args["order"],
+        args["shift_vector_coordsys"],args["planes_normal_coordsys"])
 
   def containing_cuboid(self,periodicity):
     '''Calculates the boundaries of the containing cuboid determined by axis'
     projection on boundary planes'''
     
-    axis = periodicity.get_axis("cartesian")
-
-    #Places extreme points in cuboid by projecting axis points on plane
-    #intersection lines and returns cuboid
-    corners = numpy.array([[0,0,0]])
-    
-    for line in self._lines:
-      corner = numpy.dot( line[3:],  line[:3].T
-           ) * line[:3] + line[3:]
-      corners = numpy.vstack((corners, corner))
-    
-    #Removes possible bad values (NaN, Inf) from corners
-    corners = corners[1:]
-    for index in range( len( corners )):
-      if ( numpy.isnan( corners[index] ).any() or numpy.isinf( corners[index]
-          ).any() or numpy.isneginf( corners[index] ).any() ):
-        corners = numpy.delete(corners, index, 0)
-    
-    corners = numpy.vstack(( corners + self._shift_vector, corners + axis +
-        self._shift_vector ))
-    
-    
-    return numpy.vstack(( corners.min(axis=0), corners.max(axis=0) ))
+    return numpy.vstack(( self._corners.min(axis=0), self._corners.max(axis=0) ))
   
   
   def atoms_inside(self, atoms, periodicity=None):
