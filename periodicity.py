@@ -45,7 +45,7 @@ class periodicity:
 
       self._axis_cart=geometry.coord_transform(self._axis, "lattice")
 
-  def rotate_coordsys(self,atoms_coords):
+  def rotate_coordsys(self, atoms_coords):
     '''Rotates coordsys z-Axis to direction matching the axis defining
         periodicity in case of 1D periodicity) or to direction orthogonal to
         both axes in case of 2D periodicity. Returns axis/axes in new
