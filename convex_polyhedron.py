@@ -76,17 +76,17 @@ class convex_polyhedron(body.body):
     self._corners = self._corners[1:] + self._shift_vector
     
     #Finds center of body to determine point_inside_body
-    self._point_inside_body = numpy.array([0,0,0])
+    point_inside_body = numpy.array([0,0,0])
     
     for corner in self._corners:
-      self._point_inside_body = (self._point_inside_body + corner)
-    self._point_inside_body = (self._point_inside_body /
+      point_inside_body = (point_inside_body + corner)
+    point_inside_body = (point_inside_body /
          self._corners.shape[0])
       
     #Distributes True and False values towards point_inside_body's respective
     #position towards each plane
     self._parameter = numpy.array([
-        (self._planes_normal[plane_idx,3] - sum( self._point_inside_body[0]
+        (self._planes_normal[plane_idx,3] - sum( point_inside_body
             * self._planes_normal[plane_idx,:3] ) )
             / sum( self._planes_normal[plane_idx,:3]**2) <= 0
         for plane_idx in range( len( self._planes_normal ))
