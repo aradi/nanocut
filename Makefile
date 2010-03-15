@@ -31,6 +31,9 @@ test-circular-wire: ./testinis/circular-wire.ini
 test-prism-wire:  ./testinis/prism-wire.ini
 	$(INT) $(MAIN) ./testinis/prism-wire.ini -w ./testoutput/prism-wire.xyz
 
+test-periodic-prism-tube:  ./testinis/periodic-prism-tube.ini
+	$(INT) $(MAIN) ./testinis/periodic-prism-tube.ini -w ./testoutput/periodic-prism-tube.xyz
+
 test-plane: ./testinis/plane.ini
 	$(INT) $(MAIN) ./testinis/plane.ini -w ./testoutput/plane.xyz
 

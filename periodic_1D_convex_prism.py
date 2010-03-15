@@ -75,19 +75,23 @@ class periodic_1D_convex_prism(body.body):
                     self._planes_normal[plane_idx3,3]
                     ))
                 ).T
-            print 'Warning! Planes might intersect and possibly create closed\
-            space.\n Are you sure your input is correct?'
+            print ('Warning!\n' + 
+            'Planes might intersect and possibly create closed space.\n'
+             + 'Are you sure your input is correct?')
           except:
             pass
     
     NumError = 10**(-10) #TODO Define NumError
     
+    print axis
+    print self._planes_normal
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
       try:
-        if numpy.abs( numpy.dot(plane[:3],axis.T) )-NumError>0: 
+        if numpy.abs( numpy.dot(plane[:3],axis.T) )-NumError > 0: 
+            print numpy.abs( numpy.dot(plane[:3],axis.T) )-NumError
             print "Given plane appears not parallel to axis.\n\
-            possibly numerical error.\n\
+            Possibly numerical error.\n\
             Plane will be projected to fit axis!"
             plane[:3] = numpy.cross( numpy.cross( plane[:3],axis ),axis )
         else:
@@ -147,24 +151,6 @@ class periodic_1D_convex_prism(body.body):
     self._corners = numpy.vstack(( self._corners + self._shift_vector,
         self._corners + axis + self._shift_vector ))
     
-    
-    #Calculates and initializes point_inside_body
-    point_inside_body = numpy.array([0,0,0])
-
-    for corner in self._corners:
-      point_inside_body = (point_inside_body + corner)
-    point_inside_body = (point_inside_body /
-         self._corners.shape[0])
-    
-    #Distributes True and False values towards point_inside_body's respective
-    #position towards each plane
-    try:
-      self._parameter = numpy.array([ (self._planes_normal[plane_idx,3] -
-          sum( point_inside_body * self._planes_normal[plane_idx,:3] )
-          ) / sum(self._planes_normal[plane_idx,:3]**2) <= 0
-          for plane_idx in range( len( self._planes_normal )) ])
-    except ZeroDivisionError:
-         pass
 
   @classmethod  
   def _from_dict_helper(cls, geometry, args, periodicity):
@@ -183,6 +169,24 @@ class periodic_1D_convex_prism(body.body):
     '''Creates boolean array assigning True and False values towards points in
         and out of plane boundaries respectively'''
     
+    #Calculates point_inside_body
+    point_inside_body = numpy.array([0,0,0])
+
+    for corner in self._corners:
+      point_inside_body = (point_inside_body + corner)
+    point_inside_body = (point_inside_body /
+         self._corners.shape[0])
+    
+    #Distributes True and False values towards point_inside_body's respective
+    #position towards each plane
+    try:
+      parameter = numpy.array([ (self._planes_normal[plane_idx,3] -
+          numpy.dot( point_inside_body - self._shift_vector, 
+          self._planes_normal[plane_idx,:3].T) )
+          <= 0 for plane_idx in range( len( self._planes_normal )) ])
+    except ZeroDivisionError:
+         pass
+    
     atoms_inside_body = numpy.zeros(atoms.shape[0], bool)
     
     #Retrieves periodic axis from periodicity
@@ -194,12 +198,11 @@ class periodic_1D_convex_prism(body.body):
     for idx in range( len( atoms )):
       TF_planes = numpy.array([
           (self._planes_normal[plane_idx,3]
-              - sum( ( atoms[idx,:3] - self._shift_vector )[0]
-              *  self._planes_normal[plane_idx,:3]) ) /
-              sum( self._planes_normal[plane_idx,:3]**2 ) <= 0
+              - numpy.dot( ( atoms[idx,:3] - self._shift_vector )[0],
+              self._planes_normal[plane_idx,:3].T) ) <= 0
               for plane_idx in range( len( self._planes_normal ))
           ])
-      atoms_inside_body[idx] = ( TF_planes==self._parameter ).all()
+      atoms_inside_body[idx] = ( TF_planes == parameter ).all()
     
     
     return atoms_inside_body

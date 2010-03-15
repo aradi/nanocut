@@ -75,23 +75,6 @@ class convex_polyhedron(body.body):
     #Places extreme points in cuboid and returns cuboid
     self._corners = self._corners[1:] + self._shift_vector
     
-    #Finds center of body to determine point_inside_body
-    point_inside_body = numpy.array([0,0,0])
-    
-    for corner in self._corners:
-      point_inside_body = (point_inside_body + corner)
-    point_inside_body = (point_inside_body /
-         self._corners.shape[0])
-      
-    #Distributes True and False values towards point_inside_body's respective
-    #position towards each plane
-    self._parameter = numpy.array([
-        (self._planes_normal[plane_idx,3] - sum( point_inside_body
-            * self._planes_normal[plane_idx,:3] ) )
-            / sum( self._planes_normal[plane_idx,:3]**2) <= 0
-        for plane_idx in range( len( self._planes_normal ))
-        ])
-    
   
   @classmethod  
   def _from_dict_helper(cls, geometry, args, periodicity=None):
@@ -109,19 +92,33 @@ class convex_polyhedron(body.body):
     '''Creates array assigning True and False values to points in and out of
         each plane's boundaries respectively'''
     
-    atoms_inside_body = numpy.zeros(atoms.shape[0], bool)
+    #Calculates point_inside_body
+    point_inside_body = numpy.array([0,0,0])
     
+    for corner in self._corners:
+      point_inside_body = (point_inside_body + corner)
+    point_inside_body = (point_inside_body /
+         self._corners.shape[0])
+    
+    #Distributes True and False values towards point_inside_body's respective
+    #position towards each plane
+    parameter = numpy.array([
+        (self._planes_normal[plane_idx,3] - numpy.dot( (point_inside_body
+        - self._shift_vector)[0], self._planes_normal[plane_idx,:3] ) ) <= 0
+            for plane_idx in range( len( self._planes_normal ))
+        ])
+    
+    atoms_inside_body = numpy.zeros(atoms.shape[0], bool)
     #Determines for each point given if it shares the same position related
     #to each plane as the point_in_body
     for index in range(len(atoms)):
       TF_value = numpy.array([
-          (self._planes_normal[plane_idx,3] - sum( ( atoms[index,:3] -
-              self._shift_vector )[0] * self._planes_normal[plane_idx,:3] ) )
-              / sum( self._planes_normal[plane_idx,:3]**2 ) <= 0
+          (self._planes_normal[plane_idx,3] - numpy.dot( ( atoms[index,:3] -
+              self._shift_vector )[0], self._planes_normal[plane_idx,:3] ) )
+              <= 0
           for plane_idx in range( len( self._planes_normal ))
           ])
-        
-      atoms_inside_body[index] = ( TF_value==self._parameter ).all()
+      atoms_inside_body[index] = ( TF_value == parameter.T ).all()
     
     return atoms_inside_body
                         
