@@ -165,6 +165,7 @@ class geometry:
         #Test if point at idx1 is dublicate of point at idx2 for every
         #possible combination
         for idx_1 in range(len(nmo)):
+          print idx_1, "/", len(nmo)
           if is_dub[idx_1]==False:
             for idx_2 in range(idx_1+1,len(nmo)):
 	      if is_dub[idx_2]==False:
