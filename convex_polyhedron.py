@@ -86,7 +86,7 @@ class convex_polyhedron(body.body):
       idx1 += 1
       idx2 = idx1 + 1
     
-    
+    print self._planes_normal
     #Calculates and initalizes body's corners
     self._corners = numpy.array([0,0,0])
     

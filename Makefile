@@ -4,7 +4,7 @@ MAIN = main.py
 nothing:
 
 
-doc: doc/srcexamples/basic.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/sphere.xyz doc/srcexamples/cylinder.xyz
+doc: doc/srcexamples/basic.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/cylinder.xyz doc/srcexamples/geometry.xyz doc/srcexamples/convex_polyhedron.xyz doc/srcexamples/periodic_1D_convex_prism.xyz
 
 doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
