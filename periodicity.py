@@ -59,7 +59,7 @@ class periodicity:
     elif self.period_type_is("2D"):
       z_axis=numpy.cross(self._axis_cart[0],self._axis_cart[1])
     elif self.period_type_is("0D"):
-      return atoms_coords
+      return "",atoms_coords
     z_axis=z_axis/numpy.linalg.norm(z_axis)
 
     #Calculate rotation angle
@@ -67,9 +67,12 @@ class periodicity:
 
     #Calculate rotation axis
     rot = numpy.cross(z_axis,numpy.array([0,0,1]))
-    rot = rot/numpy.linalg.norm(rot)
+    if numpy.linalg.norm(rot)!=0:
+      rot = rot/numpy.linalg.norm(rot)
     sin=numpy.sin(angle)
     cos=numpy.cos(angle)
+
+    
 
     #Calculate rotation matrix
     rotation_matrix = numpy.array([
@@ -85,7 +88,13 @@ class periodicity:
 
     #Rotate atoms
     atoms_coords = numpy.dot(rotation_matrix,atoms_coords.T).T
-    return atoms_coords
+
+    #Calculate rotated axes and write them to string
+    axis_string="Periodicity axes: "
+    for axis in numpy.dot(rotation_matrix,self._axis_cart.T).T:
+      axis_string+="("+repr(axis[0])+", "+repr(axis[1])+", "+repr(axis[2])+") "
+
+    return axis_string,atoms_coords
 
 
   def get_axis(self,coordsys="lattice"):

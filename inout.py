@@ -82,7 +82,8 @@ def ini2dict(ini):
   return dict([ (section, dict(ini.items(section)) )
       for section in ini.sections() ])
 
-def write_crystal(geometry, atoms_coords, atoms_idx, writefilenames, appendfilenames):
+def write_crystal(geometry, atoms_coords, atoms_idx, axis_string,
+    writefilenames, appendfilenames):
 
   number_atoms = atoms_idx.shape[0]
   if len(writefilenames) == 0 and len(appendfilenames) == 0:
@@ -120,7 +121,7 @@ def write_crystal(geometry, atoms_coords, atoms_idx, writefilenames, appendfilen
            "Can't open " + filename + '.'
            + '\nExiting...')
     
-    file.write(repr(number_atoms)+'\n\n')
+    file.write(repr(number_atoms)+'\n'+axis_string+'\n')
     files.append(file)
     
   for it in range(atoms_coords.shape[0]):

@@ -103,8 +103,9 @@ atoms_idx = atoms_idx[atoms_inside_bodies]
 period.arrange_positions(geo, atoms_coords, atoms_idx)
 
 #Rotate coordinate system if desired
-atoms_coords = period.rotate_coordsys(atoms_coords)
+axis_string,atoms_coords = period.rotate_coordsys(atoms_coords)
+
 
 #Write final crystal to file
-inout.write_crystal(geo,atoms_coords, atoms_idx,
+inout.write_crystal(geo,atoms_coords, atoms_idx, axis_string,
 writefilenames, appendfilenames)
