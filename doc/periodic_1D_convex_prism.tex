@@ -1,13 +1,15 @@
 \subsubsection{periodic\_1D\_convex\_prism}
-\lstinline{periodic_1D_convex_prism} enables cutting a convex prism which can be appended unto itself to create an infinte cut from the given crystal structure. The prism is determined by its surface planes. These planes can be determined in different ways and the combination of planes defined differently is possible. Please note the planes should not surround. They need to lack the base and its projection since these will be calculated to enable the periodicity. The planes should be parallel to the axis or they will be projected accordingly which will change the created body. Of course at least three planes are needed to create a proper body. If no prism can be calculated from the given planes the programm will indicate so and exit.
+\lstinline{[periodic_1D_convex_prism: NAME]} enables cutting a convex prism which can be appended unto itself to create an infinte cut from the given crystal structure. The prism is determined by its surface planes. These planes can be determined in different ways and the combination of planes defined differently is possible. Please note the planes should not surround. They need to lack the base and its projection since these will be calculated to enable the periodicity. The planes should be parallel to the axis or they will be projected accordingly which will change the created body. Of course at least three planes are needed to create a proper body. If no prism can be calculated from the given planes the programm will indicate so and exit.
 
 \paragraph{Parameters}
-\lstinline{periodic_1D_convex_prism} requires at least one item of the following. Each item may contain an arbitrary amount of planes each determined by four integer or float values.
+\lstinline{[periodic_1D_convex_prism: NAME]} requires at least one item of the following. Each item may contain an arbitrary amount of planes each determined by four integer or float values.
 
 \begin{description}
- \item{planes\_miller} \lstinline{planes_miller} contains planes defined by miller indizes. Each plane is given by 4 integers or floats with the first three being the miller indices and the last one the plane's minimum distance from the origin (the length of the smallest possible cartesian vector between the origin and the plane)
- \item{planes\_normal} \lstinline{planes_normal} contains planes defined by a vector orthogonal to the plane and its minimum distance from the origin as in \lstinline{planes_miller}. The vector does not need to be normalized.
+ \item{\lstinline{planes_miller}} planes defined by miller indizes. Each plane is given by 4 integers or floats with the first three being the miller indices and the last one the plane's minimum distance from the origin (the length of the smallest possible cartesian vector between the origin and the plane)
+ \item{\lstinline{planes_normal}} planes defined by a vector orthogonal to the plane and its minimum distance from the origin as in \lstinline{planes_miller}. The vector does not need to be normalized.
 \end{description} 
 
-\lstinputlisting{srcexamples/convex_polyhedron}
-\lstinputlisting{srcexamples/bodyname}
+
+\paragraph{Example}
+
+\lstinputlisting{srcexamples/periodic_1D_convex_prism}
