@@ -32,21 +32,37 @@ class periodic_1D_convex_prism(body.body):
     body.body.__init__(self, geometry, shift_vector, order, 
         shift_vector_coordsys)
     
+    if (planes_normal==0).all:
+      pass
+    else:
+      planes_normal = numpy.array(planes_normal, dtype='float64')
+      planes_normal.shape = (-1,4)
+      planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
+          planes_normal_coordsys)
+      if ([(plane[:3]==0).all() for plane in planes_normal]):
+        print 'Empty normal vector found. Are you sure your input is correct?'
     
-    planes_normal = numpy.array(planes_normal, dtype='float64')
-    planes_normal.shape = (-1,4)
-    planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
-        planes_normal_coordsys)
 
-    planes_miller = numpy.array(planes_miller, dtype='float64')
-    planes_miller.shape = (-1,4)
+    if (planes_miller==0).all:
+      pass
+    else:
+      planes_miller = numpy.array(planes_miller, dtype='float64')
+      planes_miller.shape = (-1,4)
+      if ([(plane[:3]==0).all() for plane in planes_miller]):
+        print 'Empty miller plane found. Are you sure your input is correct?'
 
     #Transforms planes determined by miller indices into normal shape
-    self._planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
+    planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
 	geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
 
     #Appends planes calculated from miller indices to planes in normal form
-    self._planes_normal = numpy.vstack(( planes_normal, self._planes_miller ))
+    self._planes_normal = numpy.vstack(( planes_normal, planes_miller ))
+    
+    if ([(plane[:3]==0).all() for plane in self._planes_normal]):
+      exit('Error:\n' +
+          'No proper planes specified.'
+          + '\nExiting...\n')
+      
 
     #Retrieve periodic axis from module periodicity
     axis = periodicity.get_axis("cartesian")
@@ -118,10 +134,13 @@ class periodic_1D_convex_prism(body.body):
     #Removes possible bad values (NaN, Inf) from corners
     self._corners = self._corners[1:]
     for index in range( len( self._corners )):
-      if ( numpy.isnan( self._corners[index] ).any()
+      try:
+        if ( numpy.isnan( self._corners[index] ).any()
             or numpy.isinf( self._corners[index] ).any()
             or numpy.isneginf( self._corners[index] ).any() ):
-        self._corners = numpy.delete(self._corners, index, 0)
+          self._corners = numpy.delete(self._corners, index, 0)
+      except:
+          pass
     
     self._corners = numpy.vstack(( self._corners + self._shift_vector,
         self._corners + axis + self._shift_vector ))
