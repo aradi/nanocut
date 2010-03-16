@@ -63,6 +63,7 @@ class convex_polyhedron(body.body):
           'No proper planes specified.'
           + '\nExiting...\n')
     
+    #Removes empty planes and normalizes others
     idx = 0
     while idx < self._planes_normal.shape[0]:
       if (self._planes_normal[idx,:3]==0).all():
@@ -79,6 +80,7 @@ class convex_polyhedron(body.body):
             (numpy.cross( self._planes_normal[idx1,:3],
             self._planes_normal[idx2,:3]) == 0).all()):
             self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
+            print 'Identical planes found. Double plane will be removed...'
         else:
           idx2 += 1
       idx1 += 1
