@@ -52,18 +52,24 @@ class periodic_1D_convex_prism(body.body):
         print 'Empty miller plane found. Are you sure your input is correct?'
 
     #Transforms planes determined by miller indices into normal shape
-    planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
-	geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
+      planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
+          geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
 
     #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack(( planes_normal, planes_miller ))
     
-    if ([(plane[:3]==0).all() for plane in self._planes_normal]):
+    if (self._planes_normal[:,:3]==0).all():
       exit('Error:\n' +
           'No proper planes specified.'
           + '\nExiting...\n')
+    
+    for idx in range(self._planes_normal.shape[0]):
+      try:
+        if (self._planes_normal[idx,:3]==0).all():
+          self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
+      except:
+          pass
       
-
     #Retrieve periodic axis from module periodicity
     axis = periodicity.get_axis("cartesian")
     
@@ -80,7 +86,7 @@ class periodic_1D_convex_prism(body.body):
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
       try:
-        if numpy.abs( numpy.dot(plane[:3],axis.T) )-NumError > 0: 
+        if numpy.abs( numpy.dot(plane[:3],axis.T) )- NumError > 0: 
             print "Given plane appears not parallel to axis.\n\
             Possibly numerical error.\n\
             Plane will be projected to fit axis!"
