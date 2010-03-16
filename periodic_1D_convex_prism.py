@@ -58,28 +58,6 @@ class periodic_1D_convex_prism(body.body):
             raise ValueError, "Plane orthogonal to axis.\n\
             Projection impossible."
     
-    #Check if planes create closed space and warn if necessary
-    for plane_idx1 in range( 0,len( self._planes_normal )):
-      for plane_idx2 in range( plane_idx1+1,len( self._planes_normal )):
-        for plane_idx3 in range( plane_idx2+1,len( self._planes_normal )):
-          try:
-            corner = numpy.linalg.solve(
-                numpy.vstack((
-                    self._planes_normal[plane_idx1,:3],
-                    self._planes_normal[plane_idx2,:3],
-                    self._planes_normal[plane_idx3,:3]
-                    )),
-                numpy.vstack((
-                    self._planes_normal[plane_idx1,3],
-                    self._planes_normal[plane_idx2,3],
-                    self._planes_normal[plane_idx3,3]
-                    ))
-                ).T
-            print ('Warning!\n' + 
-            'Planes might intersect and possibly create closed space.\n'
-             + 'Are you sure your input is correct?')
-          except:
-            pass
     
     NumError = 10**(-10) #TODO Define NumError
     
