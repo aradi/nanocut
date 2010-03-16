@@ -1,5 +1,10 @@
 \section{Body - defining Bodies}
+
+An INI file can contain an arbitrary number of sections defining bodies. Each body section is opened by \lstinline{[BODY: NAME]} where \lstinline{BODY:} defines the bodies type and \lstinline{NAME} is an unique name to tell different bodies with equal types apart. The \lstinline{order} and the \lstinline{shift_vector} parameters are supported by all bodies but mandatory. They will be explained later (???TODO ADD REFERENCE???).
+
+\paragraph{Important:} All vectors inside a body section are specified in lattice coordinates by default. For every vector specified in cartesian coordinates the additional parameter \lstinline{someparameter_coordsys} must be added. Its value is either \lstinline{lattice} or \lstinline{cartesian}.
+
 \subsection{Non-periodic bodies}
-\input{body_template}
+\input{sphere}
 \subsection{1D-periodic bodies}
 \subsection{2D-periodic bodies}

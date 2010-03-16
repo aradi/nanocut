@@ -28,28 +28,28 @@ period = periodicity.periodicity.from_dict(geo,config_dict)
 bodies=[]
 if period.period_type_is("0D"):
   for bodyname in config_dict.keys():
-    if bodyname.startswith('sphere'):
+    if bodyname.startswith('sphere:'):
       body = sphere.sphere.from_dict(geo, config_dict[bodyname])
       bodies.append(body)
-    elif bodyname.startswith('convex_polyhedron'):
+    elif bodyname.startswith('convex_polyhedron:'):
       body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[bodyname])
       bodies.append(body)
-    elif bodyname.startswith('cylinder'):
+    elif bodyname.startswith('cylinder:'):
       body = cylinder.cylinder.from_dict(geo, config_dict[bodyname])
       bodies.append(body)
       
 elif period.period_type_is("1D"):
   for bodyname in config_dict:
-    if bodyname.startswith('periodic_1D_cylinder'):
+    if bodyname.startswith('periodic_1D_cylinder:'):
       body = periodic_1D_cylinder.periodic_1D_cylinder.from_dict(geo,config_dict[bodyname],period)
       bodies.append(body)
-    elif bodyname.startswith('periodic_1D_convex_prism'):
+    elif bodyname.startswith('periodic_1D_convex_prism:'):
       body = periodic_1D_convex_prism.periodic_1D_convex_prism.from_dict(geo,config_dict[bodyname],period)
       bodies.append(body)
 
 elif period.period_type_is("2D"):
   for bodyname in config_dict:
-    if bodyname.startswith('periodic_2D_plane'):
+    if bodyname.startswith('periodic_2D_plane:'):
       body = periodic_2D_plane.periodic_2D_plane.from_dict(geo,config_dict[bodyname],period)
       bodies.append(body)
 
