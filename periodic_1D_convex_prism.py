@@ -32,24 +32,25 @@ class periodic_1D_convex_prism(body.body):
     body.body.__init__(self, geometry, shift_vector, order, 
         shift_vector_coordsys)
     
-    if (planes_normal==0).all:
+    if (planes_normal==0).all():
       pass
     else:
       planes_normal = numpy.array(planes_normal, dtype='float64')
       planes_normal.shape = (-1,4)
       planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
           planes_normal_coordsys)
-      if ([(plane[:3]==0).all() for plane in planes_normal]):
-        print 'Empty normal vector found. Are you sure your input is correct?'
+      for plane in planes_normal:
+        if (plane[:3]==0).all():
+          print 'Empty normal vector found. Are you sure input is correct?'
     
-
-    if (planes_miller==0).all:
+    if (planes_miller==0).all():
       pass
     else:
       planes_miller = numpy.array(planes_miller, dtype='float64')
       planes_miller.shape = (-1,4)
-      if ([(plane[:3]==0).all() for plane in planes_miller]):
-        print 'Empty miller plane found. Are you sure your input is correct?'
+      for plane in planes_miller:
+        if (plane[:3]==0).all():
+          print 'Empty miller plane found. Are you sure input is correct?'
 
       #Transforms planes determined by miller indices into normal shape
       planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
@@ -63,69 +64,71 @@ class periodic_1D_convex_prism(body.body):
           'No proper planes specified.'
           + '\nExiting...\n')
     
-    for idx in range(self._planes_normal.shape[0]):
-      try:
-        if (self._planes_normal[idx,:3]==0).all():
-          self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
-      except:
-          pass
+    idx = 0
+    while idx < self._planes_normal.shape[0]:
+      if (self._planes_normal[idx,:3]==0).all():
+        self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
+      else:
+        idx += 1
       
     #Retrieve periodic axis from module periodicity
     axis = periodicity.get_axis("cartesian")
     
     #Check for 
     for plane in self._planes_normal:
-      if (plane[:3]!=0).any():
-        if ( numpy.cross( plane[:3], axis ) == 0 ).all():
-            raise ValueError, "Plane orthogonal to axis.\n\
-            Projection impossible."
+      if ( numpy.cross( plane[:3], axis ) == 0 ).all():
+          raise ValueError, "Plane orthogonal to axis.\nProjection impossible."
     
     
     NumError = 10**(-10) #TODO Define NumError
     
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
-      try:
-        if numpy.abs( numpy.dot(plane[:3],axis.T) )- NumError > 0: 
-            print "Given plane appears not parallel to axis.\n\
-            Possibly numerical error.\n\
-            Plane will be projected to fit axis!"
-            plane[:3] = numpy.cross( numpy.cross( plane[:3],axis ),axis )
-        else:
-          pass
-      except ZeroDivisionError:
-          pass
+      if numpy.abs( numpy.dot(plane[:3],axis.T) )- NumError > 0: 
+          print "Given plane appears not parallel to axis.\n\
+          Possibly numerical error.\n\
+          Plane will be projected to fit axis!"
+          plane[:3] = numpy.cross( numpy.cross( plane[:3],axis ),axis )
     
-    #Calculates normal vectors if necessary
+    #Normalizes planes
     for plane in self._planes_normal:
-      try:
-         plane[:3] = plane[:3] / numpy.linalg.norm(plane[:3])
-      except ZeroDivisionError:
-        pass
+      plane[:3] = plane[:3] / numpy.linalg.norm(plane[:3])
 
+    #Removes identical planes
+    idx1 = 0
+    idx2 = 1
+    while idx1 < (self._planes_normal.shape[0]-1):
+      while idx2 < self._planes_normal.shape[0]:
+        if (self._planes_normal[idx1,3]==self._planes_normal[idx2,3] and
+            (numpy.cross( self._planes_normal[idx1,:3],
+            self._planes_normal[idx2,:3]) == 0).all() ):
+            self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
+            print 'Identical planes found. Double plane will be removed...'
+        else:
+          idx2 += 1
+      idx1+=1
+      idx2 = idx1 + 1
     
     #Computes intersection lines of planes if possible
     self._lines = numpy.array([0,0,0,0,0,0])
     for plane in self._planes_normal:
-      try:
-        self._lines = numpy.vstack((
-            self._lines, numpy.hstack((
-                numpy.cross( plane[:3], axis)[0], (numpy.dot(plane[:3],
-                    self._shift_vector.T) + plane[3]) * plane[:3] /
-                    numpy.linalg.norm(plane[:3]) - self._shift_vector[0]
-                ))
-             ))
-      except ZeroDivisionError:
-        pass 
+      self._lines = numpy.vstack((
+          self._lines, numpy.hstack((
+          numpy.cross( plane[:3], axis)[0], (numpy.dot(plane[:3],
+          self._shift_vector.T) + plane[3]) * plane[:3] - self._shift_vector[0]
+          ))
+        ))
       
     #Properly shaping and norming self._lines
-    self._lines = self._lines[1:]
+    self._lines = self._lines[1:] 
     
-    for line in self._lines:
-      try:
-        line[:3] = line[:3] / numpy.linalg.norm(line[:3])
-      except ZeroDivisionError:
-        pass 
+    idx = 0
+    while idx < self._lines.shape[0]:
+      if (self._lines[idx]==0).all():
+        self._lines = numpy.delete(self._lines, idx, 0)
+      else:
+        self._lines[idx,:3] = self._lines[idx,:3] / numpy.linalg.norm(self._lines[idx,:3])
+        idx += 1
     
     
     #Places extreme points in cuboid by projecting axis points on plane
@@ -139,15 +142,26 @@ class periodic_1D_convex_prism(body.body):
     
     #Removes possible bad values (NaN, Inf) from corners
     self._corners = self._corners[1:]
-    for index in range( len( self._corners )):
-      try:
-        if ( numpy.isnan( self._corners[index] ).any()
-            or numpy.isinf( self._corners[index] ).any()
-            or numpy.isneginf( self._corners[index] ).any() ):
-          self._corners = numpy.delete(self._corners, index, 0)
-      except:
-          pass
     
+    idx = 0
+    while idx < self._corners.shape[0]:
+      
+      
+#    for index in range( len( self._corners )):
+#      try:
+      if ( numpy.isnan( self._corners[idx] ).any()
+          or numpy.isinf( self._corners[idx] ).any()
+          or numpy.isneginf( self._corners[idx] ).any() ):
+        self._corners = numpy.delete(self._corners, idx, 0)
+      else:
+        idx += 1
+#      except IndexError:
+#          pass
+    
+    if (self._corners==0).all() or self._corners.shape[0] < 3:
+      exit('Error:\nNo or insufficient corners found.\nExiting...\n')
+
+      
     self._corners = numpy.vstack(( self._corners + self._shift_vector,
         self._corners + axis + self._shift_vector ))
     
