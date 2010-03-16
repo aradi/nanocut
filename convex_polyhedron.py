@@ -56,10 +56,17 @@ class convex_polyhedron(body.body):
     #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack(( planes_normal, planes_miller ))
     
-    if ([(plane[:3]==0).all() for plane in self._planes_normal]):
+    if (self._planes_normal[:,:3]==0).all():
       exit('Error:\n' +
           'No proper planes specified.'
           + '\nExiting...\n')
+    
+    for idx in range(self._planes_normal.shape[0]):
+      try:
+        if (self._planes_normal[idx,:3]==0).all():
+          self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
+      except:
+          pass
     
     #Calculates and initalizes body's corners
     self._corners = numpy.array([0,0,0])
