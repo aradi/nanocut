@@ -1,10 +1,1 @@
-\subsubsection{Geometry}
-The \lstinline{geometry} section contains the information required to create the crystal structure. Only one geometry section if every INI file is allowed and in case of multiple entries only the last one will be used. It requires always two parameters and only a third one is enabled.
-\paragraph{Parameters}
-\begin{description}
- \item{lattice_vectors} \lstinline{lattice_vectors} contains in cartesian coordinates the boundaries of a unit cell of the crystal. Of course three and only three entries are allowed which may not be linear dependant upon one another or empty. The vectors are to be given one vector after another. Each item can be an integer or float.
- \item{basis} \lstinline{basis} contains all the atoms included in a unit cell. The atoms are each to be noted beginning with their chemical symbol followed by their coordinate in the unit cell. Each vector item can be an integer or float.
- \item{basis_coordsys} \lstinline{basis_coordsys} is optional and enables to switch the coordinate system the atoms are defined in from the default lattice system to cartesian. Possible entries are \lstinline{'lattice'} or \lstineline{'cartesian'}. 
-\end{description}
-
-\lstinputlisting{srcexamples/geometry}
+\section{Geometry - defining unit cells} 
