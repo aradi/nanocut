@@ -30,24 +30,26 @@ class convex_polyhedron(body.body):
     #Type checking/conversion and initialisation of parent class
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
 
-    if (planes_normal==0).all:
+    if (planes_normal==0).all():
       pass
     else:
       planes_normal = numpy.array(planes_normal, dtype='float64')
       planes_normal.shape = (-1,4)
       planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
           planes_normal_coordsys)
-      if ([(plane[:3]==0).all() for plane in planes_normal]):
-        print 'Empty normal vector found. Are you sure your input is correct?'
+      for plane in planes_normal:
+        if (plane[:3]==0).all():
+          print 'Empty normal vector found. Are you sure input is correct?'
     
 
-    if (planes_miller==0).all:
+    if (planes_miller==0).all():
       pass
     else:
       planes_miller = numpy.array(planes_miller, dtype='float64')
       planes_miller.shape = (-1,4)
-      if ([(plane[:3]==0).all() for plane in planes_miller]):
-        print 'Empty miller plane found. Are you sure your input is correct?'
+      for plane in planes_normal:
+        if (plane[:3]==0).all():
+          print 'Empty miller plane found. Are you sure your input is correct?'
 
       #Transforms planes determined by miller indices into normal shape
       planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
@@ -61,12 +63,27 @@ class convex_polyhedron(body.body):
           'No proper planes specified.'
           + '\nExiting...\n')
     
-    for idx in range(self._planes_normal.shape[0]):
-      try:
-        if (self._planes_normal[idx,:3]==0).all():
-          self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
-      except:
-          pass
+    idx = 0
+    while idx < self._planes_normal.shape[0]:
+      if (self._planes_normal[idx,:3]==0).all():
+        self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
+      else:
+        idx += 1
+    
+    #Removes identical planes
+    idx1 = 0
+    idx2 = 1
+    while idx1 < (self._planes_normal.shape[0]-1):
+      while idx2 < self._planes_normal.shape[0]:
+        if (self._planes_normal[idx1,3]==self._planes_normal[idx2,3] and
+            (numpy.cross( self._planes_normal[idx1,:3],
+            self._planes_normal[idx2,:3]) == 0).all()):
+            self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
+        else:
+          idx2 += 1
+      idx1 += 1
+      idx2 = idx1 + 1
+    
     
     #Calculates and initalizes body's corners
     self._corners = numpy.array([0,0,0])
@@ -91,10 +108,15 @@ class convex_polyhedron(body.body):
                 ).T
             self._corners = numpy.vstack(( self._corners, corner ))
           except numpy.linalg.linalg.LinAlgError:
-            print 'Pair of parallel planes found!'
+            print 'Pair of parallel planes found.'
     
-    #Places extreme points in cuboid and returns cuboid
+    if (self._corners==0).all() or self._corners.shape[0] < 5:
+      exit('Error:\n' +
+          'No or insufficient corners found.'
+          + '\nExiting...\n')
+    
     self._corners = self._corners[1:] + self._shift_vector
+    
     
   
   @classmethod  
