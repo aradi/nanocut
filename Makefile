@@ -3,12 +3,11 @@ MAIN = main.py
 
 nothing:
 
-doc:
-	echo "Make doc (TODO)"
 
-test:
-	make test-clean
-	make test-house
+doc: doc/srcexamples/basic.xyz doc/srcexamples/periodicity.xyz
+
+doc/srcexamples/%.xyz: doc/srcexamples/%.ini
+	$(INT) $(MAIN) -w $@ $<
 
 test-clean:
 	rm ./testoutput/*
@@ -36,9 +35,8 @@ test-steps: ./testinis/steps.ini
 
 
 
-test-house: ./testoutput/house-roof.xyz
+test-house: ./testoutput/house-roof.xyz ./testinis/house-base.ini ./testinis/house-roof.ini
 	cp ./testoutput/house-roof.xyz ./testoutput/house.xyz
-	echo "Built house"
 
 ./testoutput/house-base.xyz: ./testinis/house-base.ini
 	$(INT) $(MAIN) ./testinis/house-base.ini -w ./testoutput/house-base.xyz
