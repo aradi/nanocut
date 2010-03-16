@@ -2,7 +2,7 @@
 \subsection{A very basic setup}
 
 Every information on the the material and structures you want to cut out must be stored in an INI file. In the listing below is an example of a very basic setup defining a sphere made up of Natriumchloride:
-\lstinputlisting{srcexamples/basic}
+\lstinputlisting{srcexamples/basic.ini}
 Every input file producing any output consists at least of two sections. The geometry section, containing everything needed to specify the crystals structure, and at least one body section (opened by \lstinline{[sphere: somename]} in this case), defining the body to be cut out.
 
 \subsection{Usage}
@@ -14,4 +14,4 @@ The simplest valid command is \lstinline{nanocut INFILE}. INFILE must be a valid
  \item{-h} Prints helptext.
  \item{--help} Prints helptext.
 \end{description}
-Usually the command looks like this: 
+Usually the command looks like this: \lstinline{nanocut basic.ini -w out.xyz}. With basic.ini containing the configuration specified in the listing above the output looks like this:
