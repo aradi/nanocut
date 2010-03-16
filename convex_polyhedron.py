@@ -30,23 +30,44 @@ class convex_polyhedron(body.body):
     #Type checking/conversion and initialisation of parent class
     body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
 
-    planes_normal = numpy.array(planes_normal, dtype='float64')
-    planes_normal.shape = (-1,4)
-    planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
-        planes_normal_coordsys)
+    if (planes_normal==0).all:
+      pass
+    else:
+      planes_normal = numpy.array(planes_normal, dtype='float64')
+      planes_normal.shape = (-1,4)
+      planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
+          planes_normal_coordsys)
+      if ([(plane[:3]==0).all() for plane in planes_normal]):
+        print 'Empty normal vector found. Are you sure your input is correct?'
+    
 
-    planes_miller = numpy.array(planes_miller, dtype='float64')
-    planes_miller.shape = (-1,4)
+    if (planes_miller==0).all:
+      pass
+    else:
+      planes_miller = numpy.array(planes_miller, dtype='float64')
+      planes_miller.shape = (-1,4)
+      if ([(plane[:3]==0).all() for plane in planes_miller]):
+        print 'Empty miller plane found. Are you sure your input is correct?'
 
-
-    #Transforms planes determined by miller indices into normal shape
-    self._planes_miller = numpy.array([ numpy.hstack((
-        self.miller_to_normal(geometry, plane[:3]), plane[3] ))
-        for plane in planes_miller ])
+      #Transforms planes determined by miller indices into normal shape
+      planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
+          geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
 
     #Appends planes calculated from miller indices to planes in normal form
-    self._planes_normal = numpy.vstack(( planes_normal, self._planes_miller ))
-
+    self._planes_normal = numpy.vstack(( planes_normal, planes_miller ))
+    
+    if (self._planes_normal[:,:3]==0).all():
+      exit('Error:\n' +
+          'No proper planes specified.'
+          + '\nExiting...\n')
+    
+    for idx in range(self._planes_normal.shape[0]):
+      try:
+        if (self._planes_normal[idx,:3]==0).all():
+          self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
+      except:
+          pass
+    
     #Calculates and initalizes body's corners
     self._corners = numpy.array([0,0,0])
     
