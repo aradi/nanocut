@@ -1,0 +1,9 @@
+\subsubsection{convex_polyhedron}
+\lstinline{convex_polyhedron} enables cutting of bodies surrounded by a given amount of planes. The planes might be determined in different ways. Also the combination of planes defined differently is possible but only one kind is required. A message noting parallel planes will be given if such are found to indicate possible mistake in entries. Of course if planes are supposed to be parallel this can be ignored. Also a message will indicate whenever identical planes have been defined. The planes should create a closed space. If the input is insufficient the program will exit if no proper body can be calculated or calculate the shape it can derive from the given INI.
+\paragraph{Parameters}
+\begin{description}
+ \item{planes_miller} \lstinline{planes_miller} contains planes defined by miller indizes. Each plane is given by 4 integers or floats with the first three being the miller indices and the last one the plane's minimum distance from the origin (the length of the smallest possible cartesian vector between the origin and the plane)
+ \item{planes_normal} \lstinline{planes_normal} contains planes defined by a vector orthogonal to the plane and its minimum distance from the origin as in \lstinline{planes_miller}. The vector does not need to be normalized.
+\end{description} 
+
+\lstinputlisting{srcexamples/convex_polyhedron}

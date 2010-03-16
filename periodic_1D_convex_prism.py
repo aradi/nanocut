@@ -90,7 +90,7 @@ class periodic_1D_convex_prism(body.body):
           Plane will be projected to fit axis!"
           plane[:3] = numpy.cross( numpy.cross( plane[:3],axis ),axis )
     
-    #Calculates normal vectors if necessary
+    #Normalizes planes
     for plane in self._planes_normal:
       plane[:3] = plane[:3] / numpy.linalg.norm(plane[:3])
 
@@ -103,6 +103,7 @@ class periodic_1D_convex_prism(body.body):
             (numpy.cross( self._planes_normal[idx1,:3],
             self._planes_normal[idx2,:3]) == 0).all() ):
             self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
+            print 'Identical planes found. Double plane will be removed...'
         else:
           idx2 += 1
       idx1+=1
