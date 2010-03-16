@@ -51,7 +51,7 @@ class periodic_1D_convex_prism(body.body):
       if ([(plane[:3]==0).all() for plane in planes_miller]):
         print 'Empty miller plane found. Are you sure your input is correct?'
 
-    #Transforms planes determined by miller indices into normal shape
+      #Transforms planes determined by miller indices into normal shape
       planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
           geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
 

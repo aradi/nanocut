@@ -49,9 +49,9 @@ class convex_polyhedron(body.body):
       if ([(plane[:3]==0).all() for plane in planes_miller]):
         print 'Empty miller plane found. Are you sure your input is correct?'
 
-    #Transforms planes determined by miller indices into normal shape
-    planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
-	geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
+      #Transforms planes determined by miller indices into normal shape
+      planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
+          geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
 
     #Appends planes calculated from miller indices to planes in normal form
     self._planes_normal = numpy.vstack(( planes_normal, planes_miller ))
