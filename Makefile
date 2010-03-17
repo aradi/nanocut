@@ -3,8 +3,11 @@ MAIN = main.py
 
 nothing:
 
+.PHONY: doc
 
-doc: doc/srcexamples/basic.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/cylinder.xyz doc/srcexamples/geometry.xyz doc/srcexamples/convex_polyhedron.xyz doc/srcexamples/periodic_1D_convex_prism.xyz
+doc: doc/srcexamples/basic.xyz doc/srcexamples/convex_polyhedron.xyz doc/srcexamples/cylinder.xyz doc/srcexamples/geometry.xyz doc/srcexamples/order.xyz doc/srcexamples/periodic_1D_convex_prism.xyz doc/srcexamples/periodic_1D_cylinder.xyz doc/srcexamples/periodic_2D_plane.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/sphere.xyz
+	cd doc && pdflatex -interaction=nonstopmode 'main.tex'
+
 
 doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
