@@ -122,11 +122,12 @@ class geometry:
 
     #Add buffer to abc_boudaries
     abc_boundaries+=abs(self._lattice_vectors).max(axis=0).reshape((3,1))
-    
+
     #Calculate inverse of lattice_vectors matrix.
     #Result transforms any vector (d,e,f) to lattice coordinates.
-    trafo=numpy.asarray(numpy.matrix(self._lattice_vectors).I)
-    
+    trafo=numpy.array(numpy.matrix(self._lattice_vectors).I)
+    trafo_back=self._lattice_vectors
+
     #Calculate "worst case"-boundaries for n, m, o. Equation for cuboid is:
     #x=dot((a,b,c).T,trafo)+center=(n,m,o).T+center using lattice coordinates.
     coeff=numpy.array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
@@ -139,15 +140,17 @@ class geometry:
 
     #Generate list of n,m,o corresponding to all points inside the
     #cuboid (or parallelepiped)'''
-    nmo = numpy.array([[n,m,o]\
-	      for n in range(int(-nmo_boundaries[0]+nmo_center[0]),
-	                      int(nmo_boundaries[0]+nmo_center[0])+1)
-	      for m in range(int(-nmo_boundaries[1]+nmo_center[1]),
-	                      int(nmo_boundaries[1]+nmo_center[1])+1)
-	      for o in range(int(-nmo_boundaries[2]+nmo_center[2]),
-	                      int(nmo_boundaries[2]+nmo_center[2])+1)
+    nmo = numpy.array([[n,m,o]
+        for n in range(int(-nmo_boundaries[0]+nmo_center[0]),
+	                int(nmo_boundaries[0]+nmo_center[0])+1)
+	for m in range(int(-nmo_boundaries[1]+nmo_center[1]),
+	                int(nmo_boundaries[1]+nmo_center[1])+1)
+	for o in range(int(-nmo_boundaries[2]+nmo_center[2]),
+	                int(nmo_boundaries[2]+nmo_center[2])+1)
               #TODO: exclude atoms inside parallelepiped but outside cuboid
-	      if 1==1])
+	if ((abc_center-abc_boundaries.T<=numpy.dot(trafo_back.T,[n,m,o])) *
+	    (numpy.dot(trafo_back.T,[n,m,o])<=abc_center+abc_boundaries.T))
+	    .all()])
 
     #Test for equivalent points in case periodicities are present
     if periodicity==None or periodicity.period_type_is("0D"):
@@ -155,36 +158,41 @@ class geometry:
 
     else:
       axis = periodicity.get_axis("lattice")
-      is_dub=numpy.zeros(len(nmo),bool)
+      is_unique=numpy.ones(len(nmo),bool)
 
       if periodicity.period_type_is("1D"):
 
         #Identify of biggest entry of axis to prevent division with 0 later (*)
         axis_max_idx=numpy.abs(axis[0]).argmax()
+        axis_max=axis[0,axis_max_idx]
 
         #Test if point at idx1 is dublicate of point at idx2 for every
         #possible combination
+        progress=0
         for idx_1 in range(len(nmo)):
-          print idx_1, "/", len(nmo)
-          if is_dub[idx_1]==False:
+	  print progress,"/",len(nmo)
+          if is_unique[idx_1]:
+	    progress+=1
             for idx_2 in range(idx_1+1,len(nmo)):
-	      if is_dub[idx_2]==False:
+	      if is_unique[idx_2]:
 		#Calculate difference between points at idx1 and idx2
-		difference=numpy.array((nmo[idx_1]-nmo[idx_2]))
+		difference=(nmo[idx_1]-nmo[idx_2])
 		#Calculate if difference vector is integer multiple of axis (*)
-		factor=difference[axis_max_idx]/axis[0,axis_max_idx]
+		#factor=difference[axis_max_idx]/axis[0,axis_max_idx]
+		factor=difference[axis_max_idx]/axis_max
+		#Mark dublicate points
 		if (axis[0]*factor==difference).all():
-		  #Mark dublicate points
-                  is_dub[idx_2]=True
-        return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
+                  is_unique[idx_2]=False
+                  progress+=1
+        return numpy.dot(nmo[is_unique],self._lattice_vectors)
         
       elif periodicity.period_type_is("2D"):
 
 	axis_basis_3D=numpy.vstack((axis,numpy.cross(axis[0],axis[1])))
         for idx_1 in range(len(nmo)):
-	  if is_dub[idx_1]==False:
+	  if is_unique[idx_1]:
             for idx_2 in range(idx_1+1,len(nmo)):
-	      if is_dub[idx_2]==False:
+	      if is_unique[idx_2]:
 		#Calculate difference between points at idx1 and idx2
 		difference=numpy.array((nmo[idx_1]-nmo[idx_2]))
 		#Calculate if difference vector is sum of integer multiples
@@ -193,9 +201,9 @@ class geometry:
                 factor = factor.round().astype('int')
                 if (axis[0]*factor[0]+axis[1]*factor[1]==difference).all():
 		  #Mark dublicate points
-                  is_dub[idx_2]=True
+                  is_unique[idx_2]=False
 
-        return numpy.dot(nmo[numpy.invert(is_dub)],self._lattice_vectors)
+        return numpy.dot(nmo[is_unique],self._lattice_vectors)
 
       
 
