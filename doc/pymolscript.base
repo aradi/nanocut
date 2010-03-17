@@ -1,3 +1,6 @@
 
 
+show spheres
+set sphere_scale, 0.2
+ray
 

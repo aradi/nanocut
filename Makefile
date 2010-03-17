@@ -1,4 +1,4 @@
-INT = python
+INT = python -OO 
 MAIN = main.py
 
 nothing:
@@ -17,7 +17,7 @@ doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 
 doc/srcexamples/%.png: doc/srcexamples/%.xyz
 	rm -f doc/pymolscript.pml
-	cat doc/pymolscript.base $<.view > ./doc/pymolscript.pml
+	cat $<.view doc/pymolscript.base > ./doc/pymolscript.pml
 	pymol $< doc/pymolscript.pml -g $@ -c -q
 	rm -f doc/pymolscript.pml
 
