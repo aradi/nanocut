@@ -9,6 +9,8 @@ doc: doc/srcexamples/basic.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/c
 doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
 
+doc-clean:
+	rm .doc/*~ .doc/*.backup .doc/*.toc .doc/*.aux .doc/*.log .doc/srcexamples/*~ .doc/srcexamples/*.xyz
 
 test-clean:
 	rm ./testoutput/*
