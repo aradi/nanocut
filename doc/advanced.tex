@@ -1,7 +1,15 @@
 \section{Advanced Usage}
+In addition to the basic features some useful other options are implemented. 
 \subsection{Adding and substracting bodies}
+Nanocut features the possibility to not only create bodies with a certain shapes within a crystal but also to remove atoms which can be determined the same way as the created ones. This is done via an \lstinline{order} item within the specific \lstinline{[BODY]} section. \lstinline{order} causes the bodies to be handled in a certain order beginning with the one with the smallest \lstinline{order}. It is possible and in many cases recommended to give several bodies the same \lstinline{order} when it does not matter in which order they are created. That is because the algorithm causes uneven \lstinline{order} bodies to be created and even \lstinline{order} bodies to be removed.\\
+The only parameter to be added is \lstinline{order} which takes a positive integer (not zero) for a valid input. All bodies without an \lstinline{order} is assumed to be of order 1 and will therefore be calculated first before any other.
+\paragraph{Example}
+The following INI creates a hollow sphere.
+\lstinputlisting{srcexamples/order.ini}
 \subsection{Shifting vectors}
+Nanocut enables shifting of objects via a \lstinline{shift_vector} parameter. The parameter is identical for all bodies but its effect is slightly different depending on the given \lstinline{period_type}.
 \subsubsection{Non-periodic bodies}
+
 \subsubsection{1D-periodic bodies}
 \subsubsection{2D-periodic bodies}
 \subsection{Automatic rotation of periodic bodies}
