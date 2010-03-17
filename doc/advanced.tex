@@ -1,15 +1,30 @@
 \section{Advanced Usage}
-In addition to the basic features some useful other options are implemented. 
-\subsection{Adding and substracting bodies}
-Nanocut features the possibility to not only create bodies with a certain shapes within a crystal but also to remove atoms which can be determined the same way as the created ones. This is done via an \lstinline{order} item within the specific \lstinline{[BODY]} section. \lstinline{order} causes the bodies to be handled in a certain order beginning with the one with the smallest \lstinline{order}. It is possible and in many cases recommended to give several bodies the same \lstinline{order} when it does not matter in which order they are created. That is because the algorithm causes uneven \lstinline{order} bodies to be created and even \lstinline{order} bodies to be removed.\\
-The only parameter to be added is \lstinline{order} which takes a positive integer (not zero) for a valid input. All bodies without an \lstinline{order} is assumed to be of order 1 and will therefore be calculated first before any other.
-\paragraph{Example}
-The following INI creates a hollow sphere.
-\lstinputlisting{srcexamples/order.ini}
-\subsection{Shifting vectors}
-Nanocut enables shifting of objects via a \lstinline{shift_vector} parameter. The parameter is identical for all bodies but its effect is slightly different depending on the given \lstinline{period_type}.
-\subsubsection{Non-periodic bodies}
+\subsection{The order parameter - adding and substracting bodies}
+Additional to simply creating bodies nanocut features the possibility to substract and add bodies.
+The \lstinline{order} parameter is an integer which can be specified for every body. It determines the order in which the bodies are substracted or added. Beginnig with the bodies with the smallest order greater than zero the bodies are processed in ascending order. Therefore bodies with orders beiing lower than one are ignored.
+An uneven order causes the body to be added. Those with uneven orders are substracted. The default order is 1.
 
-\subsubsection{1D-periodic bodies}
-\subsubsection{2D-periodic bodies}
-\subsection{Automatic rotation of periodic bodies}
+Multiple bodies having the same order is allowed and common practice since there is no difference in result for processing a set of bodies in any order as long as they are all substracted or added.
+
+\paragraph{Example}\ 
+\lstinputlisting{srcexamples/order.ini}
+???TODO BILD???
+
+\subsection{Shift vectors}
+The \lstinline{shift_vector} parameter enables the possibility to shift a body to a certain position. The value for \lstinline{shift_vector} is the vector defining the translation.
+
+This is particularly usefull when using the order parameter to create specific shapes.
+
+\subsubsection{Periodic bodies}
+
+Using a shift vector with periodic can lead to unexpected results at first glance, for two reasons. 
+\begin{enumerate}
+ \item Every atom is moved into the first supercell after being cut out. This undoes the effect of the shift vector's components in the direction(s) of the axis or both axes.
+ \item The automatic rotation of periodic bodies is applied last.
+\end{enumerate}
+In combination this means: 
+
+A body's translation in 1D-periodic structures is visible in the result as a translation inside the x-y-plane which is lacking the component in direction of axis.
+
+In 2D-periodic structures the translation is visible in z-direction by the shift vector's component orthogonal to both axes.
+

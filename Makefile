@@ -5,15 +5,22 @@ nothing:
 
 .PHONY: doc
 
-doc: doc/srcexamples/basic.xyz doc/srcexamples/convex_polyhedron.xyz doc/srcexamples/cylinder.xyz doc/srcexamples/geometry.xyz doc/srcexamples/order.xyz doc/srcexamples/periodic_1D_convex_prism.xyz doc/srcexamples/periodic_1D_cylinder.xyz doc/srcexamples/periodic_2D_plane.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/sphere.xyz
-	cd doc && pdflatex -interaction=nonstopmode 'main.tex'
+xyz: doc/srcexamples/basic.xyz doc/srcexamples/convex_polyhedron.xyz doc/srcexamples/cylinder.xyz doc/srcexamples/geometry.xyz doc/srcexamples/order.xyz doc/srcexamples/periodic_1D_convex_prism.xyz doc/srcexamples/periodic_1D_cylinder.xyz doc/srcexamples/periodic_2D_plane.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/sphere.xyz
 
+png: doc/srcexamples/basic.png doc/srcexamples/convex_polyhedron.png doc/srcexamples/cylinder.png doc/srcexamples/geometry.png doc/srcexamples/order.png doc/srcexamples/periodic_1D_convex_prism.png doc/srcexamples/periodic_1D_cylinder.png doc/srcexamples/periodic_2D_plane.png doc/srcexamples/periodicity.png doc/srcexamples/sphere.png
+
+doc: xyz png
+	cd doc && pdflatex -interaction=nonstopmode 'main.tex' > /dev/null
 
 doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
 
+doc/srcexamples/%.png: doc/srcexamples/%.xyz
+	cat doc/pymolscript.base $<.view > pymolscript.pml
+	pymol $< doc/pymolscript.pml -g $@ -c -q
+
 doc-clean:
-	rm ./doc/*~ ./doc/*.backup ./doc/*.toc ./doc/*.aux ./doc/*.log ./doc/srcexamples/*~ ./doc/srcexamples/*.xyz ./doc/*.pdf
+	rm ./doc/*~ ./doc/*.backup ./doc/*.toc ./doc/*.aux ./doc/*.log ./doc/srcexamples/*~ ./doc/srcexamples/*.xyz ./doc/srcexamples/*.png ./doc/*.pdf
 
 test-clean:
 	rm ./testoutput/*
