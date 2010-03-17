@@ -1,7 +1,10 @@
 INT = python -OO
 MAIN = ../main.py
 
-all: surf2-162-periodic_florian.xyz r6.68_new.xyz r5.39_new.xyz r-04.85_new.xyz r5.58_new.xyz
+all: circwire surf prismwire
+
+clean: 
+	rm *_florian.xyz *_new.xyz *~
 
 %.xyz: %.ini
 	$(INT) $(MAIN) -w $@ $< 
@@ -12,3 +15,5 @@ surf2-162-periodic_florian_reapeat.xyz: surf2-162-periodic_florian.xyz
 circwire: w111-2.0.wire_florian.xyz w011-2.0.wire_florian.xyz w001-2.0.wire_florian.xyz
 
 surf: surf2-162-periodic_florian_reapeat.xyz
+
+prismwire: r6.68_new.xyz r5.39_new.xyz r-04.85_new.xyz r5.58_new.xyz
