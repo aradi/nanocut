@@ -39,7 +39,7 @@ class convex_polyhedron(body.body):
           planes_normal_coordsys)
       for plane in planes_normal:
         if (plane[:3]==0).all():
-          print 'Empty normal vector found. Are you sure input is correct?'
+          raise ValueError, "Bad input: empty normal vector"
     
 
     if (planes_miller==0).all():
@@ -49,7 +49,7 @@ class convex_polyhedron(body.body):
       planes_miller.shape = (-1,4)
       for plane in planes_normal:
         if (plane[:3]==0).all():
-          print 'Empty miller plane found. Are you sure your input is correct?'
+          raise ValueError, "Bad input: empty miller plane"
 
       #Transforms planes determined by miller indices into normal shape
       planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
@@ -82,7 +82,8 @@ class convex_polyhedron(body.body):
             (self._planes_normal[idx1,:3]!=-self._planes_normal[idx2,:3]).all()
               ):
             self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
-            print 'Identical planes found. Double plane will be removed...'
+#            raise ValueError, "Identical planes.\n\
+#                Double plane will be removed."
         else:
           idx2 += 1
       idx1 += 1
@@ -111,7 +112,7 @@ class convex_polyhedron(body.body):
                 ).T
             self._corners = numpy.vstack(( self._corners, corner ))
           except numpy.linalg.linalg.LinAlgError:
-            print 'Pair of parallel planes found.'
+            pass
     
     if (self._corners==0).all() or self._corners.shape[0] < 5:
       exit('Error:\n' +

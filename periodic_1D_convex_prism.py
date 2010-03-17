@@ -41,7 +41,7 @@ class periodic_1D_convex_prism(body.body):
           planes_normal_coordsys)
       for plane in planes_normal:
         if (plane[:3]==0).all():
-          print 'Empty normal vector found. Are you sure input is correct?'
+          raise ValueError, "Bad input: empty normal vector"
     
     if (planes_miller==0).all():
       pass
@@ -50,9 +50,9 @@ class periodic_1D_convex_prism(body.body):
       planes_miller.shape = (-1,4)
       for plane in planes_miller:
         if (plane[:3]==0).all():
-          print 'Empty miller plane found. Are you sure input is correct?'
+          raise ValueError, "Bad input: empty miller plane"
 
-      #Transforms planes determined by miller indices into normal shape
+      #Transforms planes deteraise ValueError, "Parallel planes. No intersection found."rmined by miller indices into normal shape
       planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
           geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
 
@@ -77,7 +77,9 @@ class periodic_1D_convex_prism(body.body):
     #Check for orthogonal planes
     for plane in self._planes_normal:
       if ( numpy.cross( plane[:3], axis ) == 0 ).all():
-          raise ValueError, "Plane orthogonal to axis.\nProjection impossible."
+        exit('Error:\n'+
+           'Plane orthogonal to axis. Unable to project.'
+           +'\nExiting...')
     
     
     NumError = 10**(-10) #TODO Define NumError
@@ -85,9 +87,8 @@ class periodic_1D_convex_prism(body.body):
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
       if numpy.abs( numpy.dot(plane[:3],axis.T) )- NumError > 0: 
-          print "Given plane appears not parallel to axis.\n\
-          Possibly numerical error.\n\
-          Plane will be projected to fit axis!"
+          print "Plane appears parallel to axis.\n\
+          Plane will be projected to fit axis."
           plane[:3] = numpy.cross( numpy.cross( plane[:3],axis ),axis )
     
     #Normalizes planes
@@ -105,7 +106,8 @@ class periodic_1D_convex_prism(body.body):
             (self._planes_normal[idx1,:3]!=-self._planes_normal[idx2,:3]).all()
               ):
             self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
-            print 'Identical planes found. Double plane will be removed...'
+#            raise ValueError, "Identical planes.\n\
+#                Double plane will be removed..."
         else:
           idx2 += 1
       idx1+=1
@@ -161,7 +163,9 @@ class periodic_1D_convex_prism(body.body):
 #          pass
     
     if (self._corners==0).all() or self._corners.shape[0] < 3:
-      exit('Error:\nNo or insufficient corners found.\nExiting...\n')
+      exit('Error:\n'+
+          'No or insufficient corners found.'+
+          '\nExiting...')
 
       
     self._corners = numpy.vstack(( self._corners + self._shift_vector,
