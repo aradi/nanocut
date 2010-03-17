@@ -9,6 +9,7 @@ doc: doc/srcexamples/basic.xyz doc/srcexamples/periodicity.xyz doc/srcexamples/s
 doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
 
+
 test-clean:
 	rm ./testoutput/*
 
