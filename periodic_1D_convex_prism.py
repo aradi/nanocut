@@ -87,8 +87,8 @@ class periodic_1D_convex_prism(body.body):
     #Check if planes are parallel to axis, rotate plane if not so
     for plane in self._planes_normal:
       if numpy.abs( numpy.dot(plane[:3],axis.T) )- NumError > 0: 
-          print "Plane appears parallel to axis.\n\
-          Plane will be projected to fit axis."
+#          print "Plane appears parallel to axis.\n\
+#          Plane will be projected to fit axis."
           plane[:3] = numpy.cross( numpy.cross( plane[:3],axis ),axis )
     
     #Normalizes planes
