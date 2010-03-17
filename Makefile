@@ -16,14 +16,24 @@ doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
 
 doc/srcexamples/%.png: doc/srcexamples/%.xyz
-	cat doc/pymolscript.base $<.view > pymolscript.pml
+	rm -f doc/pymolscript.pml
+	cat doc/pymolscript.base $<.view > ./doc/pymolscript.pml
 	pymol $< doc/pymolscript.pml -g $@ -c -q
+	rm -f doc/pymolscript.pml
 
 doc-clean:
-	rm ./doc/*~ ./doc/*.backup ./doc/*.toc ./doc/*.aux ./doc/*.log ./doc/srcexamples/*~ ./doc/srcexamples/*.xyz ./doc/srcexamples/*.png ./doc/*.pdf
+	rm -f ./doc/*~ ./doc/*.backup ./doc/*.toc ./doc/*.aux ./doc/*.log ./doc/srcexamples/*~ ./doc/srcexamples/*.xyz ./doc/srcexamples/*.png ./doc/*.pdf
 
 test-clean:
-	rm ./testoutput/*
+	rm -f ./testoutput/*
+
+src-clean:
+	rm -f *~ *.pyo *.pyc
+
+clean:
+	make doc-clean
+	make src-clean
+	make test-clean
 
 test-landscape: 
 	$(INT) $(MAIN) ./testinis/house-base.ini -w ./testoutput/landscape.xyz
