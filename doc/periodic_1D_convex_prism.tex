@@ -1,4 +1,4 @@
-\subsubsection{periodic\_1D\_convex\_prism}
+\subsubsection{Periodic\_1D\_convex\_prism}
 \lstinline{[periodic_1D_convex_prism: NAME]} enables cutting a convex prism which can be appended unto itself to create an infinte cut from the given crystal structure. The prism is determined by its surface planes. These planes can be determined in different ways and the combination of planes defined differently is possible. Please note the planes should not surround. They need to lack the base and its projection since these will be calculated to enable the periodicity. The planes should be parallel to the axis or they will be projected accordingly which will change the created body. Of course at least three planes are needed to create a proper body. If no prism can be calculated from the given planes the programm will indicate so and exit.
 
 \paragraph{Parameters}
@@ -10,6 +10,6 @@
 \end{description} 
 
 
-\paragraph{Example}
+\paragraph{Example}\
 
 \lstinputlisting{srcexamples/periodic_1D_convex_prism.ini}

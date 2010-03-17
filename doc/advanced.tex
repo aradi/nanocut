@@ -7,9 +7,10 @@ The only parameter to be added is \lstinline{order} which takes a positive integ
 The following INI creates a hollow sphere.
 \lstinputlisting{srcexamples/order.ini}
 \subsection{Shifting vectors}
-Nanocut enables shifting of objects via a \lstinline{shift_vector} parameter. The parameter is identical for all bodies but its effect is slightly different depending on the given \lstinline{period_type}.
+Nanocut enables shifting of objects via a \lstinline{shift_vector} parameter. The parameter is identical for all kinds of bodies but its effect is slightly different depending on the given \lstinline{period_type}. Each body has its own \lstinline{shift_vector}.
 \subsubsection{Non-periodic bodies}
-
+If no periodicity is given, \lstinline{period_type: 0D}, the \lstinline{shift_vector} simply moves the origin to its target. The bodies are still defined as if they were near the origin.
 \subsubsection{1D-periodic bodies}
 \subsubsection{2D-periodic bodies}
 \subsection{Automatic rotation of periodic bodies}
+Periodic bodies are rotated by Nanocut to align the periodicity axis with the z-axis in 1D-periodic bodies or to turn the periodic plane in the x-y-plane for 2D-periodic surfaces. This option is always active.

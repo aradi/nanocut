@@ -6,8 +6,9 @@ The \lstinline{[geometry]} section requires the two entries \lstinline{lattice_v
 \begin{description}
  \item{\lstinline{lattice_vectors}} unit vectors of a unit cell of the crystal in cartesian coordinates. Of course three and only three entries are allowed which may not be linear dependant upon one another or empty. The vectors are to be given one vector after another.
  \item{\lstinline{basis}} all atoms included in a unit cell. The atoms are each to be noted beginning with their chemical symbol followed by their coordinate in the unit cell.
+ \item{\lstinline{basis_coordsys}} determines the coordinate system the vectors in \lstinline{basis} are considered to be in. Options are either \lstinline{cartesian} for values in cartesian coordinate system or \lstinline{lattice} for fractions of lattice vectors.
 \end{description}
 
-\paragraph{Example}
+\paragraph{Example}\
 
 \lstinputlisting{srcexamples/geometry.ini}
