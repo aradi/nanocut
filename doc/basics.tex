@@ -6,7 +6,7 @@ Every information on the the material and structures you want to cut out must be
 Every input file producing any output consists at least of two sections. The geometry section, containing everything needed to specify the crystals structure, and at least one body section (opened by \lstinline{[sphere: somename]} in this case), defining the body to be cut out.
 
 \subsection{Usage}
-The simplest valid command is \lstinline{nanocut INFILE}. INFILE must be a valid INI file like the one specified in the example above. The result will be written to the standard output in xyz format. Options can be added to the commandline at arbitrary positions. Possible Options are:
+The simplest valid command is \lstinline{nanocut INFILE}. INFILE must be a valid INI file like the one specified in the example above. The result will be written to the standard output by default in xyz format. Options can be added to the commandline at arbitrary positions. Possible Options are:
 \begin{description}
  \item{-w FILE} This writes the output to the file specified by FILE. In case FILE doesn't exist it will be created, otherwise the existing file will be overwritten without further questions.
  \item{-a FILE} This merges the result with the content of an existing INI file specified by FILE. FILE must exist.

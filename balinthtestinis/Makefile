@@ -4,13 +4,13 @@ MAIN = ../main.py
 all: circwire surf prismwire
 
 clean: 
-	rm *_florian.xyz *_new.xyz *~
+	rm ./*_florian.xyz ./*_florian_repeat.xyz ./*_new.xyz ./*~
 
 %.xyz: %.ini
 	$(INT) $(MAIN) -w $@ $< 
 
 surf2-162-periodic_florian_reapeat.xyz: surf2-162-periodic_florian.xyz
-	./repeatxyz -l lattice_vectors surf2-162-periodic_florian.xyz  6 6 1 > surf2-162-periodic_florian_reapeat.xyz
+	./repeatxyz -l lattice_vectors surf2-162-periodic_florian.xyz  6 6 1 > surf2-162-periodic_florian_repeat.xyz
 
 circwire: w111-2.0.wire_florian.xyz w011-2.0.wire_florian.xyz w001-2.0.wire_florian.xyz
 
