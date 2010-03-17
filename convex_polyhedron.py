@@ -78,7 +78,9 @@ class convex_polyhedron(body.body):
       while idx2 < self._planes_normal.shape[0]:
         if (self._planes_normal[idx1,3]==self._planes_normal[idx2,3] and
             (numpy.cross( self._planes_normal[idx1,:3],
-            self._planes_normal[idx2,:3]) == 0).all()):
+            self._planes_normal[idx2,:3]) == 0).all()  and
+            (self._planes_normal[idx1,:3]!=-self._planes_normal[idx2,:3]).all()
+              ):
             self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
             print 'Identical planes found. Double plane will be removed...'
         else:

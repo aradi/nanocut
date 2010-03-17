@@ -74,7 +74,7 @@ class periodic_1D_convex_prism(body.body):
     #Retrieve periodic axis from module periodicity
     axis = periodicity.get_axis("cartesian")
     
-    #Check for 
+    #Check for orthogonal planes
     for plane in self._planes_normal:
       if ( numpy.cross( plane[:3], axis ) == 0 ).all():
           raise ValueError, "Plane orthogonal to axis.\nProjection impossible."
@@ -101,7 +101,9 @@ class periodic_1D_convex_prism(body.body):
       while idx2 < self._planes_normal.shape[0]:
         if (self._planes_normal[idx1,3]==self._planes_normal[idx2,3] and
             (numpy.cross( self._planes_normal[idx1,:3],
-            self._planes_normal[idx2,:3]) == 0).all() ):
+            self._planes_normal[idx2,:3]) == 0).all() and
+            (self._planes_normal[idx1,:3]!=-self._planes_normal[idx2,:3]).all()
+              ):
             self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
             print 'Identical planes found. Double plane will be removed...'
         else:
