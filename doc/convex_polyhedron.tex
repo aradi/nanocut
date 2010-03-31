@@ -1,13 +1,12 @@
 \subsubsection{Convex polyhedron}
 
-\lstinline{[convex_polyhedron]} enables cutting of bodies surrounded by an arbitrary amount of planes. The planes might be determined in different ways. Also the combination of planes defined differently is possible but only one kind is required. If the input is insufficient the program will exit if no proper body can be calculated or calculate the shape it can derive from the given INI.
-The body's section is opened by \lstinline{[convex_polyhedron: NAME]}.
+A convex polyhedron is defined by the planes delimiting the body. A plane can be defined using miller indices or the normal vector. The body's section is opened by \lstinline{[convex_polyhedron: NAME]}.
 
 \paragraph{Parameters}
-\lstinline{[convex_polyhedron]} requires at least one item of the following. Each item may contain an arbitrary amount of planes each determined by four integer or float values.
+
 \begin{description}
- \item{\lstinline{planes_miller}} planes defined by miller indizes. Each plane is given by 4 integers or floats with the first three being the miller indices and the last one the plane's minimum distance from the origin (the length of the smallest possible cartesian vector between the origin and the plane)
- \item{\lstinline{planes_normal}} planes defined by a vector orthogonal to the plane and its minimum distance from the origin as in \lstinline{planes_miller}. The vector does not need to be normalized.
+ \item{\lstinline{planes_miller}} Miller indices of each plane (except those defined using normal vectors) followed by its distance from the origin.
+ \item{\lstinline{planes_normal}} Vector orthogonal to each plane (except those defined using miller indices) followed by its distance from the origin. The vectors do not need to be normalized.
 \end{description} 
 
 \paragraph{Example}\

@@ -1,17 +1,17 @@
 \section{Basics}
 \subsection{A very basic setup}
 
-Every information on the material and structures you want to cut out must be stored in an INI file. The listing below shows an example of a very basic setup defining a sphere made up of Natriumchloride:
+Every information on the material and structures to be cut out must be stored in an INI file. The listing below shows an example of a very basic setup defining a sphere made up of Natriumchloride:
 \lstinputlisting{srcexamples/basic.ini}
-Every input file producing any output consists at least of two sections. The geometry section, containing everything needed to specify the crystals structure, and at least one body section (opened by \lstinline{[sphere: somename]} in this case), defining the body to be cut out.
+Every input file producing any output consists of at least two sections. The geometry section, containing everything needed to specify the crystal's structure, and at least one body section (opened by \lstinline{[sphere: somename]} in the example above case), defining the body to be cut out.
 
 \subsection{Usage}
 The simplest valid command is \lstinline{nanocut INFILE}. INFILE must be a valid INI file like the one shown in the example above. The result will be written to the standard output by default. The output format is XYZ. Options can be added to the commandline at arbitrary positions. Possible Options are:
 \begin{description}
- \item{-w FILE} This writes the output to the file specified by FILE. In case FILE doesn't exist it will be created, otherwise the existing file will be overwritten without further questions.
- \item{-a FILE} This merges the result with the content of an existing INI file specified by FILE. FILE must exist.
- \item{-h} Prints helptext.
- \item{--help} Prints helptext.
+ \item{\textbf{-w FILE}} Writes the output into the file specified by \textbf{FILE}. In case \textbf{FILE} doesn't exist it will be created, otherwise the existing file will be overwritten without further questions.
+ \item{\textbf{-a FILE}} This merges the result with the content of an existing INI file specified by \textbf{FILE}. \textbf{FILE} must exist.
+ \item{\textbf{-h}} Prints helptext.
+ \item{\textbf{--help}} Prints helptext.
 \end{description}
-Usually the command looks like this: \lstinline{nanocut basic.ini -w basic.xyz}. With basic.ini containing the configuration specified in the listing above the output looks like this:
+Usually the command looks like this: \lstinline{nanocut basic.ini -w basic.xyz}. With basic.ini containing the configuration specified in the listing above, the output looks like this:
 \ \\\includegraphics[width=0.6\textwidth]{srcexamples/basic.png}

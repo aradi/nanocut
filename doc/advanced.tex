@@ -1,10 +1,12 @@
 \section{Advanced Usage}
+\label{Advanced Usage}
 \subsection{The order parameter - adding and substracting bodies}
-Additional to simply creating bodies nanocut features the possibility to substract and add bodies.
-The \lstinline{order} parameter is an integer which can be specified for every body. It determines the order in which the bodies are substracted or added. Beginnig with the bodies with the smallest order greater than zero the bodies are processed in ascending order. Therefore bodies with orders beiing lower than one are ignored.
-An uneven order causes the body to be added. Those with uneven orders are substracted. The default order is 1.
+In addition to simply creating structures of the shapes mentioned in the previous section, Nanocut features the possibility to substract and add those to build more complex shapes.
 
-Multiple bodies having the same order is allowed and common practice since there is no difference in result for processing a set of bodies in any order as long as they are all substracted or added.
+The \lstinline{order} parameter is an integer which can be specified for every body. It determines the order in which the bodies are substracted or added. The bodies are processed in ascending order, beginnig with the bodies with the smallest value for \lstinline{order} greater than zero. Therefore bodies with orders lower than one are ignored.
+An uneven value for \lstinline{order} causes a body to be added. Those with even values for \lstinline{order} are substracted. The default value for \lstinline{order} is \lstinline{1}.
+
+It is allowed and common practice to define multiple bodies with the same value for \lstinline{order}, since there is no difference in the result for processing a set of bodies in any order as long as they are all substracted or added.
 
 \paragraph{Example}\ 
 \lstinputlisting{srcexamples/order.ini}
@@ -13,18 +15,17 @@ Multiple bodies having the same order is allowed and common practice since there
 \subsection{Shift vectors}
 The \lstinline{shift_vector} parameter enables the possibility to shift a body to a certain position. The value for \lstinline{shift_vector} is the vector defining the translation.
 
-This is particularly usefull when using the order parameter to create specific shapes.
+This is particularly useful when the order parameter is used to create specific shapes.
 
 \subsubsection{Periodic bodies}
 
-Using a shift vector with periodic can lead to unexpected results at first glance, for two reasons. 
+Using a shift vector with periodic bodies can lead to unexpected results at first glance, for two reasons. 
 \begin{enumerate}
  \item Every atom is moved into the first supercell after being cut out. This undoes the effect of the shift vector's components in the direction(s) of the axis or both axes.
- \item The automatic rotation of periodic bodies is applied last.
+ \item The automatic rotation of periodic bodies is applied after the body is shifted.
 \end{enumerate}
 In combination this means: 
 
-A body's translation in 1D-periodic structures is visible in the result as a translation inside the x-y-plane which is lacking the component in direction of axis.
+A body's translation in 1D-periodic structures is visible in the result as a translation inside the x-y-plane which is lacking the component in direction of the periodicity axis.
 
 In 2D-periodic structures the translation is visible in z-direction by the shift vector's component orthogonal to both axes.
-

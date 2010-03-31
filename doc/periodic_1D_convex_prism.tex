@@ -1,13 +1,12 @@
-\subsubsection{Prism shaped wires}
-\lstinline{[periodic_1D_convex_prism: NAME]} enables cutting a convex prism which can be appended unto itself to create an infinte wire from the given crystal structure. The prism is determined by its lateral planes. These planes can be determined in different ways and the combination of planes defined differently is possible. Please note the planes should not cross with the axis but be parallel to it or they will be projected accordingly changing the created body. Of course at least three planes are needed to create a proper body. If no prism can be calculated from the given planes the programm will indicate so and exit.\\
-The body's section is opened by \lstinline{[periodic_1D_convex_prism: NAME]}.
+\subsubsection{Periodic convex prism}
+The periodic convex prism is an infinitely long cylinder with a convex polygon as base area. The prism is defined by its lateral planes. A plane can be defined using it's miller indices or it's normal vector. The body's section is opened by \lstinline{[convex_polyhedron: NAME]}.
+
+If a plane is not parallel to the periodicity axis the plane is rotated until it is paralell. The rotation axis is orthogonal to the normal vector of the plane and the periodicity axis and intersects with the origin. 
 
 \paragraph{Parameters}
-\lstinline{[periodic_1D_convex_prism]} requires at least one item of the following. Each item may contain an arbitrary amount of planes each determined by four integer or float values.
-
 \begin{description}
- \item{\lstinline{planes_miller}} planes defined by miller indizes. Each plane is given by 4 integers or floats with the first three being the miller indices and the last one the plane's minimum distance from the origin (the length of the smallest possible cartesian vector between the origin and the plane)
- \item{\lstinline{planes_normal}} planes defined by a vector orthogonal to the plane and its minimum distance from the origin as in \lstinline{planes_miller}. The vector does not need to be normalized.
+ \item{\lstinline{planes_miller}} Miller indices of each plane (except those defined using normal vectors) followed by its distance from the origin.
+ \item{\lstinline{planes_normal}} Vector orthogonal to each plane (except those defined using miller indices) followed by its distance from the origin. The vectors do not need to be normalized.
 \end{description} 
 
 
