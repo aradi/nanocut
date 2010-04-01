@@ -10,7 +10,8 @@ xyz: doc/srcexamples/basic.xyz doc/srcexamples/convex_polyhedron.xyz doc/srcexam
 png: doc/srcexamples/basic.png doc/srcexamples/convex_polyhedron.png doc/srcexamples/cylinder.png doc/srcexamples/geometry.png doc/srcexamples/order.png doc/srcexamples/periodic_1D_convex_prism.png doc/srcexamples/periodic_1D_cylinder.png doc/srcexamples/periodic_2D_plane.png doc/srcexamples/periodicity.png doc/srcexamples/sphere.png
 
 doc: xyz png
-	cd doc && pdflatex -interaction=nonstopmode 'main.tex' > /dev/null
+	cd doc && pdflatex -interaction=nonstopmode 'main.tex' > /dev/null && pdflatex -interaction=nonstopmode 'main.tex' > /dev/null && pdflatex -interaction=nonstopmode 'main.tex' > /dev/null
+	cp ./doc/main.pdf ./manual.pdf
 
 doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 	$(INT) $(MAIN) -w $@ $<
@@ -18,7 +19,7 @@ doc/srcexamples/%.xyz: doc/srcexamples/%.ini
 doc/srcexamples/%.png: doc/srcexamples/%.xyz
 	rm -f doc/pymolscript.pml
 	cat $<.view doc/pymolscript.base > ./doc/pymolscript.pml
-	pymol $< doc/pymolscript.pml -g $@ -c -q
+	pymol $< doc/pymolscript.pml -W 1024 -H 768 -g $@ -c -q
 	rm -f doc/pymolscript.pml
 
 doc-clean:
