@@ -94,7 +94,7 @@ class geometry:
   def coord_transform(self, array, array_coordsys):
     '''Transforms given vector into lattice or cartesian coordinate system'''
     if array_coordsys == "lattice":
-      return  numpy.dot(self._lattice_vectors.T,array.T).T
+      return numpy.dot(self._lattice_vectors.T,array.T).T
     elif array_coordsys == "cartesian":
       return array
     else:

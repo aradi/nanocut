@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-'''
-Created on Sep 2, 2009
-
-@author: sebastian
-'''
-import numpy
+import numpy as np
 import body
+import nanocut.common as nc
 
 class convex_polyhedron(body.body):
   '''Class for bodies determined by a planes describing its boundaries'''
@@ -28,99 +23,93 @@ class convex_polyhedron(body.body):
         [0,0,0], as well as each attribute's coordinate system'''
     
     #Type checking/conversion and initialisation of parent class
-    body.body.__init__(self,geometry,shift_vector,order,shift_vector_coordsys)
+    body.body.__init__(self, geometry, shift_vector, order,
+                       shift_vector_coordsys)
 
-    if (planes_normal==0).all():
+    if np.all(planes_normal == 0):
       pass
     else:
-      planes_normal = numpy.array(planes_normal, dtype='float64')
-      planes_normal.shape = (-1,4)
+      planes_normal = np.array(planes_normal, dtype=np.float64)
       planes_normal[:,:3] = geometry.coord_transform(planes_normal[:,:3],
           planes_normal_coordsys)
       for plane in planes_normal:
-        if (plane[:3]==0).all():
+        if np.all(abs(plane[:3]) < 1e-12):
           raise ValueError, "Bad input: empty normal vector"
-    
 
-    if (planes_miller==0).all():
+    if np.all(planes_miller == 0):
       pass
     else:
-      planes_miller = numpy.array(planes_miller, dtype='float64')
-      planes_miller.shape = (-1,4)
-      for plane in planes_normal:
-        if (plane[:3]==0).all():
+      planes_miller = np.array(planes_miller, dtype=np.float64)
+      for plane in planes_miller:
+        if np.all(abs(plane[:3]) < 1e-12):
           raise ValueError, "Bad input: empty miller plane"
 
       #Transforms planes determined by miller indices into normal shape
-      planes_miller = numpy.array([ numpy.hstack(( self.miller_to_normal(
-          geometry,plane[:3]), plane[3] )) for plane in planes_miller ])
+      planes_miller[:,0:3] = nc.miller_to_normal(geometry._lattice_vectors,
+                                                 planes_miller[:,0:3])
 
-    #Appends planes calculated from miller indices to planes in normal form
-    self._planes_normal = numpy.vstack(( planes_normal, planes_miller ))
+    # Appends planes calculated from miller indices to planes in normal form
+    self._planes_normal = np.vstack(( planes_normal, planes_miller ))
+    if np.all(abs(self._planes_normal[:,:3]) < 1e-12):
+      exit('Error:\nNo proper planes specified.\nExiting...\n')
     
-    if (self._planes_normal[:,:3]==0).all():
-      exit('Error:\n' +
-          'No proper planes specified.'
-          + '\nExiting...\n')
-    
-    #Removes empty planes and normalizes others
+    # Removes empty (dummy) planes and normalizes others
     idx = 0
     while idx < self._planes_normal.shape[0]:
-      if (self._planes_normal[idx,:3]==0).all():
-        self._planes_normal = numpy.delete(self._planes_normal, idx, 0)
+      if np.all(abs(self._planes_normal[idx,:3]) < 1e-12):
+        self._planes_normal = np.delete(self._planes_normal, idx, 0)
       else:
         idx += 1
-    
-    #Removes identical planes
+    norms = np.sqrt(np.sum(self._planes_normal[:,0:3]**2, axis=1))
+    self._planes_normal[:,0:3] /= norms[:,np.newaxis] 
+
+    # Removes identical planes
     idx1 = 0
     idx2 = 1
-    while idx1 < (self._planes_normal.shape[0]-1):
+    while idx1 < self._planes_normal.shape[0] - 1:
       while idx2 < self._planes_normal.shape[0]:
-        if (self._planes_normal[idx1,3]==self._planes_normal[idx2,3] and
-            (numpy.cross( self._planes_normal[idx1,:3],
-            self._planes_normal[idx2,:3]) == 0).all()  and
-            (self._planes_normal[idx1,:3]!=-self._planes_normal[idx2,:3]).all()
-              ):
-            self._planes_normal = numpy.delete(self._planes_normal, idx2, 0)
-#            raise ValueError, "Identical planes.\n\
-#                Double plane will be removed."
+        ddiff = self._planes_normal[idx1,3] - self._planes_normal[idx2,3]
+        cross = np.cross(self._planes_normal[idx1,:3],
+                         self._planes_normal[idx2,:3])
+        vsum = self._planes_normal[idx1,:3] + self._planes_normal[idx2,:3]
+        if (abs(ddiff) < 1e-12 and np.all(abs(cross) < 1e-12) 
+            and np.all(abs(vsum) > 1e-12)): 
+          self._planes_normal = np.delete(self._planes_normal, idx2, 0)
         else:
           idx2 += 1
       idx1 += 1
       idx2 = idx1 + 1
     
-    #Calculates and initalizes body's corners
-    self._corners = numpy.array([0,0,0])
+    # Calculates and initalizes body's corners
+    self._corners = []
     
-    #Solves a linear equation for each triplet of planes returning their
-    #vertex, warns at parallel planes'''
-    for plane_idx1 in range( 0, len( self._planes_normal )):
-      for plane_idx2 in range( plane_idx1 + 1, len( self._planes_normal )):
-        for plane_idx3 in range( plane_idx2 + 1, len( self._planes_normal )):
+    # Solves a linear equation for each triplet of planes returning their
+    # vertex, warns at parallel planes'''
+    for plane_idx1 in range(0, len( self._planes_normal)):
+      for plane_idx2 in range(plane_idx1 + 1, len( self._planes_normal)):
+        for plane_idx3 in range(plane_idx2 + 1, len( self._planes_normal)):
           try:
-            corner = numpy.linalg.solve(
-                numpy.vstack((
+            corner = np.linalg.solve(
+                np.vstack((
                     self._planes_normal[plane_idx1,:3],
                     self._planes_normal[plane_idx2,:3],
                     self._planes_normal[plane_idx3,:3]
                     )),
-                numpy.vstack((
+                np.vstack((
                     self._planes_normal[plane_idx1,3],
                     self._planes_normal[plane_idx2,3],
                     self._planes_normal[plane_idx3,3]
-                    ))
-                ).T
-            self._corners = numpy.vstack(( self._corners, corner ))
-          except numpy.linalg.linalg.LinAlgError:
+                    )
+                ))
+            self._corners.append(corner.flatten())
+          except np.linalg.linalg.LinAlgError:
             pass
+    self._corners = np.array(self._corners)
     
-    if (self._corners==0).all() or self._corners.shape[0] < 5:
-      exit('Error:\n' +
-          'No or insufficient corners found.'
-          + '\nExiting...\n')
-    
-    self._corners = self._corners[1:] + self._shift_vector
-    
+    if np.all(len(self._corners) < 6 or abs(self._corners) < 1e-12):
+      exit('Error:\nNo or insufficient corners found.\nExiting...\n')
+
+    self._corners += self._shift_vector
     
   
   @classmethod  
@@ -132,48 +121,23 @@ class convex_polyhedron(body.body):
   def containing_cuboid(self, periodicity=None):
     '''Calculates the boundaries of the cuboid containing the polyhedron'''
     
-    return numpy.vstack(( self._corners.min(axis=0), self._corners.max(axis=0) ))
+    return np.vstack(( self._corners.min(axis=0), self._corners.max(axis=0) ))
           
   
   def atoms_inside(self, atoms, periodicity=None):
     '''Creates array assigning True and False values to points in and out of
         each plane's boundaries respectively'''
     
-    #Calculates point_inside_body
-    point_inside_body = numpy.array([0,0,0])
+    # Calculates point_inside_body
+    point_inside_body = (np.sum(self._corners, axis=0) 
+                         / float(len(self._corners)))
+    point_inside_body -= self._shift_vector[0]
     
-    for corner in self._corners:
-      point_inside_body = (point_inside_body + corner)
-    point_inside_body = (point_inside_body /
-         self._corners.shape[0])
-    
-    #Distributes True and False values towards point_inside_body's respective
-    #position towards each plane
-    parameter = numpy.array([
-        (self._planes_normal[plane_idx,3] - numpy.dot( (point_inside_body
-        - self._shift_vector)[0], self._planes_normal[plane_idx,:3] ) ) <= 0
-            for plane_idx in range( len( self._planes_normal ))
-        ])
-    
-    atoms_inside_body = numpy.zeros(atoms.shape[0], bool)
-    #Determines for each point given if it shares the same position related
-    #to each plane as the point_in_body
-    for index in range(len(atoms)):
-      TF_value = numpy.array([
-          (self._planes_normal[plane_idx,3] - numpy.dot( ( atoms[index,:3] -
-              self._shift_vector )[0], self._planes_normal[plane_idx,:3] ) )
-              <= 0
-          for plane_idx in range( len( self._planes_normal ))
-          ])
-      atoms_inside_body[index] = ( TF_value == parameter.T ).all()
-    
-    return atoms_inside_body
-                        
-  def miller_to_normal(self, geometry, plane_miller):
-    '''Calculates the normal form of a plane defined by Miller indices'''
-    
-    return (plane_miller[0] * numpy.cross( geometry._lattice_vectors[1],
-        geometry._lattice_vectors[2] ) + plane_miller[1] * numpy.cross(
-        geometry._lattice_vectors[2], geometry._lattice_vectors[0] ) +
-        plane_miller[2] * numpy.cross( geometry._lattice_vectors[0], 
-        geometry._lattice_vectors[1] ) )
+    atoms_relative = np.transpose(atoms[:,:3] - self._shift_vector[0])
+    dots_point = (self._planes_normal[:,3] 
+                  - np.dot(self._planes_normal[:,:3], point_inside_body))
+    dots_atoms = (self._planes_normal[:,3,np.newaxis] 
+                  - np.dot(self._planes_normal[:,:3], atoms_relative))
+    signs = (dots_atoms * dots_point[:,np.newaxis] >= 0.0)
+    atoms_inside_body = [ np.all(signs[:,ii]) for ii in range(len(atoms)) ]
+    return np.array(atoms_inside_body, bool)
