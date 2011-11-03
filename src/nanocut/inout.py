@@ -4,6 +4,7 @@
 import ConfigParser
 import numpy
 import getopt
+import sys
 
 def print_usage(shouldexit=True):
   '''Short Instructions'''
@@ -86,30 +87,22 @@ def write_crystal(geometry, atoms_coords, atoms_idx, axis_string,
     writefilenames, appendfilenames):
 
   number_atoms = atoms_idx.shape[0]
-  if len(writefilenames) == 0 and len(appendfilenames) == 0:
-    write_to_stdout = True
-  else:
-    write_to_stdout = False
-  
+  write_to_stdout = (len(writefilenames) == 0 and len(appendfilenames) == 0) 
+
   files = []
   for filename in appendfilenames:
     try:
-      file = open(filename, 'r+')
+      file = open(filename, 'r')
     except IOError:
-      exit('Error:\n'+
-           "Can't open "+filename+'.'
-           +'\nExiting...')
-      
+      exit("Error:\n'Can't open " + filename + ".\nExiting...")    
     try:
       old_file_number_atoms = int( file.readline() )
     except ValueError:
-      exit('Error:\n'+
-           +file.name+' not in xyz-format.'
-           +'\nExiting...')
-
-    old_file = ([ repr(old_file_number_atoms + number_atoms) + '\n' ] +
-        file.readlines()[:old_file_number_atoms + 1])
-    file.seek(0)
+      exit('Error:\n' + file.name + ' not in xyz-format.\nExiting...')
+    old_file = ([ "%d\n" % (old_file_number_atoms + number_atoms) ]
+                + file.readlines()[:old_file_number_atoms + 1])
+    file.close()
+    file = open(filename, "w")
     file.writelines(old_file)
     files.append(file)
     
@@ -117,19 +110,17 @@ def write_crystal(geometry, atoms_coords, atoms_idx, axis_string,
     try:
       file = open(filename, 'w')
     except IOError:
-      exit('Error:\n' +
-           "Can't open " + filename + '.'
-           + '\nExiting...')
-    
-    file.write(repr(number_atoms)+'\n'+axis_string+'\n')
+      exit("Error:\n Can't open " + filename + ".\nExiting...")
+    file.write("%d\n%s\n" % (number_atoms, axis_string))  
     files.append(file)
     
-  for it in range(atoms_coords.shape[0]):
-    atomsstring = geometry.get_name_of_atom(atoms_idx[it])+' '\
-          +repr(atoms_coords[it,0])+' '+ repr(atoms_coords[it,1])+' '+ repr(atoms_coords[it,2])+'\n'
-    for file in files:
-      file.write(atomsstring)
-    if write_to_stdout:
-      print atomsstring
-    
-  [file.close() for file in files]
+  fcontent = [ " %-3s %18.10E %18.10E %18.10E\n" 
+               % (geometry.get_name_of_atom(atoms_idx[it]), atoms_coords[it,0],
+                  atoms_coords[it,1], atoms_coords[it,2]) 
+               for it in range(len(atoms_coords)) ]
+  for file in files:
+    file.writelines(fcontent)
+  if write_to_stdout:
+      sys.stdout.writelines(fcontent)      
+  for file in files:
+    file.close()

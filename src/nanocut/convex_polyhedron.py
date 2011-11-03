@@ -134,10 +134,10 @@ class convex_polyhedron(body.body):
     point_inside_body -= self._shift_vector[0]
     
     atoms_relative = np.transpose(atoms[:,:3] - self._shift_vector[0])
-    dots_point = (self._planes_normal[:,3] 
-                  - np.dot(self._planes_normal[:,:3], point_inside_body))
-    dots_atoms = (self._planes_normal[:,3,np.newaxis] 
-                  - np.dot(self._planes_normal[:,:3], atoms_relative))
-    signs = (dots_atoms * dots_point[:,np.newaxis] >= 0.0)
-    atoms_inside_body = [ np.all(signs[:,ii]) for ii in range(len(atoms)) ]
+    sign_point = (self._planes_normal[:,3] 
+                  - np.dot(self._planes_normal[:,:3], point_inside_body)) <= 0.0
+    sign_atoms = (self._planes_normal[:,3,np.newaxis] 
+                  - np.dot(self._planes_normal[:,:3], atoms_relative)) <= 0.0
+    compared = (sign_atoms == sign_point[:,np.newaxis])
+    atoms_inside_body = [ np.all(compared[:,ii]) for ii in range(len(atoms)) ]
     return np.array(atoms_inside_body, bool)
