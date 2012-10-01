@@ -1,44 +1,35 @@
-# -*- coding: utf-8 -*-
-'''
-Created on Aug 31, 2009
+import numpy as np
+from nanocut.body import Body
 
-@author: sebastian
-'''
-import numpy
-import nanocut.body as body
+class Sphere(Body):
+    """Class for spheres"""
+    
+    # Create argument dictionary as union of parent class' dictionary
+    # and extending keywords (only works since dictionary keys are stings)
+    arguments = {
+                 "radius": ( "float", None, False, False ),
+                 }
 
-class sphere(body.body):
-    '''Class for spheres'''
-    #arguments of class defined in the following format:
-    #[default, type, shape, is_coord_sys_definable]
-    _arguments={
-        "radius_vector":[None, "array", (1,3), True],
-        "shift_vector":["0 0 0", "array", (1,3), True],
-        "order":[1,"integer", None, False]
-    }
-    #_init_arguments=['radius_vector', 'shift_vector', 'order',
-    #'radius_vector_coordsys', 'shift_vector_coordsys']
+    
+    def __init__(self, geometry, period, configdict=None, **kwargs):
+        """Extends the constructor of the class Body.
+        
+        Additional keywords:
+            radius: Radius of the sphere.
+        """
+        Body.__init__(self, geometry, configdict=configdict, **kwargs)
+        kwargs.update(self.parse_arguments(Sphere.arguments, configdict))
+        self.radius = kwargs.get("radius")
+    
+    
+    def containing_cuboid(self, periodicity=None):
+        """Returns the edges of the containing cuboid (see Body class).""" 
+        return (self.radius * np.array([[ -1, -1, -1], [ 1, 1, 1 ]]) 
+                + self.shift_vector)
 
-    def __init__(self, geometry, radius_vector, shift_vector=
-        numpy.array([0,0,0]),order=1, radius_vector_coordsys="lattice",
-        shift_vector_coordsys="lattice"):
-        body.body.__init__(self, geometry,shift_vector, order, shift_vector_coordsys)
-        radius_vector = numpy.array(radius_vector, dtype='float64')
-        radius_vector.shape = (1,3)
-        radius_vector = geometry.coord_transform(radius_vector, radius_vector_coordsys)
-        self._radius = numpy.linalg.norm(radius_vector)
-    @classmethod
-    def _from_dict_helper(cls, geometry, args, periodicity=None):
-        return cls(geometry, args["radius_vector"], args["shift_vector"],
-            args["order"], args["radius_vector_coordsys"],
-            args["shift_vector_coordsys"])
 
-    def containing_cuboid(self,periodicity=None):
-        '''Calculates the boundaries of the cuboid containing the sphere'''
-        return self._radius * numpy.array([[-1,-1,-1],[1,1,1]]) + self._shift_vector
-
-    def atoms_inside(self, atoms,periodicity=None):
-        '''Assigns True and False values towards points in and out of sphere
-        boundaries respectively'''
-        return numpy.array([numpy.linalg.norm( self._shift_vector-x[0:3] )
-            for x in atoms]) <= self._radius
+    def atoms_inside(self, atoms, periodicity=None):
+        """Decides which atoms are inside the body (see Body class)."""
+        dists = np.sqrt(np.sum((atoms - self.shift_vector)**2, axis=1))
+        return (dists <= self.radius)
+    

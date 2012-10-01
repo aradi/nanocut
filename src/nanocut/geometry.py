@@ -1,196 +1,225 @@
-# -*- coding: utf-8 -*-
+import numpy as np
+from .output import error
 
-import numpy
+class Geometry:
+    """Class for handling crystal structure, containing unit-cell-vectors,
+    atom coordinates and names of atoms."""
 
-class geometry:
-    '''Class for handling crystal structure, containing unit-cell-vectors,
-    atom coordinates and names of atoms.'''
-
-    def __init__(self, lattice_vectors, basis,basis_names_idx,
-        basis_names, basis_coordsys="lattice"):
-        self._lattice_vectors = numpy.array(lattice_vectors, dtype='float64')
-        self._lattice_vectors.shape = (3, 3)
+    def __init__(self, latvecs, basis, basis_names_idx, basis_names,
+                 basis_coordsys="lattice"):
+        """Initializes Geometry object.
+        
+        Args:
+            latvecs: Lattice vectors as (3, 3) array.
+            basis: Coordinates of the atoms in the basis.
+            basis_names_idx: Type index of every atom in the basis.
+            basis_names: List of atom types.
+            basis_coordsys: Coordinate system for the basis (should be "lattice"
+                or "cartesian")
+        """
+        self.latvecs = np.array(latvecs, dtype=float)
         self._basis_names_idx = basis_names_idx
         self._basis_names = basis_names
         self._basis_coordsys = basis_coordsys
-        self._basis = numpy.array(basis, dtype='float64')
-        self._basis.shape = (-1, 3)
+        self._basis = np.array(basis, dtype=float)
         self._basis = self.coord_transform(basis, basis_coordsys)
         self._basis = self.mv_basis_to_prim(self._basis)
 
+
     @classmethod
-    def from_dict(cls,d):
-        '''Reads geometry from dict and checks data types.'''
-        if "geometry" not in d.keys():
-            exit('Error:\n geometry not defined,check configuration.\n Exiting...')
-    
-        if "lattice_vectors" not in d["geometry"].keys():
-            exit('Error:\n lattice_vectors not defined, check configuration.\n Exiting...')
-    
-        if "basis" not in d["geometry"].keys():
-            exit('Error:\n basis not defined, check configuration.\n Exiting...')
-           
+    def fromdict(cls, inidict):
+        """Initliazes geometry from dict with type checking.
+        
+        Args:
+            cls: Class type.
+            inidict: Dictionary with settings
+        """
+
+        
         try:
-            lattice_vectors = numpy.array([float(el) for el in d["geometry"]["lattice_vectors"].split()])
-        except ValueError:
-            exit('Error:\n Supplied string for lattice_vectors not convertable to number'+
-                ', check configuration.\n Exiting...')
-
+            section = inidict["geometry"]
+        except KeyError:
+            error("Geometry not defined.")
+        if "lattice_vectors" not in section:
+            error("latvecs not defined.")
+        if "basis" not in section:
+            error("Basis not defined.")
+            
         try:
-            lattice_vectors.shape=(3,3)
+            latvecs = np.array(
+                [ float(s) for s in section["lattice_vectors"].split() ])
+            latvecs.shape = (3, 3)
         except ValueError:
-            exit('Error:\n Wrong number of elements supplied for lattice_vectors,'+
-                ' check configuration.\n Exiting...')
-
-        basis=d["geometry"]["basis"].split()
-  
-        if len(basis) % 4 != 0:
-            exit('Error:\n Wrong number of elements supplied for basis,'
-                +'check configuration.\n Exiting...')
-
-        basis_names=[basis.pop(idx) for idx in range(0,int(len(basis)*3/4),3)]
+            error("Invalid lattice vector specification.")
+        if abs(np.linalg.det(latvecs)) < 1e-8:
+            error("Linearly dependent lattice vectors.")
+            
+        basis = section["basis"].split()
+        basis_names=[ basis.pop(idx) 
+                      for idx in range(0, len(basis) * 3 // 4, 3) ]
         try:
-            basis = numpy.array([float(el) for el in basis])
+            basis = np.array([ float(s) for s in basis ])
+            basis.shape= (-1, 3)
         except ValueError:
-            exit('Error:\n Supplied string for basis not convertible to number,'+
-                'check configuration.\n Exiting...')
-           
-        basis.shape=(-1,3)
-        basis_names_idx=range(int(basis.size/3))
+            exit("Invalid basis specification.")
+        basis_names_idx = range(len(basis))
+        basis_coordsys = section.get("basis_coordsys", "lattice")
+        if basis_coordsys not in ["lattice", "cartesian"]:
+            error("Invalid coordinate system specification.")
 
-        basis_coordsys = d["geometry"].get("basis_coordsys","lattice")
-    
-        if basis_coordsys not in ["lattice","cartesian"]:
-            exit('Error:\n Supplied string "' + array_coordsys + 
-                '" for coordsys not valid, check configuration.\n Exiting...')
-
-        if numpy.linalg.det(lattice_vectors)==0:
-            exit('Error:\n Value of lattice_vectors is invalid.\n Exiting...\n')
-        return cls(lattice_vectors,basis,basis_names_idx,basis_names,basis_coordsys)
+        return cls(latvecs, basis, basis_names_idx, basis_names, basis_coordsys)
 
 
     def coord_transform(self, array, array_coordsys):
-        '''Transforms given vector into lattice or cartesian coordinate system'''
+        """Transforms given vector into cartesian coordinate system.
+        
+        Args:
+            array: Array with coordinates.
+            array_coordsys: Coordinate system ("lattice" or "cartesian")
+        
+        Returns:
+            Cartesian coordinates.
+        """
         if array_coordsys == "lattice":
-            return numpy.dot(self._lattice_vectors.T,array.T).T
+            return np.dot(array, self.latvecs)
         elif array_coordsys == "cartesian":
             return array
         else:
-            raise ValueError
+            raise ValueError("Invalid coodinate system type '{:s}'".format(
+                array_coordsys))
+
 
     def mv_basis_to_prim(self, basis):
-        '''Moves basis vectors into primitive cell'''
-        basis = numpy.dot(numpy.asarray(numpy.matrix(self._lattice_vectors.T).I),basis.T).T
-        basis %= 1
+        """Folds vectors into primitive cell.
+        
+        Args:
+           basis:Coordinates.
+        
+        Return:
+            Coordintes folded into the central cell.
+        """
+        invlatvecs = np.linalg.inv(self.latvecs)
+        basis = np.dot(basis, invlatvecs) % 1.0
         return self.coord_transform(basis, "lattice")
 
+
     def gen_cuboid(self, cuboid, periodicity=None):
-        '''Generates grid of lattice points containing at least every lattice point
-        corresponding to atoms inside the given cuboid boundaries. Eliminates
-        equivalent lattice points in case periodicities are present.'''
+        """Generates list of lattice points containing all points in a cuboid.
+        
+        Args:
+            cuboid: lower and upper ends of the cuboid.
+            periodicity: periodicity object.
+            
+        Returns:
+            Cartesian coordinates of the grid points.
+        """
 
-        #Calculate center of cuboid
-        abc_center = 0.5*numpy.array([cuboid[0]+cuboid[1]])
+        # Get the 8 corners of the cuboid
+        mesh = np.mgrid[0:2,0:2,0:2].reshape(3, -1).transpose()
+        abc_corners = [ [ cuboid[mm[0],0], cuboid[mm[1],1], cuboid[mm[2],2] ]
+                          for mm in mesh ]
 
-        #Calculate boundaries for a,b,c. Equation for cuboid is:
-        #x=(a,b,c).T+center using cartesian coordinates.
-        #Boundaries are: -a_min=a_max -b_min=b_max -c_min=c_max .'''
-        abc_boundaries=abs(0.5*numpy.array([cuboid[0]-cuboid[1]])).T
+        # Get corners of the containing parallelepiped in relative coordinates
+        invlatvecs = np.linalg.inv(self.latvecs)
+        nmo_corners = np.dot(abc_corners, invlatvecs)
+        nmo_mininds = np.floor(nmo_corners.min(axis=0)).astype(int)
+        nmo_maxinds = np.floor(nmo_corners.max(axis=0)).astype(int)
+        
+        # Generate mesh indexing all points inside the parallelepiped
+        nmo = np.mgrid[nmo_mininds[0]:nmo_maxinds[0]+1,
+                       nmo_mininds[1]:nmo_maxinds[1]+1,
+                       nmo_mininds[2]:nmo_maxinds[2]+1, ]
+        nmo = nmo.reshape(3, -1).transpose()
+        
+        # Throw away points in the parallelepiped which are farther away from
+        # the cuboid as the maximal size of the unit cell along given direction
+        abc = np.dot(nmo, self.latvecs)
+        buffer = np.max(np.abs(self.latvecs), axis=0)
+        cond1 = np.all(abc < cuboid[0] - buffer, axis=1)
+        cond2 = np.all(abc > cuboid[1] + buffer, axis=1)
+        inside = np.logical_not(np.logical_or(cond1, cond2))
+        nmo = nmo[inside]
 
-        #Add buffer to abc_boudaries
-        abc_boundaries+=abs(self._lattice_vectors).max(axis=0).reshape((3,1))
+        # Test for equivalent points in case periodicities are present
+        if periodicity == None or periodicity.period_type == "0D":
+            return np.dot(nmo, self.latvecs)        
 
-        #Calculate inverse of lattice_vectors matrix.
-        #Result transforms any vector (d,e,f) to lattice coordinates.
-        trafo=numpy.array(numpy.matrix(self._lattice_vectors).I)
-        trafo_back=self._lattice_vectors
+        axis = periodicity.get_axis("lattice")
+        is_unique = np.ones(nmo.shape[0], bool)
 
-        #Calculate "worst case"-boundaries for n, m, o. Equation for cuboid is:
-        #x=dot((a,b,c).T,trafo)+center=(n,m,o).T+center using lattice coordinates.
-        coeff=numpy.array([[1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1]])
-        coeff_abc_boundaries = (coeff.T*abc_boundaries).T
-        nmo_boundaries=abs(numpy.dot(trafo.T,coeff_abc_boundaries.T))
-        nmo_boundaries=nmo_boundaries.max(axis=1)
+        if periodicity.period_type == "1D":            
+            # Identify one nonzero entry in the axis vector to prevent
+            # division by zero later.
+            axis_max_idx = np.abs(axis[0]).argmax()
+            axis_max = axis[0, axis_max_idx]
 
-        #Calculate n,m,o of center
-        nmo_center=numpy.dot(trafo.T,abc_center.T)
+            # Preallocate some arrays to speed up.
+            diff = np.empty(nmo.shape, dtype=float)
+            factor = np.empty(nmo.shape[0], dtype=float)
+            tmp = np.empty(nmo.shape, dtype=float)
 
-        #Generate list of n,m,o corresponding to all points inside the
-        #cuboid (or parallelepiped)'''
-        nmo = numpy.array([[n,m,o]
-            for n in range(int(-nmo_boundaries[0]+nmo_center[0]),
-            int(nmo_boundaries[0]+nmo_center[0])+1)
-            for m in range(int(-nmo_boundaries[1]+nmo_center[1]),
-            int(nmo_boundaries[1]+nmo_center[1])+1)
-            for o in range(int(-nmo_boundaries[2]+nmo_center[2]),
-            int(nmo_boundaries[2]+nmo_center[2])+1)
-            #TODO: exclude atoms inside parallelepiped but outside cuboid
-        if ((abc_center-abc_boundaries.T<=numpy.dot(trafo_back.T,[n,m,o])) *
-            (numpy.dot(trafo_back.T,[n,m,o])<=abc_center+abc_boundaries.T)).all()])
+            # Mark differences being integer multiple of the axis
+            for ii in range(nmo.shape[0]):
+                if not is_unique[ii]:
+                    continue
+                diff[ii+1:,:] = nmo[ii+1:,:] - nmo[ii]
+                factor[ii+1:] = diff[ii+1:, axis_max_idx] / axis_max
+                tmp[ii+1:,:] = factor[ii+1:,np.newaxis] * axis[0]
+                is_unique[ii+1:] *= np.any(tmp[ii+1:] != diff[ii+1:], axis=1)
 
-        #Test for equivalent points in case periodicities are present
-        if periodicity==None or periodicity.period_type_is("0D"):
-            return numpy.dot(nmo,self._lattice_vectors)
+        elif periodicity.period_type == "2D":
+                        
+            # Create fake 3D basis
+            axis_basis_3D = np.vstack(( axis, np.cross(axis[0], axis[1]) ))
+            invaxis_3D = np.linalg.inv(axis_basis_3D)
 
-        else:
-            axis = periodicity.get_axis("lattice")
-            is_unique=numpy.ones(len(nmo),bool)
+            # Preallocate some arrays to speed up.
+            diff = np.empty(nmo.shape, dtype=float)
+            factor = np.empty((nmo.shape[0], 3), dtype=int)
 
-        if periodicity.period_type_is("1D"):
-
-            #Identify of biggest entry of axis to prevent division with 0 later (*)
-            axis_max_idx=numpy.abs(axis[0]).argmax()
-            axis_max=axis[0,axis_max_idx]
-
-            #Test if point at idx1 is dublicate of point at idx2 for every
-            #possible combination
-            progress=0
-            for idx_1 in range(len(nmo)):
-                #print(progress,"/",len(nmo))
-                if is_unique[idx_1]:
-                    progress+=1
-                    for idx_2 in range(idx_1+1,len(nmo)):
-                        if is_unique[idx_2]:
-                            #Calculate difference between points at idx1 and idx2
-                            difference=(nmo[idx_1]-nmo[idx_2])
-                            #Calculate if difference vector is integer multiple of axis (*)
-                            #factor=difference[axis_max_idx]/axis[0,axis_max_idx]
-                            factor=difference[axis_max_idx]/axis_max
-                            #Mark dublicate points
-                            if (axis[0]*factor==difference).all():
-                                is_unique[idx_2]=False
-                                progress+=1
-            return numpy.dot(nmo[is_unique],self._lattice_vectors)
-
-        elif periodicity.period_type_is("2D"):
-
-            axis_basis_3D=numpy.vstack((axis,numpy.cross(axis[0],axis[1])))
-            for idx_1 in range(len(nmo)):
-                if is_unique[idx_1]:
-                    for idx_2 in range(idx_1+1,len(nmo)):
-                        if is_unique[idx_2]:
-                            #Calculate difference between points at idx1 and idx2
-                            difference=numpy.array((nmo[idx_1]-nmo[idx_2]))
-                            #Calculate if difference vector is sum of integer multiples
-                            #of axes (*)
-                            factor = numpy.linalg.solve(axis_basis_3D.T,difference.T)
-                            factor = factor.round().astype('int')
-                            if (axis[0]*factor[0]+axis[1]*factor[1]==difference).all():
-                            #Mark dublicate points
-                                is_unique[idx_2]=False
-            return numpy.dot(nmo[is_unique],self._lattice_vectors)
+            # Mark differences being integer multiple of the two lattice vectors
+            for ii in range(nmo.shape[0]):
+                if not is_unique[ii]:
+                    continue
+                diff[ii+1:,:] = nmo[ii+1:,:] - nmo[ii]
+                factor[ii+1:,:] = (np.dot(diff[ii+1:,:], invaxis_3D).round()
+                                   .astype(int))
+                is_unique[ii+1:] *= np.any(
+                    np.dot(factor[ii+1:,0:2], axis) != diff[ii+1:,:], axis=1)
+                
+        return np.dot(nmo[is_unique], self.latvecs)
+    
 
     def get_name_of_atom(self, index):
-        '''Returns name corresponding to given index.'''
+        """Returns the name of an atom with given index.
+        
+        Args:
+            index: Index of the atom.
+            
+        Returns:
+            Name (type) of the atom.
+        """
         return self._basis_names[self._basis_names_idx[index]]
 
+
     def gen_atoms(self, lattice_points):
-        '''Returns the coordinates and index of each atom inside the cells
-        corresponding to given lattice points'''
-        #coordinates
-        atoms_coords = numpy.array([(point+self._basis[atom_idx])
-            for point in lattice_points for atom_idx in range(len(self._basis))])
-        #indexes
-        atoms_idx = numpy.array([ atom_idx
-            for point in lattice_points for atom_idx in range(len(self._basis))])
+        """Returns the coordinates and index of each atom inside the cells
+        corresponding to given lattice points.
+        
+        Args:
+           lattice_points: Cartesian coordinates of the lattice points as
+               (-1,3) shaped array.
+        
+        Returns:
+            Coordinates of all atoms in the cells with the given coordinates. 
+        """
+        nbasis = len(self._basis)
+        nlatpoint = len(lattice_points) 
+        atoms_coords = np.empty((nlatpoint * nbasis , 3), dtype=float)
+        # Taking longer loop (instead over range(len(basis)) to have nicer
+        # output with atoms being in the same cell having close indices.
+        for ii in range(nlatpoint):
+            atoms_coords[ii * nbasis : (ii + 1) * nbasis ] = (self._basis +
+                lattice_points[ii])
+        atoms_idx = np.resize(np.arange(nbasis), (nlatpoint * nbasis))
         return atoms_coords, atoms_idx

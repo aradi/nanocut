@@ -1,105 +1,154 @@
-#!/usr/bin/python
-
-#Import public modules
-
-import sys, numpy, getopt
-
-
-#Import own modules
+#!/usr/bin/env python3
+import sys
+import argparse
+import numpy as np
+import configparser
 from nanocut import *
 
-inputfilename, writefilenames, appendfilenames = inout.parse_args(sys.argv)
+BODYOBJECTS = {
+    "0D": {
+           "sphere": sphere.Sphere,
+           "convex_polyhedron": polyhedron.Polyhedron,
+           "cylinder": cylinder.Cylinder,
+           },
+    "1D": {
+           "periodic_1D_cylinder": periodic_1D_cylinder.Periodic1DCylinder,
+           "periodic_1D_prism": periodic_1D_prism.Periodic1DPrism,
+           },
+    "2D": {
+           "periodic_2D_plane": periodic_2D_plane.Periodic2DPlane,
+           }
+    }
 
-#Parse configuration from ini-file and store it in a config_ini-object.
-config_ini=inout.read_ini(inputfilename)
 
-#Read configuration from config_ini and write it into a (dict) config_dict.
-config_dict=inout.ini2dict(config_ini)
+def parse_args():
+    """Builds parser and returns parsed command line.
+    
+    Returns:
+        Parsed command line as Namespace object.
+    """
+    parser = argparse.ArgumentParser(
+        description="Cuts out various 0D, 1D and 2D shapes from crystals.")
+    parser.add_argument("-a", "--append", action="store_true", default=False,
+                        help="appends created structure to output file "
+                        "(instead of overwriting it)")
+    parser.add_argument("inifile", help="initialization file")
+    parser.add_argument("resultxyz",
+                        help="file containing resulting structure in xyz "
+                        "format")
+    return parser.parse_args()
 
-#Initialise geometry-object from config_dict
-geo = geometry.geometry.from_dict(config_dict)
 
-#Initialise periodicity-object form config_dict
-period = periodicity.periodicity.from_dict(geo,config_dict)
+def read_inifile(filename):
+    """Reads configuration file and returns it as nested dictionary.
+    
+    Args:
+        filename: Name of the file with the configuration.
+    """
+    ini = configparser.ConfigParser()
+    try:
+        configfile = open(filename, "r")
+    except IOError:
+        sys.exit("Error: Can't open " + filename + ".\nExiting...")
+    try:
+        ini.readfp(configfile)
+    except configparser.Error as error:
+        sys.exit("Error: Malformed ini-file:\n" + str(error) + "\nExiting...")
+    configfile.close()
+    return ini
 
-#Initialise body objects and store references in bodies list
-bodies=[]
-if period.period_type_is("0D"):
-    for bodyname in config_dict.keys():
-        if bodyname.startswith('sphere:'):
-            body = sphere.sphere.from_dict(geo, config_dict[bodyname])
-            bodies.append(body)
-        elif bodyname.startswith('convex_polyhedron:'):
-            body = convex_polyhedron.convex_polyhedron.from_dict(geo, config_dict[bodyname])
-            bodies.append(body)
-        elif bodyname.startswith('cylinder:'):
-            body = cylinder.cylinder.from_dict(geo, config_dict[bodyname])
-            bodies.append(body)
 
-elif period.period_type_is("1D"):
-    for bodyname in config_dict:
-        if bodyname.startswith('periodic_1D_cylinder:'):
-            body = periodic_1D_cylinder.periodic_1D_cylinder.from_dict(geo,config_dict[bodyname],period)
-            bodies.append(body)
-        elif bodyname.startswith('periodic_1D_convex_prism:'):
-            body = periodic_1D_convex_prism.periodic_1D_convex_prism.from_dict(geo,config_dict[bodyname],period)
-            bodies.append(body)
+def getbodies(configdict, allowed_bodies, geometry, period):
+    """Initializes body object based on the input.
+    
+    Args:
+        configdict: Dictionary with configuration options.
+        allowed_bodies: Dictionary with allowed body objects.
+        geometry: Geometry object.
+        period: Periodicity object.
+        
+    Returns:
+       List of initialized body objects.
+    """
+    bodies = []
+    tmp = []
+    for section in configdict:
+        words = section.split(":")
+        if len(words) == 2:
+            tmp.append((allowed_bodies.get(words[0], None), section))
+    bodies = [ 
+        bodyobj(geometry, period, configdict=configdict[section])
+        for bodyobj, section in tmp if bodyobj is not None ]
+    if not len(bodies):
+        output.error("No bodies specified.")
+    return bodies
 
-elif period.period_type_is("2D"):
-    for bodyname in config_dict:
-        if bodyname.startswith('periodic_2D_plane:'):
-            body = periodic_2D_plane.periodic_2D_plane.from_dict(geo,config_dict[bodyname],period)
-            bodies.append(body)
-else:
-    exit("Could not determine type of periodicity. This should never happen.")
 
-if len(bodies)==0:
-    print ('Warning:\n No bodies specified.\n Exiting...')
-    exit()
+def getatomsinside(bodies, period, geo):
+    """Selects the atoms in the final structure.
+    
+    Args:
+        bodies: Bodies to consider (can be additive or subtractive)
+        period: Periodicity object.
+        geo: Basic crystall geometry
+        
+    Returns:
+        Cartesian position of the atoms in the final structure.
+    """
+    # Get boundaries of the cuboid containing all bodies
+    cuboid_boundaries = np.vstack([ body.containing_cuboid(period)
+                                      for body in bodies if body.additive ])
+    cuboid_boundaries = np.array([ cuboid_boundaries.min(axis=0),
+                                   cuboid_boundaries.max(axis=0)])
 
-#Get boundaries of the cuboid containing all bodies
-cuboid_boundaries = numpy.vstack(
-    [body.containing_cuboid(period) for body in bodies if body.is_additive()])
-cuboid_boundaries = numpy.vstack(
-    [cuboid_boundaries.max(axis=0),cuboid_boundaries.min(axis=0)])
-
-#Generate lattice-cuboid
-lattice_cuboid = geo.gen_cuboid(cuboid_boundaries,period)
-
-#Generate cuboid containing all atoms
-atoms_coords,atoms_idx = geo.gen_atoms(lattice_cuboid)
-
-#Decide which atoms are inside the specified set of bodies.
-#Find the highest order
-max_order = max([body.get_order() for body in bodies])
-
-#Test for atoms inside bodies in the right order.
-atoms_inside_bodies=numpy.zeros(atoms_coords.shape[0],bool)
-
-for order in range(1,max_order+1):
-
+    # Generate lattice-cuboid and all atoms in it
+    lattice_cuboid = geo.gen_cuboid(cuboid_boundaries, period)
+    atoms_coords, atoms_idx = geo.gen_atoms(lattice_cuboid)
+    atoms_inside_bodies = np.zeros(len(atoms_coords), dtype=bool)
     for body in bodies:
-
-        if body.order_is(order):
-            tmp_atoms_inside_bodies = body.atoms_inside(atoms_coords,period)
-            #Add and substract them respectively
-            if order%2!=0:
-                atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
-            else:
-                atoms_inside_bodies = ((atoms_inside_bodies + tmp_atoms_inside_bodies)
-                    - tmp_atoms_inside_bodies)
-
-#Forget atoms outside bodies
-atoms_coords = atoms_coords[atoms_inside_bodies]
-atoms_idx = atoms_idx[atoms_inside_bodies]
-
-#Put atoms in periodic structures in proper position
-period.arrange_positions(geo, atoms_coords, atoms_idx)
-
-#Rotate coordinate system if desired
-axis_string,atoms_coords = period.rotate_coordsys(atoms_coords)
+        tmp_atoms_inside_bodies = body.atoms_inside(atoms_coords, period)
+        
+        # Add or substract them respectively
+        if body.additive:
+            atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
+        else:
+            atoms_inside_bodies = (atoms_inside_bodies 
+                                   + tmp_atoms_inside_bodies
+                                   - tmp_atoms_inside_bodies)
+    # Take only atoms flagged being inside
+    return atoms_coords[atoms_inside_bodies], atoms_idx[atoms_inside_bodies]
 
 
-#Write final crystal to file
-inout.write_crystal(geo,atoms_coords, atoms_idx, axis_string,
-writefilenames, appendfilenames)
+def main():
+    """Main program."""
+ 
+    # Parse command line paramters
+    args = parse_args()
+    
+    # Read initial file
+    configdict = read_inifile(args.inifile)
+
+    # Process crystal geometry
+    geo = geometry.Geometry.fromdict(configdict)
+    
+    # Process periodicity
+    period = periodicity.Periodicity.fromdict(geo, configdict)
+    
+    # Process bodies
+    bodies = getbodies(configdict, BODYOBJECTS[period.period_type], geo, period)
+    
+    # Select atoms in the desired shape (first fold atoms into unit cell)
+    atoms_coords, atoms_idx = getatomsinside(bodies, period, geo)
+
+    # Fold atoms to unit cell and rotate to standard form
+    period.arrange_positions(geo, atoms_coords, atoms_idx)
+    axis_string, atoms_coords = period.rotate_coordsys(atoms_coords)
+
+    # Write object to file
+    output.write_crystal(geo,atoms_coords, atoms_idx, axis_string,
+                         args.resultxyz, args.append)
+
+
+
+if __name__ == "__main__":
+    main()

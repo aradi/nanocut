@@ -1,56 +1,49 @@
-# -*- coding: utf-8 -*-
-'''
-Created on Aug 31, 2009
+import numpy as np
+from nanocut.body import Body
 
-@author: sebastian
-'''
-import numpy
-import nanocut.body as body
 
-class periodic_1D_cylinder(body.body):
-    '''Class for periodic cylinders determined by a central axis and radius'''
-    #arguments of class defined in the following format:
-    #[default, type, shape, is_coord_sys_definable]
-    _arguments={
-        "radius":[None, "float", None, False],
-        "shift_vector":["0 0 0", "array", (1,3), True],
-        "order":[1,"integer", None, False]
-    }
+class Periodic1DCylinder(Body):
+    """Class for periodic cylinders determined by a central axis and radius"""
+    
+    # (type, shape, optional, has_coordsys_version)
+    arguments = {
+                 "radius": ( "float", None, False, False )
+                 }
 
-    def __init__(self, geometry, periodicity, radius, shift_vector=
-        numpy.array([0,0,0]), order=1, shift_vector_coordsys="lattice"):
-
-        body.body.__init__(self, geometry, shift_vector, order, shift_vector_coordsys)
-        self._radius = float(radius)
-
-    @classmethod
-    def _from_dict_helper(cls, geometry, args, periodicity):
-        return cls(geometry, periodicity, args["radius"], args["shift_vector"],
-            args["order"], args["shift_vector_coordsys"])
-
-    def containing_cuboid(self,periodicity):
-        '''Calculates the boundaries of the cuboid containing the cylinder'''
-        #Retrieves periodic axis from periodicity
-        axis = periodicity.get_axis("cartesian")
-        #Creates cubes containing spheres with cylinder radius surrounding axis'
-        #beginning and ending 
-        bounds = numpy.vstack((
-            self._shift_vector + self._radius,
-            self._shift_vector - self._radius,
-            axis + self._shift_vector + self._radius,
-            axis + self._shift_vector - self._radius,
+    def __init__(self, geometry, period, configdict=None, **kwargs):
+        """Extends the constructor of the class Body.
+        
+        Additional keywords:
+            radius: Radius of the cylinder.
+        """
+        Body.__init__(self, geometry, configdict=configdict, **kwargs)
+        kwargs.update(self.parse_arguments(Periodic1DCylinder.arguments,
+                                           configdict))
+        self.radius = kwargs.get("radius")
+        
+        
+    def containing_cuboid(self, periodicity):
+        """Returns the edges of the containing cuboid (see Body class)."""
+       
+        # Creates cubes containing spheres with cylinder radius around axis'
+        # beginning and end. (somewhat rude approximation)
+        axis = periodicity.get_axis("cartesian") 
+        bounds = np.vstack((
+            self.shift_vector + self.radius,
+            self.shift_vector - self.radius,
+            axis + self.shift_vector + self.radius,
+            axis + self.shift_vector - self.radius,
             ))
-        return numpy.vstack((bounds.min(axis=0), bounds.max(axis=0)))
+        return np.vstack((bounds.min(axis=0), bounds.max(axis=0)))
+
 
     def atoms_inside(self, atoms, periodicity):
-        '''Assigns True and False values towards points inside and out of cylinder
-        boundaries respectively'''
-        atoms_inside_body = numpy.zeros(atoms.shape[0], bool)
-        #Retrieves periodic axis from periodicity
+        """Decides which atoms are inside the body (see Body class)."""
+
+        # Checks if distance from axis is larger than radius for given atom        
         axis = periodicity.get_axis("cartesian")
-        #Checks if distance from axis is larger than radius for each given atom
-        for index in range(len(atoms)):
-            ap = -self._shift_vector[0] + atoms[index,:3]
-            dist = numpy.linalg.norm(numpy.cross(ap, axis)) / numpy.linalg.norm(axis)
-            atoms_inside_body[index] = self._radius >= dist
-        return atoms_inside_body
+        relpos = atoms - self.shift_vector[0]
+        dirvec0 = axis[0] / np.linalg.norm(axis[0])
+        dists = np.sqrt(np.sum(np.cross(relpos, dirvec0)**2, axis=1))
+        atoms_inside = dists <= self.radius
+        return atoms_inside
