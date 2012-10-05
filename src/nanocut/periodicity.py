@@ -1,5 +1,6 @@
 import numpy as np
 from .output import error
+
 __all__ = [ "Periodicity", ]
 
 
@@ -96,7 +97,7 @@ class Periodicity:
         return axis_string, atoms_coords
 
 
-    def get_axis(self,coordsys="lattice"):
+    def get_axis(self, coordsys="lattice"):
         """Returns axis.
         
         Args:
@@ -117,19 +118,17 @@ class Periodicity:
                              " or 2D.")
 
 
-    def arrange_positions(self, geometry, atoms_coords, atoms_idx):
+    def arrange_positions(self, atoms_coords):
         """Folds atoms in the central unit cell, with relative coordinates
         between 0.0 and 1.0.
         
         Args:
-            geometry: geometry object.
             atoms_coords: Cartesian coordinates of the atoms.
-            atoms_idx: Type of the atoms.
             
         Returns:
             Cartesian coordinates of the atoms in the unit cell.
         """
-        '''Put atoms in periodic structures in proper position'''
+        atoms_coords = np.array(atoms_coords)
         if self.period_type == "1D":    
             axis_norm = np.linalg.norm(self._axis_cart[0])
             shifts = np.floor(
@@ -143,6 +142,36 @@ class Periodicity:
             shifts = np.floor(np.dot(atoms_coords, invbasis))
             shifts[:,2] = 0.0
             atoms_coords -= np.dot(shifts, axis_3D)
+        return atoms_coords
+
+            
+    def mask_unique(self, coords, mask=None):
+        """Masks points being unique in the unit cell.
+        
+        Args:
+            coords: Cartesian coordinates of the points (atoms).
+            mask: Only those coordinates are considered, where mask is True
+            
+        Returns:
+           Logical list containing True for unique atoms and False otherwise.
+        """
+        if mask is not None:                     
+            unique = np.array(mask, dtype=bool)
+        else:
+            unique = np.ones(( coords.shape[0], ), dtype=bool)                
+        if self.period_type == "0D":
+            return unique
+        # Fold in all atoms into the unit cell and mask out those very close
+        # to each other.
+        # TODO: Dimension specific algorithm to speed it up.
+        foldedcoords = self.arrange_positions(coords)
+        for ii in range(len(unique)):
+            if not unique[ii]:
+                continue
+            diff2 = np.sum((foldedcoords[ii+1:,:] - foldedcoords[ii])**2,
+                           axis=1)
+            unique[ii+1:] *= diff2 > (1e-8)**2
+        return unique
 
 
     @classmethod

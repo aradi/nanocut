@@ -84,29 +84,28 @@ def getbodies(configdict, allowed_bodies, geometry, period):
     return bodies
 
 
-def getatomsinside(bodies, period, geo):
+def getatomsinside(bodies, geo):
     """Selects the atoms in the final structure.
     
     Args:
         bodies: Bodies to consider (can be additive or subtractive)
-        period: Periodicity object.
         geo: Basic crystall geometry
         
     Returns:
         Cartesian position of the atoms in the final structure.
     """
     # Get boundaries of the cuboid containing all bodies
-    cuboid_boundaries = np.vstack([ body.containing_cuboid(period)
+    cuboid_boundaries = np.vstack([ body.containing_cuboid()
                                       for body in bodies if body.additive ])
     cuboid_boundaries = np.array([ cuboid_boundaries.min(axis=0),
                                    cuboid_boundaries.max(axis=0)])
 
     # Generate lattice-cuboid and all atoms in it
-    lattice_cuboid = geo.gen_cuboid(cuboid_boundaries, period)
+    lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
     atoms_coords, atoms_idx = geo.gen_atoms(lattice_cuboid)
     atoms_inside_bodies = np.zeros(len(atoms_coords), dtype=bool)
     for body in bodies:
-        tmp_atoms_inside_bodies = body.atoms_inside(atoms_coords, period)
+        tmp_atoms_inside_bodies = body.atoms_inside(atoms_coords)
         
         # Add or substract them respectively
         if body.additive:
@@ -138,10 +137,10 @@ def main():
     bodies = getbodies(configdict, BODYOBJECTS[period.period_type], geo, period)
     
     # Select atoms in the desired shape (first fold atoms into unit cell)
-    atoms_coords, atoms_idx = getatomsinside(bodies, period, geo)
+    atoms_coords, atoms_idx = getatomsinside(bodies, geo)
 
     # Fold atoms to unit cell and rotate to standard form
-    period.arrange_positions(geo, atoms_coords, atoms_idx)
+    period.arrange_positions(atoms_coords)
     axis_string, atoms_coords = period.rotate_coordsys(atoms_coords)
 
     # Write object to file

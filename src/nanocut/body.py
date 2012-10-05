@@ -7,6 +7,7 @@ class Body:
     Attributes:
         additive: Signalizes whether content should be added or subtracted.
         shift_vector: Origin of the body.
+        periodicity: Stores information about periodicity.
         
     Class attributes:
         arguments: Dictionary of names which can occure as arguments in the
@@ -35,11 +36,20 @@ class Body:
                 keywords.
             **kwags: Dictionary Python values for the keywords.
         """
-        kwags.update(self.parse_arguments(Body.arguments, configdict))
+        kwags.update(self.parse_arguments(self.get_arguments(), configdict))
         self.shift_vector = geometry.coord_transform(
             kwags.get("shift_vector", np.zeros((3,), dtype=float)),
             kwags.get("shift_vector_coordsys", "lattice"))
         self.additive = kwags.pop("additive", True)
+        self.periodicity = period
+
+
+    @staticmethod
+    def get_arguments():
+        """Returns a dictioniary of the defintions of the configuration settings
+        the object can process.
+        """ 
+        return Body.arguments
 
 
     @staticmethod
@@ -132,13 +142,10 @@ class Body:
         return init_args
 
 
-    def containing_cuboid(self, periodicity=None):
+    def containing_cuboid(self):
         """Returns the edges of the containing cuboid.
         
         This method must be overriden in the child classes.
-        
-        Args:
-            periodicity: Periodicity object.
         
         Returns:
             Array of two 3D-vectors, the first one containing the lowest, the
@@ -148,14 +155,11 @@ class Body:
         raise NotImplementedError
     
     
-    def atoms_inside(self, periodicity=None):
+    def atoms_inside(self):
         """Decides which atoms are inside the body.
         
         This method must be overriden in the child classes.
         
-        Args:
-            periodicity: Periodicty object.
-            
         Returns:
             Logical array with True for all atoms inside the body.
         """

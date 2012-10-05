@@ -138,56 +138,7 @@ class Geometry:
         cond1 = np.all(abc < cuboid[0] - buffer, axis=1)
         cond2 = np.all(abc > cuboid[1] + buffer, axis=1)
         inside = np.logical_not(np.logical_or(cond1, cond2))
-        nmo = nmo[inside]
-
-        # Test for equivalent points in case periodicities are present
-        if periodicity == None or periodicity.period_type == "0D":
-            return np.dot(nmo, self.latvecs)        
-
-        axis = periodicity.get_axis("lattice")
-        is_unique = np.ones(nmo.shape[0], bool)
-
-        if periodicity.period_type == "1D":            
-            # Identify one nonzero entry in the axis vector to prevent
-            # division by zero later.
-            axis_max_idx = np.abs(axis[0]).argmax()
-            axis_max = axis[0, axis_max_idx]
-
-            # Preallocate some arrays to speed up.
-            diff = np.empty(nmo.shape, dtype=float)
-            factor = np.empty(nmo.shape[0], dtype=float)
-            tmp = np.empty(nmo.shape, dtype=float)
-
-            # Mark differences being integer multiple of the axis
-            for ii in range(nmo.shape[0]):
-                if not is_unique[ii]:
-                    continue
-                diff[ii+1:,:] = nmo[ii+1:,:] - nmo[ii]
-                factor[ii+1:] = diff[ii+1:, axis_max_idx] / axis_max
-                tmp[ii+1:,:] = factor[ii+1:,np.newaxis] * axis[0]
-                is_unique[ii+1:] *= np.any(tmp[ii+1:] != diff[ii+1:], axis=1)
-
-        elif periodicity.period_type == "2D":
-                        
-            # Create fake 3D basis
-            axis_basis_3D = np.vstack(( axis, np.cross(axis[0], axis[1]) ))
-            invaxis_3D = np.linalg.inv(axis_basis_3D)
-
-            # Preallocate some arrays to speed up.
-            diff = np.empty(nmo.shape, dtype=float)
-            factor = np.empty((nmo.shape[0], 3), dtype=int)
-
-            # Mark differences being integer multiple of the two lattice vectors
-            for ii in range(nmo.shape[0]):
-                if not is_unique[ii]:
-                    continue
-                diff[ii+1:,:] = nmo[ii+1:,:] - nmo[ii]
-                factor[ii+1:,:] = (np.dot(diff[ii+1:,:], invaxis_3D).round()
-                                   .astype(int))
-                is_unique[ii+1:] *= np.any(
-                    np.dot(factor[ii+1:,0:2], axis) != diff[ii+1:,:], axis=1)
-                
-        return np.dot(nmo[is_unique], self.latvecs)
+        return np.dot(nmo[inside], self.latvecs)
     
 
     def get_name_of_atom(self, index):
