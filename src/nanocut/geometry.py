@@ -1,5 +1,5 @@
 import numpy as np
-from .output import error
+from .output import error, printstatus
 
 class Geometry:
     """Class for handling crystal structure, containing unit-cell-vectors,
@@ -126,6 +126,10 @@ class Geometry:
         nmo_maxinds = np.floor(nmo_corners.max(axis=0)).astype(int)
         
         # Generate mesh indexing all points inside the parallelepiped
+        nallpoint = np.abs(np.prod(nmo_maxinds - nmo_mininds))
+        printstatus(
+            "Number of necessary grid points: {:d}".format(int(nallpoint)),
+            level=1)
         nmo = np.mgrid[nmo_mininds[0]:nmo_maxinds[0]+1,
                        nmo_mininds[1]:nmo_maxinds[1]+1,
                        nmo_mininds[2]:nmo_maxinds[2]+1, ]

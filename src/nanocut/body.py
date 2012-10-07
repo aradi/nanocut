@@ -5,24 +5,16 @@ class Body:
     """Parent class for all geometrical bodies.
     
     Attributes:
-        additive: Signalizes whether content should be added or subtracted.
         shift_vector: Origin of the body.
-        periodicity: Stores information about periodicity.
-        
-    Class attributes:
-        arguments: Dictionary of names which can occure as arguments in the
-            configuration dictionary for that class. The correpsonding values
-            [ type_string, shape, optional, is_coord_sys_definable ]
-            Child classes should define it according their needs.
     """
-    
+        
+    # (type, shape, optional, has_coordsys_version)
     arguments = {
-                 "shift_vector": ( "floatarray", (1, 3), True, True ),
-                 "additive": ( "logical", None, True, False ),
-                 }
-
+                 "shift_vector": ( "floatarray", (3,), True, True ),    
+    }
+        
     
-    def __init__(self, geometry, period, configdict=None, **kwags):
+    def __init__(self, geometry, period, **kwargs):
         """Initializes instance.
         
         It processes following keywords in the passed dictionaries:
@@ -31,26 +23,34 @@ class Body:
         
         Args:
             geometry: Geometry of the base crystal (for coord. transformations)
-            period: Periodicity object.
-            configdict: Configuration dictionary with text representation of
-                keywords.
-            **kwags: Dictionary Python values for the keywords.
+            period: Periodicity of the target system.
+        
+        Keyword args:
+            shift_vector: origin of the body as (3,) array.
+            shift_vector_coordsys: coordinate system of the origin ("lattice"
+                or "cartesian")
         """
-        kwags.update(self.parse_arguments(self.get_arguments(), configdict))
         self.shift_vector = geometry.coord_transform(
-            kwags.get("shift_vector", np.zeros((3,), dtype=float)),
-            kwags.get("shift_vector_coordsys", "lattice"))
-        self.additive = kwags.pop("additive", True)
-        self.periodicity = period
+            kwargs.get("shift_vector", np.zeros((3,), dtype=float)),
+            kwargs.get("shift_vector_coordsys", "lattice"))
 
 
-    @staticmethod
-    def get_arguments():
-        """Returns a dictioniary of the defintions of the configuration settings
-        the object can process.
-        """ 
-        return Body.arguments
-
+    @classmethod
+    def fromdict(cls, geometry, period, configdict):
+        """Create object from configuration dictionary.
+        
+        Args:
+            geometry: Geometry of the base crystal.
+            periodicity: Periodicity of the target object
+            configdict: Dictionary with text representation of the objects
+                keyword arguments.
+                
+        Returns:
+            Initialized object.
+        """
+        argdict = cls.parse_arguments(cls.arguments, configdict)
+        return cls(geometry, period, **argdict)
+        
 
     @staticmethod
     def parse_arguments(arguments, configdict=None):
@@ -60,10 +60,10 @@ class Body:
         Args:
             arguments: Dict of arguments to process.
             configdict: Dictionary with configuration items or None.
-
         
         Returns:
-            Dictionary of body related entries only with Python values.
+            Dictionary of body related entries only with values converted
+            to their python type.
         """ 
         if configdict is None:
             return {}

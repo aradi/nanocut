@@ -49,11 +49,11 @@ def read_inifile(filename):
     try:
         configfile = open(filename, "r")
     except IOError:
-        sys.exit("Error: Can't open " + filename + ".\nExiting...")
+        sys.exit("Error: Can't open " + filename + ".\nExiting")
     try:
         ini.readfp(configfile)
     except configparser.Error as error:
-        sys.exit("Error: Malformed ini-file:\n" + str(error) + "\nExiting...")
+        sys.exit("Error: Malformed ini-file:\n" + str(error) + "\nExiting")
     configfile.close()
     return ini
 
@@ -68,18 +68,24 @@ def getbodies(configdict, allowed_bodies, geometry, period):
         period: Periodicity object.
         
     Returns:
-       List of initialized body objects.
+       List of tuples with initialized body objects and flag signalizing whether
+       body is additive or not.
     """
     bodies = []
     tmp = []
     for section in configdict:
         words = section.split(":")
-        if len(words) == 2:
-            tmp.append((allowed_bodies.get(words[0], None), section))
-    bodies = [ 
-        bodyobj(geometry, period, configdict=configdict[section])
-        for bodyobj, section in tmp if bodyobj is not None ]
-    if not len(bodies):
+        if len(words) != 2:
+            continue
+        bodyobj = allowed_bodies.get(words[0], None)
+        if bodyobj is None:
+            output.error("Body type '" + words[0] + "' unknown or incompatible "
+                         " with periodicity")
+        additive = configdict[section].getboolean("additive", fallback=True)
+        bodies.append(
+            ( bodyobj.fromdict(geometry, period, configdict[section]),
+              additive ))
+    if not bodies:
         output.error("No bodies specified.")
     return bodies
 
@@ -88,27 +94,31 @@ def getatomsinside(bodies, geo):
     """Selects the atoms in the final structure.
     
     Args:
-        bodies: Bodies to consider (can be additive or subtractive)
+        bodies: Bodies to consider and their additivity flag.
         geo: Basic crystall geometry
         
     Returns:
         Cartesian position of the atoms in the final structure.
     """
+    output.printstatus("Determining boundaries of the lattice grid")
     # Get boundaries of the cuboid containing all bodies
-    cuboid_boundaries = np.vstack([ body.containing_cuboid()
-                                      for body in bodies if body.additive ])
+    cuboid_boundaries = np.vstack(
+        [ body.containing_cuboid() for body, additive in bodies if additive ])
     cuboid_boundaries = np.array([ cuboid_boundaries.min(axis=0),
                                    cuboid_boundaries.max(axis=0)])
 
     # Generate lattice-cuboid and all atoms in it
+    output.printstatus("Creating all lattice grid points")
     lattice_cuboid = geo.gen_cuboid(cuboid_boundaries)
+    
+    output.printstatus("Filtering atoms inside specified bodies")
     atoms_coords, atoms_idx = geo.gen_atoms(lattice_cuboid)
     atoms_inside_bodies = np.zeros(len(atoms_coords), dtype=bool)
-    for body in bodies:
+    for body, additive in bodies:
         tmp_atoms_inside_bodies = body.atoms_inside(atoms_coords)
         
         # Add or substract them respectively
-        if body.additive:
+        if additive:
             atoms_inside_bodies = atoms_inside_bodies + tmp_atoms_inside_bodies
         else:
             atoms_inside_bodies = (atoms_inside_bodies 
@@ -123,8 +133,11 @@ def main():
  
     # Parse command line paramters
     args = parse_args()
+ 
+    output.printheader()
     
     # Read initial file
+    output.printstatus("Parsing config file '{}'".format(args.inifile))
     configdict = read_inifile(args.inifile)
 
     # Process crystal geometry
@@ -140,12 +153,17 @@ def main():
     atoms_coords, atoms_idx = getatomsinside(bodies, geo)
 
     # Fold atoms to unit cell and rotate to standard form
+    output.printstatus("Rotating coordinate system to standard form "
+                       "(if necessary)")
     period.arrange_positions(atoms_coords)
     axis_string, atoms_coords = period.rotate_coordsys(atoms_coords)
 
     # Write object to file
+    output.printstatus("Writing result to file '{}'".format(args.resultxyz))
     output.write_crystal(geo,atoms_coords, atoms_idx, axis_string,
                          args.resultxyz, args.append)
+    
+    output.printstatus("Done.")
 
 
 

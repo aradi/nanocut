@@ -1,48 +1,53 @@
 import numpy as np
-from nanocut.body import Body
+from nanocut.polyhedron import Polyhedron
 
-class Periodic2DPlane(Body):
+class Periodic2DPlane(Polyhedron):
     """Class for plane elements with 2D periodicity"""
     
     # (type, shape, optional, has_coordsys_version)
     arguments = {
+                 "shift_vector": ( "floatarray", (3,), True, True ),    
                  "thickness": ( "float", None, False, False )
                 }
 
-    def __init__(self, geometry, period, configdict=None, **kwargs):
-        """Extends the constructor of the class Body.
+    def __init__(self, geometry, period, **kwargs):
+        """Construct Periodic2DPlane instance.
         
-        Additional keywords:
-            thickness: Slab thickness.
+        Keyword args:
+            shift_vector: Origin of the body.
+            thickness: Distance between the upper and lower plane.
         """
-        Body.__init__(self, geometry, configdict=configdict, **kwargs)
-        kwargs.update(self.parse_arguments(Periodic2DPlane.arguments,
-                                           configdict))
-        self.thickness = kwargs.get("thickness")
-        
- 
-    def containing_cuboid(self, periodicity):
-        """Calculates the boundaries of the cuboid containing a plane element"""
-        axis = periodicity.get_axis("cartesian")
-        bounds = np.vstack((
-            self.shift_vector + self.thickness,
-            self.shift_vector - self.thickness,
-            axis[0] + self.shift_vector + self.thickness,
-            axis[0] + self.shift_vector - self.thickness,
-            axis[1] + self.shift_vector + self.thickness,
-            axis[1] + self.shift_vector - self.thickness,
-            ))
-        print("CUBOID:")
-        print(np.vstack((bounds.min(axis=0), bounds.max(axis=0))))
-        return np.vstack((bounds.min(axis=0), bounds.max(axis=0)))
+        self.periodicity = period
+        self.thickness = kwargs.get("thickness") 
+        axis1, axis2 = self.periodicity.get_axis("cartesian")
+        # Surface normal vector
+        surfnorm = np.cross(axis1, axis2).astype(float)
+        surfnorm = surfnorm / np.linalg.norm(surfnorm)
+        # Normal vector of the side planes of the polyhedron, pointing inwards
+        n1 = np.cross(surfnorm, axis1)
+        n1 /= np.linalg.norm(n1)
+        n2 = np.cross(axis2, surfnorm)
+        n2 /= np.linalg.norm(n2)
+        # Distances of the side planes from the origin
+        d1 = np.dot(n1, axis2)
+        d2 = np.dot(n2, axis1) 
+        # Assemble polyhedron
+        kwargs["planes_normal"] = np.array(
+            [[ n1[0], n1[1], n1[2], 0.0 - 1e-8 ],
+             [ n1[0], n1[1], n1[2], d1 + 1e-8 ],
+             [ n2[0], n2[1], n2[2], 0.0 - 1e-8 ],
+             [ n2[0], n2[1], n2[2], d2 + 1e-8 ],
+             [ surfnorm[0], surfnorm[1], surfnorm[2], -self.thickness / 2.0 ],
+             [ surfnorm[0], surfnorm[1], surfnorm[2], self.thickness / 2.0 ]
+             ])
+        kwargs["planes_normal_coordsys"] = "cartesian"
+        Polyhedron.__init__(self, geometry, period, **kwargs)
 
 
-    def atoms_inside(self, atoms, periodicity):
+    def atoms_inside(self, atoms):
         """Decides which atoms are inside the body (see Body class)."""
-        axis = periodicity.get_axis("cartesian")
-        non_periodic_dir = np.cross(axis[0], axis[1]).astype(float)
-        non_periodic_dir = non_periodic_dir / np.linalg.norm(non_periodic_dir)
-        relcoords = atoms - self.shift_vector
-        dists = np.abs(np.dot(relcoords, non_periodic_dir))
-        atoms_inside = (dists <= self.thickness / 2.0) 
-        return atoms_inside
+        
+        atoms_inside_body = Polyhedron.atoms_inside(self, atoms)
+        atoms_inside_body *= self.periodicity.mask_unique(
+            atoms - self.shift_vector, atoms_inside_body)
+        return atoms_inside_body

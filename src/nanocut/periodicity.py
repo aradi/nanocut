@@ -161,16 +161,25 @@ class Periodicity:
             unique = np.ones(( coords.shape[0], ), dtype=bool)                
         if self.period_type == "0D":
             return unique
+        elif self.period_type == "1D":
+            shifts = np.vstack(
+                ( [ 0.0, 0.0, 0.0], 0.5 * self._axis_cart[0] ))
+        else:
+            shifts = np.vstack(
+                ( [ 0.0, 0.0, 0.0 ],
+                  0.5 * (self._axis_cart[0] + self._axis_cart[1]) ))
         # Fold in all atoms into the unit cell and mask out those very close
-        # to each other.
-        # TODO: Dimension specific algorithm to speed it up.
-        foldedcoords = self.arrange_positions(coords)
-        for ii in range(len(unique)):
-            if not unique[ii]:
-                continue
-            diff2 = np.sum((foldedcoords[ii+1:,:] - foldedcoords[ii])**2,
-                           axis=1)
-            unique[ii+1:] *= diff2 > (1e-8)**2
+        # to each other. Done for original cell and shifted by the half diagonal
+        # to make sure atom at 0 + epsilon and 1 - epsilon are recognized as
+        # identical
+        for shift in shifts:
+            foldedcoords = self.arrange_positions(coords + shift)
+            for ii in range(len(unique)):
+                if not unique[ii]:
+                    continue
+                diff2 = np.sum((foldedcoords[ii+1:,:] - foldedcoords[ii])**2,
+                               axis=1)
+                unique[ii+1:] *= diff2 > (1e-8)**2
         return unique
 
 

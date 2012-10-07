@@ -1,49 +1,36 @@
 import numpy as np
-from nanocut.body import Body
+from nanocut.cylinder import Cylinder
 
 
-class Periodic1DCylinder(Body):
+class Periodic1DCylinder(Cylinder):
     """Class for periodic cylinders determined by a central axis and radius"""
     
     # (type, shape, optional, has_coordsys_version)
     arguments = {
+                 "shift_vector": ( "floatarray", (3,), True, True ),
                  "radius": ( "float", None, False, False )
                  }
 
-    def __init__(self, geometry, period, configdict=None, **kwargs):
-        """Extends the constructor of the class Body.
+    def __init__(self, geometry, period, **kwargs):
+        """Creates a Periodic1DCylinder instance.
         
-        Additional keywords:
+        Keyword args:
+            shift_vector: Origin of the body.        
             radius: Radius of the cylinder.
         """
-        Body.__init__(self, geometry, configdict=configdict, **kwargs)
-        kwargs.update(self.parse_arguments(Periodic1DCylinder.arguments,
-                                           configdict))
-        self.radius = kwargs.get("radius")
-        
-        
-    def containing_cuboid(self, periodicity):
-        """Returns the edges of the containing cuboid (see Body class)."""
-       
-        # Creates cubes containing spheres with cylinder radius around axis'
-        # beginning and end. (somewhat rude approximation)
-        axis = periodicity.get_axis("cartesian") 
-        bounds = np.vstack((
-            self.shift_vector + self.radius,
-            self.shift_vector - self.radius,
-            axis + self.shift_vector + self.radius,
-            axis + self.shift_vector - self.radius,
-            ))
-        return np.vstack((bounds.min(axis=0), bounds.max(axis=0)))
+        self.radius = kwargs.pop("radius")
+        self.periodicity = period
+        kwargs["radius1"] = self.radius
+        kwargs["radius2"] = self.radius
+        kwargs["point1"] = np.array([ 0.0, 0.0, 0.0 ], dtype=float)
+        kwargs["point2"] = period.get_axis("cartesian")[0]
+        Cylinder.__init__(self, geometry, period, **kwargs)
 
-
-    def atoms_inside(self, atoms, periodicity):
+        
+    def atoms_inside(self, atoms):
         """Decides which atoms are inside the body (see Body class)."""
-
-        # Checks if distance from axis is larger than radius for given atom        
-        axis = periodicity.get_axis("cartesian")
-        relpos = atoms - self.shift_vector[0]
-        dirvec0 = axis[0] / np.linalg.norm(axis[0])
-        dists = np.sqrt(np.sum(np.cross(relpos, dirvec0)**2, axis=1))
-        atoms_inside = dists <= self.radius
+        
+        atoms_inside = Cylinder.atoms_inside(self, atoms)
+        atoms_inside *= self.periodicity.mask_unique(atoms - self.shift_vector,
+                                                     atoms_inside)
         return atoms_inside

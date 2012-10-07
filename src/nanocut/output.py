@@ -1,5 +1,8 @@
 import sys
 
+verbosity = 1
+INDENT_STR = " " * 2
+
 def write_crystal(geometry, atoms_coords, atoms_idx, axis_string, 
                   resultfilename, append):
     
@@ -21,3 +24,20 @@ def error(msg):
     print("Error: " + msg)
     print("Exiting...")
     sys.exit()
+
+
+def warning(msg):
+    print("Warning: " + msg)
+
+
+def printstatus(msg, level=0):
+    if verbosity > 0:
+        print(INDENT_STR * level + msg)
+
+
+def set_verbosity(verbosity_level):
+    verbosity = verbosity_level
+    
+    
+def printheader():
+    printstatus("*** Nanocut ***")

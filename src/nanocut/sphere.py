@@ -7,18 +7,19 @@ class Sphere(Body):
     # Create argument dictionary as union of parent class' dictionary
     # and extending keywords (only works since dictionary keys are stings)
     arguments = {
+                 "shift_vector": ( "floatarray", (3,), True, True ),
                  "radius": ( "float", None, False, False ),
                  }
 
     
-    def __init__(self, geometry, period, configdict=None, **kwargs):
-        """Extends the constructor of the class Body.
+    def __init__(self, geometry, period, **kwargs):
+        """Creates Sphere instance.
         
-        Additional keywords:
+        Keyword args:
+            shift_vector: Origin of the sphere.
             radius: Radius of the sphere.
         """
-        Body.__init__(self, geometry, configdict=configdict, **kwargs)
-        kwargs.update(self.parse_arguments(Sphere.arguments, configdict))
+        Body.__init__(self, geometry, period, **kwargs)
         self.radius = kwargs.get("radius")
     
     
