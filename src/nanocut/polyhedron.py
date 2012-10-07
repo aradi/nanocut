@@ -101,9 +101,6 @@ class Polyhedron(Body):
 
     def containing_cuboid(self):
         """Returns the edges of the containing cuboid (see Body class).""" 
-        print("CUBOID:")
-        print(np.vstack(( self.corners.min(axis=0),
-                           self.corners.max(axis=0) )))
         return np.vstack(( self.corners.min(axis=0),
                            self.corners.max(axis=0) ))
 

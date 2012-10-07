@@ -23,7 +23,7 @@ def write_crystal(geometry, atoms_coords, atoms_idx, axis_string,
 def error(msg):
     print("Error: " + msg)
     print("Exiting...")
-    sys.exit()
+    sys.exit(1)
 
 
 def warning(msg):

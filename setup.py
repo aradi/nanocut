@@ -1,27 +1,22 @@
-#!/usr/bin/env python3.1
+#!/usr/bin/env python3.2
 from distutils.core import setup
-import glob
 
 setup(name="nanocut",
-      version="0.2",
+      version="1.0",
       description="Cutting out various shapes from crystals",
-      author="Florian Uekermann, Sebastian Fiedel, Balint Aradi",
+      author="Florian Uekermann, Sebastian Fiedel, Bálint Aradi",
       author_email="baradi09@gmail.com",
-      license="MIT",
+      license="BSD",
       platforms="platform independent",
-      package_dir={"": "src"},
-      packages=["nanocut", ],
+      package_dir={ "": "src"},
+      packages=[ "nanocut", ],
       scripts=[ "bin/nanocut" ],
-      data_files=[("share/doc/nanocut", ["LICENSE", "README", ] ),
-                  ("share/doc/nanocut/examples",
-                   glob.glob("doc/srcexamples/*.ini")),
-                  ],
       classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 3",
         "Environment :: Console",
         "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Topic :: Scientific/Engineering",
         ],

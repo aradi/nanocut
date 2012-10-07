@@ -37,14 +37,8 @@ class Periodicity:
             self.axis = None
             self.axis_cart = None
             return
-        axis = np.array(axis, dtype=int)
-        axis.shape = (-1, 3)
-        if self.period_type == "1D":
-            self._axis = axis / gcd(axis[0,0], axis[0,1], axis[0,2])
-        elif self.period_type == "2D":
-            gcd1 = gcd(axis[1,0], axis[1,1], axis[1,2])
-            gcd0 = gcd(axis[0,0], axis[0,1], axis[0,2])
-            self._axis = np.vstack(( axis[1] / gcd1, axis[0] / gcd0 ))
+        self._axis = np.array(axis, dtype=int)
+        self._axis.shape = (-1, 3)
         self._axis_cart = geometry.coord_transform(self._axis, "lattice")
 
 
