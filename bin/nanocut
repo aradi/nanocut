@@ -32,11 +32,18 @@ def parse_args():
     parser.add_argument("-a", "--append", action="store_true", default=False,
                         help="appends created structure to output file "
                         "(instead of overwriting it)")
+    parser.add_argument("-v", "--verbosity", default=1, type=int,
+                        help="Set verbosity level: 0 - no output, 1 - normal "
+                        "output (default)")
     parser.add_argument("inifile", help="initialization file")
     parser.add_argument("resultxyz",
                         help="file containing resulting structure in xyz "
                         "format")
     return parser.parse_args()
+
+
+def process_arguments(args):
+    output.set_verbosity(args.verbosity)
 
 
 def read_inifile(filename):
@@ -56,7 +63,7 @@ def read_inifile(filename):
         sys.exit("Error: Malformed ini-file:\n" + str(error) + "\nExiting")
     configfile.close()
     return ini
-
+     
 
 def getbodies(configdict, allowed_bodies, geometry, period):
     """Initializes body object based on the input.
@@ -131,11 +138,13 @@ def getatomsinside(bodies, geo):
 def main():
     """Main program."""
  
-    # Parse command line paramters
+    # Parse command line parameters
     args = parse_args()
- 
-    output.printheader()
+    process_arguments(args)
     
+    # Print header (delayed, so that it can be suppressed via cmd line option)
+    output.printheader()
+     
     # Read initial file
     output.printstatus("Parsing config file '{}'".format(args.inifile))
     configdict = read_inifile(args.inifile)
@@ -164,7 +173,6 @@ def main():
                          args.resultxyz, args.append)
     
     output.printstatus("Done.")
-
 
 
 if __name__ == "__main__":

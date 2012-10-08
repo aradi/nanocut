@@ -36,6 +36,7 @@ def printstatus(msg, level=0):
 
 
 def set_verbosity(verbosity_level):
+    global verbosity
     verbosity = verbosity_level
     
     
