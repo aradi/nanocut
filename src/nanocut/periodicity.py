@@ -59,7 +59,7 @@ class Periodicity:
         elif self.period_type == "2D":
             z_axis = np.cross(self._axis_cart[0], self._axis_cart[1])
         elif self.period_type == "0D":
-            return "", atoms_coords
+            return [], atoms_coords
         z_axis= z_axis / np.linalg.norm(z_axis)
         # Calculate rotation angle
         angle = np.arccos(np.dot(z_axis, np.array([0,0,1])))
@@ -83,12 +83,10 @@ class Periodicity:
              cos + rot[2] * rot[2] * (1 - cos) ]])
         # Rotate atoms
         atoms_coords = np.dot(atoms_coords, rotation_matrix)
-        # Calculate rotated axes and write them to string
-        axis_string = "Periodicity axes: "
-        for axis in np.dot(self._axis_cart, rotation_matrix):
-            axis_string += ("(" + repr(axis[0]) + ", " + repr(axis[1]) + ", "
-                            + repr(axis[2]) + ") ")
-        return axis_string, atoms_coords
+        # Calculate rotated axes
+        axis = np.dot(self._axis_cart, rotation_matrix)
+        
+        return axis, atoms_coords
 
 
     def get_axis(self, coordsys="lattice"):
@@ -130,8 +128,9 @@ class Periodicity:
                         / axis_norm**2)
             atoms_coords -= shifts[:,np.newaxis] * self._axis_cart[0]
         elif self.period_type == "2D":
-            axis_3D = np.array([ self._axis_cart[0], self._axis_cart[1],
-                                np.cross(self._axis[0], self._axis_cart[1]) ]) 
+            axis_3D = np.array(
+                [ self._axis_cart[0], self._axis_cart[1],
+                np.cross(self._axis_cart[0], self._axis_cart[1]) ])
             invbasis = np.linalg.inv(axis_3D)
             shifts = np.floor(np.dot(atoms_coords, invbasis))
             shifts[:,2] = 0.0

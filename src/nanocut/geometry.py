@@ -129,7 +129,7 @@ class Geometry:
         nallpoint = np.abs(np.prod(nmo_maxinds - nmo_mininds))
         printstatus(
             "Number of necessary grid points: {:d}".format(int(nallpoint)),
-            level=1)
+            indentlevel=1)
         nmo = np.mgrid[nmo_mininds[0]:nmo_maxinds[0]+1,
                        nmo_mininds[1]:nmo_maxinds[1]+1,
                        nmo_mininds[2]:nmo_maxinds[2]+1, ]

@@ -8,7 +8,7 @@ from nanocut import *
 BODYOBJECTS = {
     "0D": {
            "sphere": sphere.Sphere,
-           "convex_polyhedron": polyhedron.Polyhedron,
+           "polyhedron": polyhedron.Polyhedron,
            "cylinder": cylinder.Cylinder,
            },
     "1D": {
@@ -29,16 +29,27 @@ def parse_args():
     """
     parser = argparse.ArgumentParser(
         description="Cuts out various 0D, 1D and 2D shapes from crystals.")
-    parser.add_argument("-a", "--append", action="store_true", default=False,
-                        help="appends created structure to output file "
-                        "(instead of overwriting it)")
-    parser.add_argument("-v", "--verbosity", default=1, type=int,
-                        help="Set verbosity level: 0 - no output, 1 - normal "
-                        "output (default)")
+    parser.add_argument(
+        "-a", "--append", action="store_true", default=False,
+        help="appends created structure to output file (instead of overwriting "
+        "it)")
+    parser.add_argument(
+        "-v", "--verbosity", default=1, type=int,
+        help="Set verbosity level: 0 - no output, 1 - normal output (default)")
+    parser.add_argument(
+        "-o", "--orthogonal-latvecs", type=float, metavar="VECLEN",
+        default=None, dest="oveclen",
+        help="add orthogonal lattice vectors of given size to make a 3D "
+        "supercell")
     parser.add_argument("inifile", help="initialization file")
-    parser.add_argument("resultxyz",
-                        help="file containing resulting structure in xyz "
-                        "format")
+    parser.add_argument(
+        "resultxyz",
+        help="file write the resulting structure in xyz format into")
+    parser.add_argument(
+        "latvecs", nargs="?",
+        help="file to store lattice vectors (if not specified, lattice vectors "
+        "will be written to the commend field of the xyz file)")
+
     return parser.parse_args()
 
 
@@ -135,6 +146,25 @@ def getatomsinside(bodies, geo):
     return atoms_coords[atoms_inside_bodies], atoms_idx[atoms_inside_bodies]
 
 
+def extend_axis(axis, oveclen):
+    """Extend translational vectors to form 3D supercell.
+    
+    Args:
+        axis: Axis vectors or None for non-periodic structure.
+        oveclen: Length of the new lattice vectors.
+        
+    Returns:
+        Array of three supercell vectors.
+    """
+    if not len(axis):
+        axis = np.eye(3, dtype=float) * oveclen
+    elif len(axis) == 1:
+        axis = np.vstack(( np.eye(2, 3, dtype=float) * oveclen, axis ))
+    elif len(axis) == 2:
+        axis = np.vstack(( axis, np.array([ 0.0, 0.0, oveclen ])))
+    return axis
+
+
 def main():
     """Main program."""
  
@@ -162,15 +192,16 @@ def main():
     atoms_coords, atoms_idx = getatomsinside(bodies, geo)
 
     # Fold atoms to unit cell and rotate to standard form
-    output.printstatus("Rotating coordinate system to standard form "
-                       "(if necessary)")
     period.arrange_positions(atoms_coords)
-    axis_string, atoms_coords = period.rotate_coordsys(atoms_coords)
+    axis, atoms_coords = period.rotate_coordsys(atoms_coords)
+    
+    # Extend periodicity vectors if necessary
+    if args.oveclen:
+        axis = extend_axis(axis, args.oveclen)
 
     # Write object to file
-    output.printstatus("Writing result to file '{}'".format(args.resultxyz))
-    output.write_crystal(geo,atoms_coords, atoms_idx, axis_string,
-                         args.resultxyz, args.append)
+    output.write_crystal(geo,atoms_coords, atoms_idx, axis, args.resultxyz,
+                         args.append, args.latvecs)
     
     output.printstatus("Done.")
 
