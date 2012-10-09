@@ -54,22 +54,23 @@ class Periodicity:
             for 2D sytems z-axis will be orthogonal to the periodic directions
             and the first lattice vector will be along the x-axis.
         """
-        if self.period_type == "1D":
+        if self.period_type == "0D":
+            return [], atoms_coords
+        elif self.period_type == "1D":
             z_axis = self._axis_cart[0]
         elif self.period_type == "2D":
-            z_axis = np.cross(self._axis_cart[0], self._axis_cart[1])
-        elif self.period_type == "0D":
-            return [], atoms_coords
+            z_axis = np.cross(self._axis_cart[0], self._axis_cart[1])            
+
+        # Calculate rotation angle and rotation axis
         z_axis= z_axis / np.linalg.norm(z_axis)
-        # Calculate rotation angle
         angle = np.arccos(np.dot(z_axis, np.array([0,0,1])))
-        # Calculate rotation axis
         rot = np.cross(z_axis, np.array([0,0,1]))
         norm = np.linalg.norm(rot)
         if norm > 1e-12:
             rot /= norm
         sin = np.sin(angle)
         cos = np.cos(angle)
+
         # Calculate rotation matrix
         rotation_matrix = np.array([
             [ cos + rot[0] * rot[0] * (1 - cos),
@@ -81,10 +82,20 @@ class Periodicity:
             [ rot[0] * rot[2] * (1 - cos) + rot[1] * sin,
              rot[1] * rot[2] * (1 - cos) - rot[0] * sin,
              cos + rot[2] * rot[2] * (1 - cos) ]])
+
+        # If 2D rotate first lattice vector to the x-axis
+        axis = np.dot(self._axis_cart, rotation_matrix)
+        if self.period_type == "2D":
+            cos2 = self._axis_cart[0,0] / np.linalg.norm(self._axis_cart[0])
+            sin2 = -np.sqrt(1.0 - cos2**2)
+            rot2 = np.array([[ cos2, sin2, 0.0 ],
+                             [ -sin2, cos2, 0.0 ],
+                             [ 0.0, 0.0, 1.0 ]])
+            axis = np.dot(axis, rot2)
+            rotation_matrix = np.dot(rotation_matrix, rot2)
+        
         # Rotate atoms
         atoms_coords = np.dot(atoms_coords, rotation_matrix)
-        # Calculate rotated axes
-        axis = np.dot(self._axis_cart, rotation_matrix)
         
         return axis, atoms_coords
 
