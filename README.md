@@ -14,10 +14,6 @@ atomistic simulations. Currently it can create following objects:
 
 The program is available under the 2-clause BSD license. It is an open source
 project, so feel free to join it, if you think that some additional features are
-needed or something could be implemented in a more user friendly way. The
-project is currently hosted under
-
- [http://bitbucket.org/aradi/nanocut](http://bitbucket.org/aradi/nanocut)
-
-If you like the program, let us know, we are very happy to hear it! But even
-more important, please share it with others.
+needed or something could be implemented in a more user friendly way. If you
+find the program useful, please recommend it to others who may be also
+interested to use it.
