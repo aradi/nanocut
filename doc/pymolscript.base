@@ -1,7 +1,0 @@
-
-
-show spheres
-set sphere_scale, 0.3
-bg_color white
-
-ray
