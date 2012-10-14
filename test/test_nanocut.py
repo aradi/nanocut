@@ -13,7 +13,7 @@ class NanocutTestCase(unittest.TestCase):
     def testTags(self):
         for filename in self._tests:
             print(filename)
-            subprocess.call([ "python", "../bin/nanocut", "--verbosity", "0",
+            subprocess.call([ "../bin/nanocut", "--verbosity", "0",
                              filename, "current_result.xyz" ])
             result_file = open("current_result.xyz", "r")
             result = result_file.readlines()

@@ -2,10 +2,11 @@
 from distutils.core import setup
 
 setup(name="nanocut",
-      version="1.0",
+      version="12.10",
       description="Cutting out various shapes from crystals",
       author="Florian Uekermann, Sebastian Fiedel, Bálint Aradi",
       author_email="baradi09@gmail.com",
+      url="http://bitbucket.org/aradi/nanocut",
       license="BSD",
       platforms="platform independent",
       package_dir={ "": "src"},
@@ -13,7 +14,7 @@ setup(name="nanocut",
       scripts=[ "bin/nanocut" ],
       classifiers=[
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.2",
         "Environment :: Console",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: BSD License",

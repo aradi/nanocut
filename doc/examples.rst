@@ -242,12 +242,59 @@ cell would require an input like this::
   thickness: 12
 
 
-As result, you would obtain the slab in Figure :ref:`diamond-slab`.
+As result, you would obtain the slab in Figure :ref:`fig-diamond-slab`.
 
-  .. _diamond-slab:
+  .. _fig-diamond-slab:
   .. figure:: _figures/examples/diamond100.png
      :height: 40ex
      :align: center
      :alt: Diamond [100] slab
 
      Diamond slab
+
+
+
+Supercells (3D)
+---------------
+
+3C-SiC, 64 atom cubic supercell
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In order to build a 64 atom cubic supercell of 3C-SiC, the lattice vectors of
+the base lattice must be combined to yield a cubic superstructure of the right
+size::
+
+  [geometry] 
+  lattice_vectors: 
+    0.00000000  2.18000000  2.1800000
+    2.18000000  0.00000000  2.18000000
+    2.18000000  2.18000000  0.00000000
+
+  basis:
+    Si    0.00     0.00   0.00
+    C     0.25     0.25   0.25
+
+  basis_coordsys: lattice
+
+  [periodicity]
+  period_type: 3D
+  axis:
+    -2  2  2
+     2 -2  2
+     2  2 -2
+
+  [periodic_3D_supercell:1]
+  # Shifting to get more compact cluster
+  shift_vector: -0.5 -0.5 -0.5
+
+In the input above, the resulting supercell had been shifted by the half of the
+diagonal of the orginal unit cell, to make the supercell look more compact (see
+Figure :ref:`fig-cubic-sic-supercell`).
+
+  .. _fig-cubic-sic-supercell:
+  .. figure:: _figures/examples/cubic-sic.png
+     :height: 40ex
+     :align: center
+     :alt: Cubic 3C-SiC supercell
+
+     Cubic 3C-SiC supercell

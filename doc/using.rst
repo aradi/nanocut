@@ -106,14 +106,15 @@ of the translations. Following options can be specified:
 
 `period_type`
   Defines the number of directions in which the structure is periodic. Possible
-  values are ``0D``, ``1D`` or ``2D``. Specifying ``0D`` is equivalent to
-  leaving out the whole section.
+  values are ``0D``, ``1D``, ``2D`` or ``3D``. Specifying ``0D`` is equivalent
+  to leaving out the whole section.
 
 `axis`
-  Defines the axis alongside which the supercell is periodic for the ``1D`` and
-  ``2D`` cases. You must specifiy one vector (3 elements) for the former and two
-  vectors (6 elements) for the latter. The numbers are interpreted as fractional
-  coordinates of the crystal lattice and must be integer numbers.
+  Defines the axis alongside which the supercell is periodic for the ``1D``,
+  ``2D`` and ``3D`` cases. You must specifiy one vector (3 elements), two
+  vectors (6 elements) or 3 vectors (9 elements), respectively. The numbers are
+  interpreted as fractional coordinates of the crystal lattice and must be
+  integer numbers.
 
 
 
@@ -237,3 +238,10 @@ section.
 
 `thickness`
   Thickness of the slab.
+
+
+Supercell (3D)
+^^^^^^^^^^^^^^
+
+The ``[periodic_3D_supercell]`` section specifies a supercell built from the
+unit cell of the original crystal.

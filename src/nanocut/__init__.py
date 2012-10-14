@@ -4,6 +4,7 @@ from . import sphere
 from . import polyhedron
 from . import cylinder
 from . import periodic_1D_cylinder
-from . import periodic_2D_plane
 from . import periodic_1D_prism
+from . import periodic_2D_plane
+from . import periodic_3D_supercell
 from . import periodicity

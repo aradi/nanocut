@@ -11,6 +11,7 @@ atomistic simulations. Currently it can create following objects:
 * Spherical wire (1D periodic)
 * Polyhedral wire (1D periodic)
 * Plain slab (2D periodic)
+* Supercells (3D periodic)
 
 The program is available under the 2-clause BSD license (see
 :ref:`sec-license`). It is an open source project, so feel free to join it, if

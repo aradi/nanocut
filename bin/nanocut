@@ -17,7 +17,8 @@ BODYOBJECTS = {
            },
     "2D": {
            "periodic_2D_plane": periodic_2D_plane.Periodic2DPlane,
-           }
+           },
+    "3D": { "periodic_3D_supercell": periodic_3D_supercell.Periodic3DSupercell }
     }
 
 
