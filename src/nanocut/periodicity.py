@@ -137,24 +137,25 @@ class Periodicity:
             Cartesian coordinates of the atoms in the unit cell.
         """
         atoms_coords = np.array(atoms_coords)
-        if self.period_type == "1D":    
+        if self.period_type == "0D":
+            return atoms_coords
+        elif self.period_type == "1D":    
             axis_norm = np.linalg.norm(self._axis_cart[0])
-            shifts = np.floor(
-                        np.dot(atoms_coords, np.transpose(self._axis_cart[0]))
-                        / axis_norm**2)
-            atoms_coords -= shifts[:,np.newaxis] * self._axis_cart[0]
+            relcoords = np.dot(
+                atoms_coords, np.transpose(self._axis_cart[0])) / axis_norm**2
+            relcoords.shape = (len(relcoords), 1)
         elif self.period_type == "2D":
             axis_3D = np.array(
                 [ self._axis_cart[0], self._axis_cart[1],
                 np.cross(self._axis_cart[0], self._axis_cart[1]) ])
             invbasis = np.linalg.inv(axis_3D)
-            shifts = np.floor(np.dot(atoms_coords, invbasis))
-            shifts[:,2] = 0.0
-            atoms_coords -= np.dot(shifts, axis_3D)
+            relcoords = np.dot(atoms_coords, invbasis)[:,0:2]
         elif self.period_type == "3D":
             invbasis = np.linalg.inv(self._axis_cart)
-            shifts = np.floor(np.dot(atoms_coords, invbasis))
-            atoms_coords -= np.dot(shifts, self._axis_cart)
+            relcoords = np.dot(atoms_coords, invbasis)
+          
+        shifts = np.floor(relcoords)
+        atoms_coords -= np.dot(shifts, self._axis_cart)
         return atoms_coords
 
             
@@ -174,13 +175,15 @@ class Periodicity:
             unique = np.ones(( coords.shape[0], ), dtype=bool)                
         if self.period_type == "0D":
             return unique
+        
+        # TODO: make a more fine grained algorithm to speed up things.
 
         # Fold in all atoms into the unit cell and mask out those very close
-        # to each other. Done for original cell and shifted by the half diagonal
+        # to each other. Done for original cell and a slightly shifted one
         # to make sure atom at 0 + epsilon and 1 - epsilon are recognized as
         # identical
-        shifts = np.vstack(( [0.0, 0.0, 0.0],
-                             0.5 * np.sum(self._axis_cart, axis=0) ))
+        shifts = np.vstack(( [ 0.0, 0.0, 0.0 ],
+                             -1e-12 * np.sum(self._axis_cart, axis=0) ))
         for shift in shifts:
             foldedcoords = self.arrange_positions(coords + shift)
             for ii in range(len(unique)):
@@ -188,7 +191,7 @@ class Periodicity:
                     continue
                 diff2 = np.sum((foldedcoords[ii+1:,:] - foldedcoords[ii])**2,
                                axis=1)
-                unique[ii+1:] *= diff2 > (1e-2)**2
+                unique[ii+1:] *= diff2 > (1e-6)**2
         return unique
 
 
