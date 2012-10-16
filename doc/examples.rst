@@ -162,6 +162,46 @@ Should result in the structure in Figure :ref:`fig-nacl-wire`.
      NaCl wire
 
 
+Every geometrical object allows the flag ``additive``, which you can use to
+substract something from the previous structure. In the case of the NaCl wire,
+one can use that to create an empty wire::
+
+  [geometry]
+  lattice_vectors:
+    0  2.83  2.83
+    2.83  0  2.83
+    2.83  2.83  0
+
+  basis:
+    Na  0   0   0
+    Cl  0.5 -0.5 0.5
+
+  [periodicity]
+  period_type: 1D
+  axis: 4 4 4
+
+  [periodic_1D_cylinder:1]
+  radius: 10
+
+  # Second cylinder is subtracted from the previous one
+  [periodic_1D_cylinder:2]
+  additive: false
+  radius: 5
+
+After that you get a nanowire with an empty core shell as in Figure
+:ref:`fig-nacl-empty-wire`.
+
+  .. _fig-nacl-empty-wire:
+  .. figure:: _figures/examples/nacl-empty-wire.png
+     :height: 40ex
+     :align: center
+     :alt: NaCl wire
+
+     NaCl wire with an empty core
+
+
+
+
 Rectangular rutile [001] wire
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
