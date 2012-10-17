@@ -35,7 +35,7 @@ BASH shell, you could issue::
   export PYTHONPATH=$PYTHONPATH:~/opt/nanocut/lib/python3.2/site-packages
 
 provided you're using Python version 3.2. The Nanocut executable (``nanocut``)
-will be placed into the diretory ``/home/username/opt/nanocut/bin``.
+will be placed into the diretory ``~/opt/nanocut/bin``.
 
 You can check your installation by invoking Nanocut. Issuing::
 
@@ -45,4 +45,3 @@ should give you a short summary about the command line options of the
 program. If you get error messages about missing modules instead, make sure you
 use the right version of Python and NumPy and you set up your environment as
 explained above.
-

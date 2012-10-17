@@ -1,4 +1,8 @@
 .project
 .pydevproject
 __pycache__
+MANIFEST
+dist
+doc/_build
 *~
+*.pyc
