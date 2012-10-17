@@ -1,5 +1,6 @@
 import numpy as np
-from .output import error
+import nanocut.common as nc 
+from nanocut.output import error
 
 __all__ = [ "Periodicity", ]
 
@@ -71,7 +72,7 @@ class Periodicity:
         angle = np.arccos(np.dot(z_axis, np.array([0,0,1])))
         rot = np.cross(z_axis, np.array([0,0,1]))
         norm = np.linalg.norm(rot)
-        if norm > 1e-12:
+        if norm > nc.EPSILON:
             rot /= norm
         sin = np.sin(angle)
         cos = np.cos(angle)
@@ -126,12 +127,45 @@ class Periodicity:
                              " 2D or 3D.")
 
 
-    def arrange_positions(self, atoms_coords):
+    def splitcoords(self, coords):
+        """Splits Cartesian coordinates into relative and absolute parts.
+        
+        Args:
+            coords: Cartesian coordinates to split.
+            
+        Returns:
+            Tuple of relative and absolute coordinates. The original Cartesian
+            coordinates can be obtained by calculating matrix product of the
+            relative coordinates with the Cartesian axis vectors and adding the
+            absolute coordinates to it. 
+        """
+        coords = np.array(coords)
+        if self.period_type == "0D":
+            return np.empty(( len(coords), 0 ), dtype=float), coords
+        elif self.period_type == "1D":
+            axis_norm = np.linalg.norm(self._axis_cart[0])
+            relcoords = np.dot(coords, np.transpose(self._axis_cart[0])) 
+            relcoords /= axis_norm**2
+            relcoords.shape = (len(relcoords), 1)
+        elif self.period_type == "2D":
+            axis_3D = np.array(
+                [ self._axis_cart[0], self._axis_cart[1],
+                np.cross(self._axis_cart[0], self._axis_cart[1]) ])
+            invbasis = np.linalg.inv(axis_3D)
+            relcoords = np.dot(coords, invbasis)[:,0:2]
+        elif self.period_type == "3D":
+            invbasis = np.linalg.inv(self._axis_cart)
+            relcoords = np.dot(coords, invbasis)
+        shifts = coords - np.dot(relcoords, self._axis_cart)
+        return relcoords, shifts
+        
+
+    def fold_to_unitcell(self, atoms_coords):
         """Folds atoms in the central unit cell, with relative coordinates
         between 0.0 and 1.0.
         
         Args:
-            atoms_coords: Cartesian coordinates of the atoms.
+            atoms_coords: Cartesian coordinates of the atoms. 
             
         Returns:
             Cartesian coordinates of the atoms in the unit cell.
@@ -139,26 +173,12 @@ class Periodicity:
         atoms_coords = np.array(atoms_coords)
         if self.period_type == "0D":
             return atoms_coords
-        elif self.period_type == "1D":    
-            axis_norm = np.linalg.norm(self._axis_cart[0])
-            relcoords = np.dot(
-                atoms_coords, np.transpose(self._axis_cart[0])) / axis_norm**2
-            relcoords.shape = (len(relcoords), 1)
-        elif self.period_type == "2D":
-            axis_3D = np.array(
-                [ self._axis_cart[0], self._axis_cart[1],
-                np.cross(self._axis_cart[0], self._axis_cart[1]) ])
-            invbasis = np.linalg.inv(axis_3D)
-            relcoords = np.dot(atoms_coords, invbasis)[:,0:2]
-        elif self.period_type == "3D":
-            invbasis = np.linalg.inv(self._axis_cart)
-            relcoords = np.dot(atoms_coords, invbasis)
-          
-        shifts = np.floor(relcoords)
-        atoms_coords -= np.dot(shifts, self._axis_cart)
+        relcoords, shifts = self.splitcoords(atoms_coords)        
+        relcoords_folded = relcoords % 1.0
+        atoms_coords = shifts + np.dot(relcoords_folded, self._axis_cart)  
         return atoms_coords
 
-            
+
     def mask_unique(self, coords, mask=None):
         """Masks points being unique in the unit cell.
         
@@ -175,23 +195,20 @@ class Periodicity:
             unique = np.ones(( coords.shape[0], ), dtype=bool)                
         if self.period_type == "0D":
             return unique
-        
-        # TODO: make a more fine grained algorithm to speed up things.
-
-        # Fold in all atoms into the unit cell and mask out those very close
-        # to each other. Done for original cell and a slightly shifted one
-        # to make sure atom at 0 + epsilon and 1 - epsilon are recognized as
-        # identical
-        shifts = np.vstack(( [ 0.0, 0.0, 0.0 ],
-                             -1e-12 * np.sum(self._axis_cart, axis=0) ))
-        for shift in shifts:
-            foldedcoords = self.arrange_positions(coords + shift)
-            for ii in range(len(unique)):
-                if not unique[ii]:
-                    continue
-                diff2 = np.sum((foldedcoords[ii+1:,:] - foldedcoords[ii])**2,
-                               axis=1)
-                unique[ii+1:] *= diff2 > (1e-6)**2
+        relcoords, shifts = self.splitcoords(coords)
+        relcoords = np.where(
+            np.greater(relcoords, 1.0 - nc.RELATIVE_PERIODIC_TOLERANCE), 
+            relcoords - 1.0, relcoords)
+        onbounds = np.flatnonzero(np.any(np.less(relcoords, 0.01), axis=1))
+        onbounds_rel = relcoords[onbounds]
+        onbounds_cart = np.dot(onbounds_rel, self._axis_cart) + shifts[onbounds]
+        for ii in range(len(onbounds_cart)):
+            if not unique[onbounds[ii]]:
+                continue
+            diff = onbounds_cart[ii+1:] - onbounds_cart[ii]
+            equiv = np.flatnonzero(np.less(np.sum(diff**2, axis=1),
+                                           nc.DISTANCE_TOLERANCE**2))
+            unique[onbounds[equiv + ii + 1]] = False
         return unique
 
 
@@ -227,6 +244,6 @@ class Periodicity:
             if np.all(np.cross(axis[0], axis[1]) == 0):
                 error("Axis are parallel.")
         elif period_type == "3D":
-            if np.abs(np.linalg.det(axis)) < 1e-8:
+            if np.abs(np.linalg.det(axis)) < nc.EPSILON:
                 error("Linearly dependent axis")
         return cls(geometry, period_type, axis)

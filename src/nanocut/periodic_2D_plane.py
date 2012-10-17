@@ -1,4 +1,5 @@
 import numpy as np
+from nanocut.common import PERIODIC_TOLERANCE
 from nanocut.polyhedron import Polyhedron
 
 class Periodic2DPlane(Polyhedron):
@@ -33,10 +34,10 @@ class Periodic2DPlane(Polyhedron):
         d2 = np.dot(n2, axis1) 
         # Assemble polyhedron
         kwargs["planes_normal"] = np.array(
-            [[ n1[0], n1[1], n1[2], 0.0 - 1e-8 ],
-             [ n1[0], n1[1], n1[2], d1 + 1e-8 ],
-             [ n2[0], n2[1], n2[2], 0.0 - 1e-8 ],
-             [ n2[0], n2[1], n2[2], d2 + 1e-8 ],
+            [[ n1[0], n1[1], n1[2], 0.0 - PERIODIC_TOLERANCE ],
+             [ n1[0], n1[1], n1[2], d1 + PERIODIC_TOLERANCE ],
+             [ n2[0], n2[1], n2[2], 0.0 - PERIODIC_TOLERANCE ],
+             [ n2[0], n2[1], n2[2], d2 + PERIODIC_TOLERANCE ],
              [ surfnorm[0], surfnorm[1], surfnorm[2], -self.thickness / 2.0 ],
              [ surfnorm[0], surfnorm[1], surfnorm[2], self.thickness / 2.0 ]
              ])

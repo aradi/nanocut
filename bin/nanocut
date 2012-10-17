@@ -193,7 +193,7 @@ def main():
     atoms_coords, atoms_idx = getatomsinside(bodies, geo)
 
     # Fold atoms to unit cell and rotate to standard form
-    period.arrange_positions(atoms_coords)
+    period.fold_to_unitcell(atoms_coords)
     axis, atoms_coords = period.rotate_coordsys(atoms_coords)
     
     # Extend periodicity vectors if necessary

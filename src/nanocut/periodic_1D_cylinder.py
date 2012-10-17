@@ -1,4 +1,5 @@
 import numpy as np
+from nanocut.common import PERIODIC_TOLERANCE
 from nanocut.cylinder import Cylinder
 
 
@@ -22,8 +23,12 @@ class Periodic1DCylinder(Cylinder):
         self.periodicity = period
         kwargs["radius1"] = self.radius
         kwargs["radius2"] = self.radius
-        kwargs["point1"] = np.array([ 0.0, 0.0, 0.0 ], dtype=float)
-        kwargs["point2"] = period.get_axis("cartesian")[0]
+        axis = period.get_axis("cartesian")[0]
+        axisnorm = np.linalg.norm(axis) 
+        kwargs["point1"] = -axis / axisnorm * PERIODIC_TOLERANCE 
+        kwargs["point2"] = axis  + axis / axisnorm * PERIODIC_TOLERANCE 
+        kwargs["point1_coordsys"] = "cartesian"
+        kwargs["point2_coordsys"] = "cartesian"
         Cylinder.__init__(self, geometry, period, **kwargs)
 
         

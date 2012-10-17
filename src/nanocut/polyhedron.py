@@ -1,7 +1,7 @@
 import numpy as np
 from .body import Body
-import nanocut.common as nc
-from .output import error
+from nanocut.common import EPSILON
+from nanocut.output import error
 
 
 class Polyhedron(Body):
@@ -41,8 +41,9 @@ class Polyhedron(Body):
                 ddiff = planes_normal[i1, 3] - planes_normal[i2, 3]
                 cross = np.cross(planes_normal[i1, 0:3], planes_normal[i2, 0:3])
                 vsum = planes_normal[i1, 0:3] + planes_normal[i2, 0:3]
-                unique[i2] = (abs(ddiff) > 1e-12 or np.any(abs(cross)) > 1e-12
-                              or np.all(abs(vsum) < 1e-12))
+                unique[i2] = (abs(ddiff) > EPSILON 
+                              or np.any(abs(cross)) > EPSILON
+                              or np.all(abs(vsum) < EPSILON))
         self.planes_normal = planes_normal[unique]
 
         # Solve a linear equation for each triplet of planes returning their
@@ -56,7 +57,7 @@ class Polyhedron(Body):
                                         self.planes_normal[i2, 0:3],
                                         self.planes_normal[i3, 0:3] ))
                     det = np.linalg.det(coeffs)
-                    if abs(det) < 1e-12:
+                    if abs(det) < EPSILON:
                         continue
                     rhs = np.vstack((
                                      self.planes_normal[i1, 3],
@@ -66,7 +67,7 @@ class Polyhedron(Body):
                     self.corners.append(corner.flatten())
         self.corners = np.array(self.corners)
         
-        if np.all(len(self.corners) < 6 or abs(self.corners) < 1e-12):
+        if np.all(len(self.corners) < 6 or abs(self.corners) < EPSILON):
             exit('Error:\nNo or insufficient corners found.\nExiting...\n')
         self.corners += self.shift_vector
 
@@ -76,10 +77,10 @@ class Polyhedron(Body):
         # Convert miller index specifications to normal vectors
         miller_defs = kwargs.pop("planes_miller", None)
         if miller_defs is not None:
-            if np.any(np.all(abs(miller_defs[:,0:3]) < 1e-12, axis=1)):
+            if np.any(np.all(abs(miller_defs[:,0:3]) < EPSILON, axis=1)):
                 error("Emtpy miller index tuple")
-            miller_defs[:,0:3] = nc.miller_to_normal(geometry._latvecs,
-                                                     miller_defs[:,0:3])
+            miller_defs[:,0:3] = miller_to_normal(geometry._latvecs,
+                                                  miller_defs[:,0:3])
         else:
             miller_defs = np.zeros((0, 4), dtype=float)
             
@@ -89,7 +90,7 @@ class Polyhedron(Body):
             normal_defs[:,0:3] = geometry.coord_transform(
                 normal_defs[:,0:3],
                 kwargs.pop("planes_normal_coordsys", "lattice"))
-            if np.any(np.all(abs(normal_defs[:,0:3]) < 1e-12, axis=1)):
+            if np.any(np.all(abs(normal_defs[:,0:3]) < EPSILON, axis=1)):
                 error("Emtpy normal vector definition")
         else:
             normal_defs = np.zeros((0, 4), dtype=float)
@@ -119,3 +120,19 @@ class Polyhedron(Body):
         compared = (sign_atoms == sign_point)
         atoms_inside_body = np.all(compared, axis=1)
         return atoms_inside_body
+
+
+def miller_to_normal(latvecs, miller_indices):
+    """Calculates the normal form of a plane defined by Miller indices.
+    
+    Args:
+       latvecs: Lattice vectors.
+       miller_indices: Miller indices.
+       
+    Returns:
+        Normal vector(s) of the plane(s).
+    """
+    invlatvecs = np.linalg.inv(latvecs)
+    normals = np.dot(miller_indices, invlatvecs)
+    return normals
+

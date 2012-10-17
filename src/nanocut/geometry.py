@@ -1,5 +1,6 @@
 import numpy as np
-from .output import error, printstatus
+from nanocut.common import EPSILON
+from nanocut.output import error, printstatus
 
 class Geometry:
     """Class for handling crystal structure, containing unit-cell-vectors,
@@ -51,7 +52,7 @@ class Geometry:
             latvecs.shape = (3, 3)
         except ValueError:
             error("Invalid lattice vector specification.")
-        if abs(np.linalg.det(latvecs)) < 1e-8:
+        if abs(np.linalg.det(latvecs)) < EPSILON:
             error("Linearly dependent lattice vectors.")
             
         basis = section["basis"].split()

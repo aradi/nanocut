@@ -1,6 +1,7 @@
 import numpy as np
+from nanocut.common import EPSILON, PERIODIC_TOLERANCE
 from nanocut.polyhedron import Polyhedron
-from .output import error
+from nanocut.output import error
 
 class Periodic1DPrism(Polyhedron):
     """Class for periodic bodies bounded by a group of planes."""
@@ -19,7 +20,7 @@ class Periodic1DPrism(Polyhedron):
         axis = self.periodicity.get_axis("cartesian")
         planes_normal = self.pop_planes(geometry, kwargs)
         projections = abs(np.dot(planes_normal[:,:3], axis.transpose())) 
-        if np.any(projections > 1e-8):            
+        if np.any(projections > EPSILON):            
             error("Some plane(s) are not parallel to axis")
             
         # Determine basal planes. Shift them with a small amount to make sure
@@ -27,8 +28,8 @@ class Periodic1DPrism(Polyhedron):
         axisnorm = np.linalg.norm(axis[0])
         axis0 = axis[0] / axisnorm
         basal_planes = np.array(
-            [[ axis0[0], axis0[1], axis0[2], -1e-8 ],
-             [ axis0[0], axis0[1], axis0[2], axisnorm + 1e-8 ]])
+            [[ axis0[0], axis0[1], axis0[2], -PERIODIC_TOLERANCE ],
+             [ axis0[0], axis0[1], axis0[2], axisnorm + PERIODIC_TOLERANCE ]])
         
         # Extend planes by basal planes and call base class
         planes_normal = np.vstack(( basal_planes, planes_normal ))
