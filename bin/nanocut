@@ -181,7 +181,9 @@ def main():
     configdict = read_inifile(args.inifile)
 
     # Process crystal geometry
-    geo = geometry.Geometry.fromdict(configdict)
+    if "geometry" not in configdict:
+        output.error("Section geometry missing")
+    geo = geometry.Geometry.fromdict(configdict["geometry"])
     
     # Process periodicity
     period = periodicity.Periodicity.fromdict(geo, configdict)

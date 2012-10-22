@@ -96,6 +96,13 @@ structure. Following options can be specified:
   (fractional coordinates) and ``cartesian`` (cartesian coordinates in Angstrom)
   with first being the default.
 
+`shift_vector` (optional) It would shift the coordinates of the basis atoms by
+  the given amount. You can use it to create structures with a different origin
+  as the one you would obtain based on the specified coordinates.
+
+`shift_vector_coordsys` (optional)
+  Coordinate system of the shift vector: ``lattice`` (default) or ``cartesian``.
+
 
 Periodicity
 ***********

@@ -85,6 +85,39 @@ The resulting cluster is rather big, but looks indeed spherical (see Figure
 
      Spherical diamond cluster
 
+The cluster you obtain this way is atom centered. If you wanted a Td-site
+centered sphere with its center in the origin instead, you could shift the basis
+atom coordinates by the appropriate amount::
+
+  [geometry] 
+  lattice_vectors: 
+    0.00000000  1.78500000  1.78500000
+    1.78500000  0.00000000  1.78500000
+    1.78500000  1.78500000  0.00000000
+
+  basis:
+    C     0.00     0.00   0.00
+    C     0.25     0.25   0.25
+  basis_coordsys: lattice
+
+  shift_vector: 0.25 0.25 0.25
+  shift_vector_coordsys: lattice
+
+  [sphere: 1]
+  radius: 10
+
+This results in a spherical, Td-centered cluster as shown in Figure
+:ref:`fig-spherical-diamond-td`.
+
+  .. _fig-spherical-diamond-td:
+  .. figure:: _figures/examples/sphere2.png
+     :height: 40ex
+     :align: center
+     :alt: Spherical diamond cluster
+
+     Spherical Td-centered diamond cluster
+
+
 
 
 Cylindrical silicon carbide cluster

@@ -7,7 +7,8 @@ class Geometry:
     atom coordinates and names of atoms."""
 
     def __init__(self, latvecs, basis, basis_names_idx, basis_names,
-                 basis_coordsys="lattice"):
+                 basis_coordsys="lattice", shift=None,
+                 shift_coordsys="lattice"):
         """Initializes Geometry object.
         
         Args:
@@ -24,6 +25,9 @@ class Geometry:
         self._basis_coordsys = basis_coordsys
         self._basis = np.array(basis, dtype=float)
         self._basis = self.coord_transform(basis, basis_coordsys)
+        if shift is not None:
+            shift = self.coord_transform(shift, shift_coordsys)
+            self._basis += shift
         self._basis = self.mv_basis_to_prim(self._basis)
 
 
@@ -35,40 +39,41 @@ class Geometry:
             cls: Class type.
             inidict: Dictionary with settings
         """
-
-        
-        try:
-            section = inidict["geometry"]
-        except KeyError:
-            error("Geometry not defined.")
-        if "lattice_vectors" not in section:
+        if "lattice_vectors" not in inidict:
             error("latvecs not defined.")
-        if "basis" not in section:
-            error("Basis not defined.")
-            
+        if "basis" not in inidict:
+            error("Basis not defined.")            
         try:
             latvecs = np.array(
-                [ float(s) for s in section["lattice_vectors"].split() ])
+                [ float(s) for s in inidict["lattice_vectors"].split() ])
             latvecs.shape = (3, 3)
         except ValueError:
             error("Invalid lattice vector specification.")
         if abs(np.linalg.det(latvecs)) < EPSILON:
             error("Linearly dependent lattice vectors.")
             
-        basis = section["basis"].split()
+        basis = inidict["basis"].split()
         basis_names=[ basis.pop(idx) 
                       for idx in range(0, len(basis) * 3 // 4, 3) ]
         try:
             basis = np.array([ float(s) for s in basis ])
             basis.shape= (-1, 3)
         except ValueError:
-            exit("Invalid basis specification.")
+            error("Invalid basis specification.")
         basis_names_idx = range(len(basis))
-        basis_coordsys = section.get("basis_coordsys", "lattice")
+        basis_coordsys = inidict.get("basis_coordsys", "lattice")
         if basis_coordsys not in ["lattice", "cartesian"]:
             error("Invalid coordinate system specification.")
+            
+        shiftstr = inidict.get("shift_vector", "0.0 0.0 0.0")
+        try:
+            shift = np.array([ float(ss) for ss in shiftstr.split() ])
+        except ValueError:
+            error("Invalid shift vector for basis")
+        shift_coordsys = inidict.get("shift_vector_coordsys", "lattice")
 
-        return cls(latvecs, basis, basis_names_idx, basis_names, basis_coordsys)
+        return cls(latvecs, basis, basis_names_idx, basis_names, basis_coordsys,
+                   shift, shift_coordsys)
 
 
     def coord_transform(self, array, array_coordsys):
