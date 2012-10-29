@@ -21,4 +21,4 @@ implemented in a more user friendly way. The project is currently hosted under
  `http://bitbucket.org/aradi/nanocut <http://bitbucket.org/aradi/nanocut>`_
 
 If you find the program useful, please recommend it to others who may be also
-interested to use it.
+interested in using it.

@@ -5,7 +5,8 @@ Examples
 
 Here you find some examples demonstrating Nanocut's capablities. You have at
 least one example for every geometrical body. The molecules had been visualized
-and rendered using `Jmol <http://jmol.sourceforge.net/>`_.
+and rendered using `Jmol <http://jmol.sourceforge.net/>`_ and `Povray
+<http://www.povray.org/>`_.
 
 
 Clusters (0D)
@@ -107,7 +108,7 @@ atom coordinates by the appropriate amount::
   radius: 10
 
 This results in a spherical, Td-centered cluster as shown in Figure
-:ref:`fig-spherical-diamond-td`.
+:ref:`fig-spherical-diamond-td` (radius had been decreased to 10 Angstrom).
 
   .. _fig-spherical-diamond-td:
   .. figure:: _figures/examples/sphere2.png
@@ -162,7 +163,7 @@ Nanowires (1D)
 --------------
 
 Cylindrical sodium chloride [111] wire
---------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Input for a salty wire::
 
@@ -308,14 +309,16 @@ cell would require an input like this::
   [periodicity]
   period_type: 2D
   axis:
-     0 0  4
-     4 -4 0
+     0 0  1
+     1 -1 0
+  axis_repetition: 4 4
 
   [periodic_2D_plane:slab]
   thickness: 12
 
-
-As result, you would obtain the slab in Figure :ref:`fig-diamond-slab`.
+Please note, that Nanocut always gives the smallest possible unit cell, so that
+the ``axis_repetition`` opion must be use to enlarge it. As result, you would
+obtain the slab in Figure :ref:`fig-diamond-slab`.
 
   .. _fig-diamond-slab:
   .. figure:: _figures/examples/diamond100.png
@@ -324,6 +327,51 @@ As result, you would obtain the slab in Figure :ref:`fig-diamond-slab`.
      :alt: Diamond [100] slab
 
      Diamond slab
+
+
+Diamond (211) surface
+^^^^^^^^^^^^^^^^^^^^^
+
+An alternative way to specify the surface plane a slab is to specify its Miller
+index. Since the Miller indices are usually given with respect to the
+conventional Bravais lattice, the ``bravais_cell`` option in the ``[geometry]``
+should be used. (The appropriate transformation matrix can be also determined
+via Nanocut, see the section :ref:`sec-auto-bravais-cell`). For the 211 diamond
+surface the input would look as the following::
+
+  [geometry] 
+  lattice_vectors: 
+     0.000  1.785  1.785
+     1.785  0.000  1.785
+     1.785  1.785  0.000
+
+  basis:
+    C  0.00  0.00  0.00
+    C  0.25  0.25  0.25
+
+  bravais_cell:
+    -1  1  1
+     1 -1  1
+     1  1 -1
+
+  [periodicity]
+  period_type: 2D
+  miller_indices: 2 1 1
+
+  [periodic_2D_plane:slab]
+  thickness: 10
+
+
+The resuling structure should look something like Figure
+:ref:`fig-diamond-slab-211`.
+
+  .. _fig-diamond-slab-211:
+  .. figure:: _figures/examples/diamond211.png
+     :height: 40ex
+     :align: center
+     :alt: Diamond 211 surface
+
+     Diamond 211 surface
 
 
 
@@ -347,17 +395,15 @@ size::
     Si    0.00     0.00   0.00
     C     0.25     0.25   0.25
 
-  basis_coordsys: lattice
-
   [periodicity]
   period_type: 3D
   axis:
-    -2  2  2
-     2 -2  2
-     2  2 -2
+    -1  1  1
+     1 -1  1
+     1  1 -1
+  axis_repetition: 2 2 2
 
   [periodic_3D_supercell:1]
-  # Shifting to get more compact cluster
   shift_vector: -0.5 -0.5 -0.5
 
 In the input above, the resulting supercell had been shifted by the half of the
@@ -371,3 +417,42 @@ Figure :ref:`fig-cubic-sic-supercell`).
      :alt: Cubic 3C-SiC supercell
 
      Cubic 3C-SiC supercell
+
+
+.. _sec-auto-bravais-cell:
+
+Automatic Bravais cell search
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Nanocut can help you to find the transformation matrix, which creates the
+Bravais lattice from the primitive lattice. For example, in order to get the
+cubic conventional cell of SiC, you can enter the following configuration file::
+
+  [geometry] 
+  lattice_vectors: 
+    0.00000000  2.18000000  2.1800000
+    2.18000000  0.00000000  2.18000000
+    2.18000000  2.18000000  0.00000000
+
+  basis:
+    Si    0.00     0.00   0.00
+    C     0.25     0.25   0.25
+
+  [periodicity]
+  period_type: 3D
+  superlattice:
+     1.0  0.0  0.0
+     0.0  1.0  0.0
+     0.0  0.0  1.0
+
+  [periodic_3D_supercell:bravais]
+  
+
+As a result, Nanocut would print the transformation matrix::
+
+  Axis with respect to primitive lattice:
+     -1   1   1
+      1  -1   1
+      1   1  -1
+
+Additionally the resulting geometry file would contain the 8 atom cubic
+conventional cell.

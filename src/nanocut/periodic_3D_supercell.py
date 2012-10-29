@@ -30,15 +30,19 @@ class Periodic3DSupercell(Polyhedron):
         # Distances of the side planes from the origin
         d12 = np.dot(n12, axis3)
         d23 = np.dot(n23, axis1)
-        d31 = np.dot(n31, axis2) 
+        d31 = np.dot(n31, axis2)
+        # Sign of positive distance 
+        s12 = np.sign(d12)
+        s23 = np.sign(d23)
+        s31 = np.sign(d31)
         # Assemble polyhedron
         kwargs["planes_normal"] = np.array(
-            [[ n12[0], n12[1], n12[2], -PERIODIC_TOLERANCE ],
-             [ n23[0], n23[1], n23[2], -PERIODIC_TOLERANCE ],
-             [ n31[0], n31[1], n31[2], -PERIODIC_TOLERANCE ],
-             [ n12[0], n12[1], n12[2], d12 + PERIODIC_TOLERANCE ],
-             [ n23[0], n23[1], n23[2], d23 + PERIODIC_TOLERANCE ],
-             [ n31[0], n31[1], n31[2], d31 + PERIODIC_TOLERANCE ],
+            [[ n12[0], n12[1], n12[2], -s12 * PERIODIC_TOLERANCE ],
+             [ n23[0], n23[1], n23[2], -s23 * PERIODIC_TOLERANCE ],
+             [ n31[0], n31[1], n31[2], -s31 * PERIODIC_TOLERANCE ],
+             [ n12[0], n12[1], n12[2], d12 + s12 * PERIODIC_TOLERANCE ],
+             [ n23[0], n23[1], n23[2], d23 + s23 * PERIODIC_TOLERANCE ],
+             [ n31[0], n31[1], n31[2], d31 + s31 * PERIODIC_TOLERANCE ],
              ])
         kwargs["planes_normal_coordsys"] = "cartesian"
         Polyhedron.__init__(self, geometry, period, **kwargs)

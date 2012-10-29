@@ -2,7 +2,7 @@
 from distutils.core import setup
 
 setup(name="nanocut",
-      version="12.10",
+      version="12.11",
       description="Cutting out various shapes from crystals",
       author="Florian Uekermann, Sebastian Fiedel, Bálint Aradi",
       author_email="baradi09@gmail.com",

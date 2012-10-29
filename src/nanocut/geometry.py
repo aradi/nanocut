@@ -8,7 +8,7 @@ class Geometry:
 
     def __init__(self, latvecs, basis, basis_names_idx, basis_names,
                  basis_coordsys="lattice", shift=None,
-                 shift_coordsys="lattice"):
+                 shift_coordsys="lattice", bravais_cell=None):
         """Initializes Geometry object.
         
         Args:
@@ -17,18 +17,23 @@ class Geometry:
             basis_names_idx: Type index of every atom in the basis.
             basis_names: List of atom types.
             basis_coordsys: Coordinate system for the basis (should be "lattice"
-                or "cartesian")
+                or "cartesian").
+            bravais_cell: Specifies the Bravais superlattice.
         """
         self.latvecs = np.array(latvecs, dtype=float)
-        self._basis_names_idx = basis_names_idx
-        self._basis_names = basis_names
-        self._basis_coordsys = basis_coordsys
-        self._basis = np.array(basis, dtype=float)
-        self._basis = self.coord_transform(basis, basis_coordsys)
+        self.basis_names_idx = basis_names_idx
+        self.basis_names = basis_names
+        self.basis_coordsys = basis_coordsys
+        self.basis = np.array(basis, dtype=float)
+        self.basis = self.coord_transform(basis, basis_coordsys)
         if shift is not None:
             shift = self.coord_transform(shift, shift_coordsys)
-            self._basis += shift
-        self._basis = self.mv_basis_to_prim(self._basis)
+            self.basis += shift
+        self.basis = self.mv_basis_to_prim(self.basis)
+        if bravais_cell is not None:
+            self.bravais_cell = np.array(bravais_cell)
+        else:
+            self.bravais_cell = np.eye(3, dtype=float)
 
 
     @classmethod
@@ -68,12 +73,21 @@ class Geometry:
         shiftstr = inidict.get("shift_vector", "0.0 0.0 0.0")
         try:
             shift = np.array([ float(ss) for ss in shiftstr.split() ])
+            shift.shape = (3, )
         except ValueError:
             error("Invalid shift vector for basis")
         shift_coordsys = inidict.get("shift_vector_coordsys", "lattice")
+        
+        bravais_cell = inidict.get("bravais_cell", "1 0 0  0 1 0  0 0 1")
+        try:
+            bravais_cell = np.array(
+                [ float(ss) for ss in bravais_cell.split() ])
+            bravais_cell.shape = (3, 3)
+        except ValueError:
+            error("Invalid Bravais cell definition")
 
         return cls(latvecs, basis, basis_names_idx, basis_names, basis_coordsys,
-                   shift, shift_coordsys)
+                   shift, shift_coordsys, bravais_cell)
 
 
     def coord_transform(self, array, array_coordsys):
@@ -160,7 +174,7 @@ class Geometry:
         Returns:
             Name (type) of the atom.
         """
-        return self._basis_names[self._basis_names_idx[index]]
+        return self.basis_names[self.basis_names_idx[index]]
 
 
     def gen_atoms(self, lattice_points):
@@ -174,13 +188,13 @@ class Geometry:
         Returns:
             Coordinates of all atoms in the cells with the given coordinates. 
         """
-        nbasis = len(self._basis)
+        nbasis = len(self.basis)
         nlatpoint = len(lattice_points) 
         atoms_coords = np.empty((nlatpoint * nbasis , 3), dtype=float)
         # Taking longer loop (instead over range(len(basis)) to have nicer
         # output with atoms being in the same cell having close indices.
         for ii in range(nlatpoint):
-            atoms_coords[ii * nbasis : (ii + 1) * nbasis ] = (self._basis +
+            atoms_coords[ii * nbasis : (ii + 1) * nbasis ] = (self.basis +
                 lattice_points[ii])
         atoms_idx = np.resize(np.arange(nbasis), (nlatpoint * nbasis))
         return atoms_coords, atoms_idx

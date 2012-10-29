@@ -31,13 +31,16 @@ class Periodic2DPlane(Polyhedron):
         n2 /= np.linalg.norm(n2)
         # Distances of the side planes from the origin
         d1 = np.dot(n1, axis2)
-        d2 = np.dot(n2, axis1) 
+        d2 = np.dot(n2, axis1)
+        # Sign of the positive distance
+        s1 = np.sign(d1)
+        s2 = np.sign(d2)
         # Assemble polyhedron
         kwargs["planes_normal"] = np.array(
-            [[ n1[0], n1[1], n1[2], 0.0 - PERIODIC_TOLERANCE ],
-             [ n1[0], n1[1], n1[2], d1 + PERIODIC_TOLERANCE ],
-             [ n2[0], n2[1], n2[2], 0.0 - PERIODIC_TOLERANCE ],
-             [ n2[0], n2[1], n2[2], d2 + PERIODIC_TOLERANCE ],
+            [[ n1[0], n1[1], n1[2], 0.0 -s1 * PERIODIC_TOLERANCE ],
+             [ n1[0], n1[1], n1[2], d1 + s1 * PERIODIC_TOLERANCE ],
+             [ n2[0], n2[1], n2[2], 0.0 - s2 * PERIODIC_TOLERANCE ],
+             [ n2[0], n2[1], n2[2], d2 + s2 * PERIODIC_TOLERANCE ],
              [ surfnorm[0], surfnorm[1], surfnorm[2], -self.thickness / 2.0 ],
              [ surfnorm[0], surfnorm[1], surfnorm[2], self.thickness / 2.0 ]
              ])

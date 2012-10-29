@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-import sys
 import argparse
 import numpy as np
 import configparser
 from nanocut import *
+
+VERSION = "12.11"
+HOMEURL = "http://aradi.bitbucket.org/nanocut"
 
 BODYOBJECTS = {
     "0D": {
@@ -18,7 +20,9 @@ BODYOBJECTS = {
     "2D": {
            "periodic_2D_plane": periodic_2D_plane.Periodic2DPlane,
            },
-    "3D": { "periodic_3D_supercell": periodic_3D_supercell.Periodic3DSupercell }
+    "3D": { 
+           "periodic_3D_supercell": periodic_3D_supercell.Periodic3DSupercell
+           }
     }
 
 
@@ -29,7 +33,8 @@ def parse_args():
         Parsed command line as Namespace object.
     """
     parser = argparse.ArgumentParser(
-        description="Cuts out various 0D, 1D and 2D shapes from crystals.")
+        description="Cuts out various 0D, 1D and 2D shapes from crystals.",
+        epilog="See {:s} for detailed documentation.".format(HOMEURL))
     parser.add_argument(
         "-a", "--append", action="store_true", default=False,
         help="appends created structure to output file (instead of overwriting "
@@ -42,6 +47,7 @@ def parse_args():
         default=None, dest="oveclen",
         help="add orthogonal lattice vectors of given size to make a 3D "
         "supercell")
+    parser.add_argument("--version", action="version", version=VERSION)
     parser.add_argument("inifile", help="initialization file")
     parser.add_argument(
         "resultxyz",
@@ -55,6 +61,11 @@ def parse_args():
 
 
 def process_arguments(args):
+    """Process any command line argument which needs attention at start.
+    
+    Args:
+       args: Command line arguments (Namespace object).
+    """
     output.set_verbosity(args.verbosity)
 
 
@@ -68,11 +79,11 @@ def read_inifile(filename):
     try:
         configfile = open(filename, "r")
     except IOError:
-        sys.exit("Error: Can't open " + filename + ".\nExiting")
+        output.error("Can't open " + filename + ".")
     try:
         ini.readfp(configfile)
     except configparser.Error as error:
-        sys.exit("Error: Malformed ini-file:\n" + str(error) + "\nExiting")
+        output.error("Malformed ini-file:\n" + str(error))
     configfile.close()
     return ini
      
@@ -186,7 +197,10 @@ def main():
     geo = geometry.Geometry.fromdict(configdict["geometry"])
     
     # Process periodicity
-    period = periodicity.Periodicity.fromdict(geo, configdict)
+    if "periodicity" not in configdict:
+        configdict.add_section("periodicity")
+        configdict.set("periodicity", "period_type", "0D")
+    period = periodicity.Periodicity.fromdict(geo, configdict["periodicity"])
     
     # Process bodies
     bodies = getbodies(configdict, BODYOBJECTS[period.period_type], geo, period)
@@ -211,3 +225,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+### Local Variables:
+### mode: python
+### End:

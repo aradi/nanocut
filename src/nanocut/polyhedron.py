@@ -79,8 +79,9 @@ class Polyhedron(Body):
         if miller_defs is not None:
             if np.any(np.all(abs(miller_defs[:,0:3]) < EPSILON, axis=1)):
                 error("Emtpy miller index tuple")
-            miller_defs[:,0:3] = miller_to_normal(geometry._latvecs,
-                                                  miller_defs[:,0:3])
+            miller_defs[:,0:3] = miller_to_normal(
+                np.dot(geometry.latvecs, geometry.bravais_cell),
+                miller_defs[:,0:3])
         else:
             miller_defs = np.zeros((0, 4), dtype=float)
             
@@ -101,7 +102,7 @@ class Polyhedron(Body):
 
 
     def containing_cuboid(self):
-        """Returns the edges of the containing cuboid (see Body class).""" 
+        """Returns the edges of the containing cuboid (see Body class)."""
         return np.vstack(( self.corners.min(axis=0),
                            self.corners.max(axis=0) ))
 
@@ -130,9 +131,8 @@ def miller_to_normal(latvecs, miller_indices):
        miller_indices: Miller indices.
        
     Returns:
-        Normal vector(s) of the plane(s).
+        Cartesian normal vector(s) of the plane(s).
     """
     invlatvecs = np.linalg.inv(latvecs)
     normals = np.dot(miller_indices, invlatvecs)
     return normals
-
