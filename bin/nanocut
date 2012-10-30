@@ -47,15 +47,17 @@ def parse_args():
         default=None, dest="oveclen",
         help="add orthogonal lattice vectors of given size to make a 3D "
         "supercell")
+    parser.add_argument(
+        "-g", "--gen-format", action="store_true", default=False, dest="gen",
+        help="creates result file in GEN format (instead of XYZ)")
     parser.add_argument("--version", action="version", version=VERSION)
     parser.add_argument("inifile", help="initialization file")
     parser.add_argument(
-        "resultxyz",
-        help="file write the resulting structure in xyz format into")
+        "result",
+        help="file to write the resulting structure in xyz/gen format into")
     parser.add_argument(
         "latvecs", nargs="?",
-        help="file to store lattice vectors (if not specified, lattice vectors "
-        "will be written to the commend field of the xyz file)")
+        help="extra file to store lattice vectors")
 
     return parser.parse_args()
 
@@ -217,8 +219,8 @@ def main():
         axis = extend_axis(axis, args.oveclen)
 
     # Write object to file
-    output.write_crystal(geo,atoms_coords, atoms_idx, axis, args.resultxyz,
-                         args.append, args.latvecs)
+    output.write_crystal(geo,atoms_coords, atoms_idx, axis, args.result,
+                         args.append, args.gen, args.latvecs)
     
     output.printstatus("Done.")
 

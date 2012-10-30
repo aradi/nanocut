@@ -1,4 +1,5 @@
 import sys
+from collections import OrderedDict
 
 # Verbosity level
 verbosity = 1
@@ -7,7 +8,7 @@ verbosity = 1
 INDENT_STR = " " * 2
 
 def write_crystal(geometry, atoms_coords, atoms_idx, axis, resultfilename,
-                  append, latvecsfilename):
+                  append, gen, latvecsfilename):
     """Write out the resulting crystaline structure.
     
     Args:
@@ -17,6 +18,7 @@ def write_crystal(geometry, atoms_coords, atoms_idx, axis, resultfilename,
         axis: Translational vectors.
         resultfilename: Name of the file to write the resulting structure.
         append: Whether the result file should be overwritten or appended.
+        gen: Whether the result should be written in the gen format.
         latvecsfilename: Name of the file to write the lattice vectors to
             instead to the xyz-file (or "").
     """
@@ -39,20 +41,67 @@ def write_crystal(geometry, atoms_coords, atoms_idx, axis, resultfilename,
                 "({:.10f} {:.10f} {:.10f})".format(*axisvec))
         axis_string = " ".join(tmp)
 
-    # Write xyz file
-    natom = atoms_idx.shape[0]
-    mode = "w+" if append else "w"
-    printstatus("Writing structrure file '{}'".format(resultfilename))
+    # Write geometry
     try:
+        mode = "w+" if append else "w"
         fp = open(resultfilename, mode)
     except IOError:
         error("Can't open '" + resultfilename + "'.")
-    fp.write("{:d}\n{:s}\n".format(natom, axis_string))
+    printstatus("Writing structrure file '{}'".format(resultfilename))
+    if gen:
+        writegen(fp, atoms_idx, atoms_coords, geometry, axis)
+    else:
+        writexyz(fp, atoms_idx, atoms_coords, geometry, axis_string)
+    fp.close()
+    
+    
+def writexyz(fp, atoms_idx, atoms_coords, geometry, comment):
+    """Writes the geometry in xyz format.
+    
+    Args:
+        fp: Opened file.
+        atoms_idx: Type index of the atoms.
+        atoms_coords: Coordinates of the atoms.
+        geometry: Geometry of the primitive lattice.
+        comment: Comment string.
+    """
+    natom = atoms_idx.shape[0]
+    fp.write("{:d}\n{:s}\n".format(natom, comment))
     for it in range(len(atoms_coords)):
         fp.write(" {:<3s} {:18.10f} {:18.10f} {:18.10f}\n".format(
                 geometry.get_name_of_atom(atoms_idx[it]),
                 *atoms_coords[it,:]))
-    fp.close()
+
+        
+def writegen(fp, atoms_idx, atoms_coords, geometry, axis):
+    """Writes the geometry in gen format.
+    
+    Args:
+        fp: Opened file.
+        atoms_idx: Type index of the atoms.
+        atoms_coords: Coordinates of the atoms.
+        geometry: Geometry of the primitive lattice.
+        axis: Lattice vectors.
+    """
+    atomdict = OrderedDict()
+    for atomtype in geometry.get_atom_type_names():
+        if atomtype not in atomdict:
+            atomdict[atomtype] = len(atomdict)
+    natom = atoms_idx.shape[0]
+    if len(axis):
+        fp.write("{:d} S\n".format(natom))
+    else:
+        fp.write("{:d} C\n".format(natom))
+
+    fp.write(" " + " ".join(atomdict.keys()) + "\n")
+    for ii in range(len(atoms_coords)):
+        fp.write(" {:5d} {:3d} {:18.10f} {:18.10f} {:18.10f}\n".format(
+            ii + 1, atomdict[geometry.get_name_of_atom(atoms_idx[ii])] + 1,
+            *atoms_coords[ii]))
+    if len(axis):
+        fp.write("{0:18.10f} {0:18.10f} {0:18.10f}\n".format(0.0))
+        for vec in axis:
+            fp.write("{:18.10f} {:18.10f} {:18.10f}\n".format(*vec))
 
 
 def error(msg):

@@ -164,6 +164,9 @@ class Geometry:
         inside = np.logical_not(np.logical_or(cond1, cond2))
         return np.dot(nmo[inside], self.latvecs)
     
+    def get_atom_type_names(self):
+        return self.basis_names
+    
 
     def get_name_of_atom(self, index):
         """Returns the name of an atom with given index.
