@@ -33,7 +33,7 @@ within. For example, in order to cut out a spherical diamond cluster with radius
 
 Please note, that option values going over more than one line require that the
 continuation lines are indented by at least one whitespace character (like for
-``lattice_vectors`` and ``basis`` above).  Lines starting with hashmark (``#``)
+`lattice_vectors` and `basis` above).  Lines starting with hashmark (``#``)
 are treated as comments.
 
 Below you find the formal description of the different options. For more
@@ -73,7 +73,7 @@ structure. Following options can be specified:
 `basis_coordsys` (optional)
   Defines the coordinate system of the basis. Possible values are ``lattice``
   (fractional coordinates) and ``cartesian`` (Cartesian coordinates in Angstrom)
-  with ``lattice`` being the default.
+  with ``lattice`` being default.
 
   To indicate that coordinates in the `basis` section are Cartesian coordinates
   in Angstrom (instead of fractional coordinates), you would have to write::
@@ -84,7 +84,7 @@ structure. Following options can be specified:
   It shifts the coordinates of the basis atoms by the given amount. You can
   use it to create structures with a different origin as the one you would
   obtain based on the specified coordinates. It is specified in
-  fractional coordinates, unless set in `shift_vector_coordsys` differently.
+  fractional coordinates, unless set differently in `shift_vector_coordsys`.
 
   If you wanted the diamond lattice from the example above being centered around
   a tetrahedral interstitial site (instead of the atom in the origin), you could
@@ -99,9 +99,7 @@ structure. Following options can be specified:
   Specifies the conventional Bravais cell as linear combination of the primitve
   lattice vectors (3x3 integers). If set, the axis specifications in the
   `periodicity` section and any Miller indices in the input file will
-  interpreted with respect to the conventional Bravais cell. (The `superlattice`
-  option in the `periodicity` section can be used to find out the transformation
-  vector for the conventional Bravais cell.)
+  interpreted with respect to the conventional Bravais cell. 
 
   The cubic Bravais cell of diamond would require the input::
 
@@ -110,6 +108,10 @@ structure. Following options can be specified:
        1 -1  1
        1  1 -1
 
+  You can use the `superlattice` option in the `periodicity` section to find out
+  the transformation matrix for the Bravais cell (see :ref:`sec-periodicity`).
+
+.. _sec-periodicity:
 
 Periodicity
 ***********
@@ -131,15 +133,18 @@ of the translations. Following options can be specified:
   (:ref:`sec-geometry`), the numbers are interpreted as fractional coordinates
   of either the primitive lattice or the conventional Bravais
   lattice. The numbers must be integers. For 2D and 3D periodicity you can
-  alternatively use the keywords `miller_indices` or `superlattice`.
+  alternatively use the keywords `miller_indices` or `superlattice` to specify
+  the periodicity.
 
   A nanowire along the 001 direction can be specified as::
 
+    [periodicity]
     period_type: 1D
     axis: 0 0 1
 
   A slab in the plane of the vectors 100 and 010 can be specified as::
   
+    [periodicity]
     period_type: 2D
     axis:
       1 0 0
@@ -147,15 +152,17 @@ of the translations. Following options can be specified:
 
   A possible 3D supercell definition could look like::
   
-     period_type: 3D
-     axis:
-       -1  1  1
-        1 -1  1
-        1  1 -1
+    [periodicity]
+    period_type: 3D
+    axis:
+      -1  1  1
+       1 -1  1
+       1  1 -1
 
 `axis_repetition` (optional)
   Integer scaling factors for the translational vectors. Nanocut creates per
-  default the smallest possible unit cell.  It requires one (1D), two (2D) or
+  default the smallest possible unit cell along the specified periodicity axes,
+  which can be repeated by using this option. It requires one (1D), two (2D) or
   three (3D) integer numbers, respectively. Default value is one for all axis
   (no enlargment of the cell).
 
@@ -175,6 +182,7 @@ of the translations. Following options can be specified:
 
   The following example shows the input for a 211 surface slab::
 
+    [periodicity]
     miller_indices: 2 1 1
 
 `superlattice` (optional, only for 3D)
@@ -189,8 +197,10 @@ of the translations. Following options can be specified:
   possible 3D cell, which can be enlarged using the `axis_repetition` keyword if
   necessary.
 
-  To search for a cubic supercell for a given lattice, you should specify::
+  For example, in order to search for a cubic supercell for a given lattice, you
+  should specify::
 
+    [periodicity]
     superlattice:
       1.0  0.0  0.0
       0.0  1.0  0.0
@@ -228,11 +238,12 @@ the following options:
 
 `additive` (optional)
   Specifies whether the atoms inside the given body should be added to or
-  subtracted from the previous structure.
+  subtracted from the previous structure (default: ``true``).
 
   In order to subtract a given body from the previous results, specify::
 
     additive: false
+
 
 
 Sphere
@@ -242,10 +253,10 @@ Specified as `[sphere: NAME]` with following options:
 `radius`
   Radius of the sphere.
 
-In order to cut a sphere with radius 10 Angstrom::
+In order to cut a sphere with a radius of 10 Angstrom::
 
   [sphere: 1]
-  radius = 5
+  radius = 10
 
 
 
@@ -267,7 +278,7 @@ you can also create truncated cones.
 `radius1`, `radius2`
   Radius of the circular areas.
 
-Example for a truncated cone along the 111 Cartesian directon::
+Example for a truncated cone along the 111 Cartesian direction::
 
   [cylinder: 1]
   point1: 0 0 0
@@ -287,7 +298,9 @@ normal vectors.
 
 `planes_miller` 
   Miller indices of the delimiting planes (except those defined using normal
-  vectors) followed by their distance from the origin.
+  vectors) followed by their distance from the origin. Depending on the settings
+  in the `[geometry]` section, the Miller indices are interpreted with respect
+  to the primitive lattice or the Bravais lattice.
 
 `planes_normal` 
   Orthogonal vectors for each plane (except those defined using Miller indices)
@@ -322,7 +335,7 @@ the origin and its normal vector is parallel to the axis specified in the
 `[periodicity]` section.
 
 `radius`
-  The cylinders radius.
+  Cylinder radius.
 
 A cylindrical nanowire of the radius 5 Angstrom can be defined as::
 
@@ -346,8 +359,8 @@ vector. The planes must be parallel to the periodicity axis specified in the
   to the primitive lattice or the Bravais lattice.
 
 `planes_normal`
-  Vector orthogonal to each plane (except those defined using Miller indices)
-  followed by its distance from the origin. 
+  Orthogonal vector to each plane (except those defined using Miller indices)
+  followed by the distance of the plane from the origin. 
 
 `planes_normal_coordsys`
   Coordinate system for the normal vectors of the planes (``lattice`` or
@@ -367,16 +380,16 @@ Example for a 001 wire with quadratic cross section::
 Slab (2D)
 ^^^^^^^^^
 
-The `[periodic_2D_plane]` section specifies a slab delimited by two parallel
-planes and being periodic along the planes. The upper and lower limiting planes
-are equidistant from the origin. The direction of the limiting planes are
-automatically derived from the periodicity specified in the ``[periodicity]``
-section.
+The `[periodic_2D_plane:NAME]` section specifies a slab delimited by two
+parallel planes and being periodic along the planes. The upper and lower
+limiting planes are equidistant from the origin. The direction of the limiting
+planes are automatically derived from the periodicity specified in the
+``[periodicity]`` section.
 
 `thickness`
   Thickness of the slab.
 
-Slab with thickness of 20 Angstrom::
+Sample input for a slab with thickness of 20 Angstrom::
 
   [periodic_2D_plane:slab]
   thickness: 20
@@ -386,7 +399,7 @@ Slab with thickness of 20 Angstrom::
 Supercell (3D)
 ^^^^^^^^^^^^^^
 
-The `[periodic_3D_supercell]` section specifies a supercell built from the
+The `[periodic_3D_supercell:NAME]` section specifies a supercell built from the
 unit cell of the original crystal. It does not take any further options,
 everything is derived from the settings in the `[periodicity]` section::
 

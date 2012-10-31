@@ -42,7 +42,7 @@ A nice octahedral shaped diamond cluster for your quantum bit project::
 
   planes_normal_coordsys: cartesian
 
-You should obtain accordingly a 165 atom cluster as in Figure
+You should obtain a 165 atom cluster as in Figure
 :ref:`fig-octahedral-diamond`.
 
   .. _fig-octahedral-diamond:
@@ -87,8 +87,9 @@ The resulting cluster is rather big, but looks indeed spherical (see Figure
      Spherical diamond cluster
 
 The cluster you obtain this way is atom centered. If you wanted a Td-site
-centered sphere with its center in the origin instead, you could shift the basis
-atom coordinates by the appropriate amount::
+centered sphere instead (its center being in the origin), you should shift the
+basis atom coordinates by the appropriate amount using the ``shift_vector``
+option in the ``[geometry]`` section::
 
   [geometry] 
   lattice_vectors: 
@@ -108,7 +109,7 @@ atom coordinates by the appropriate amount::
   radius: 10
 
 This results in a spherical, Td-centered cluster as shown in Figure
-:ref:`fig-spherical-diamond-td` (radius had been decreased to 10 Angstrom).
+:ref:`fig-spherical-diamond-td` (the radius had been decreased to 10 Angstrom).
 
   .. _fig-spherical-diamond-td:
   .. figure:: _figures/examples/sphere2.png
@@ -165,10 +166,9 @@ Nanowires (1D)
 Cylindrical sodium chloride [111] wire
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Input for a salty wire::
+An input for a salty wire might look as follows::
 
   [geometry]
-  # Natriumchlorid
   lattice_vectors:
     0  2.83  2.83
     2.83  0  2.83
@@ -185,7 +185,7 @@ Input for a salty wire::
   [periodic_1D_cylinder:1]
   radius: 10
 
-Should result in the structure in Figure :ref:`fig-nacl-wire`.
+and should result in the structure in Figure :ref:`fig-nacl-wire`.
 
   .. _fig-nacl-wire:
   .. figure:: _figures/examples/circular-wire.png
@@ -196,9 +196,10 @@ Should result in the structure in Figure :ref:`fig-nacl-wire`.
      NaCl wire
 
 
-Every geometrical object allows the flag ``additive``, which you can use to
-substract something from the previous structure. In the case of the NaCl wire,
-one can use that to create an empty wire::
+Every geometrical object allows the flag ``additive``, which you can set to
+``false`` in order to substract something from the previous structure. In the
+case of the NaCl wire, one can use that to create wire being empty in the
+middle::
 
   [geometry]
   lattice_vectors:
@@ -222,8 +223,8 @@ one can use that to create an empty wire::
   additive: false
   radius: 5
 
-After that you get a nanowire with an empty core shell as in Figure
-:ref:`fig-nacl-empty-wire`.
+With this input you should obtain a nanowire with an empty core shell as in
+Figure :ref:`fig-nacl-empty-wire`.
 
   .. _fig-nacl-empty-wire:
   .. figure:: _figures/examples/nacl-empty-wire.png
@@ -242,7 +243,6 @@ Rectangular rutile [001] wire
 The input below should create the primitve cell of a rutile [001] nanowire::
 
   [geometry]
-  # Rutile structure
   lattice_vectors:
         4.67700000      0.00000000      0.00000000
         0.00000000      4.67700000      0.00000000
@@ -294,7 +294,6 @@ Creating a diamond slab with a thickness of 12 atoms and a 4x4 surface supercell
 cell would require an input like this::
 
   [geometry] 
-  # Diamond
   lattice_vectors: 
     0.00000000  1.78500000  1.78500000
     1.78500000  0.00000000  1.78500000
@@ -423,9 +422,11 @@ Figure :ref:`fig-cubic-sic-supercell`).
 
 Automatic Bravais cell search
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 Nanocut can help you to find the transformation matrix, which creates the
 Bravais lattice from the primitive lattice. For example, in order to get the
-cubic conventional cell of SiC, you can enter the following configuration file::
+cubic conventional cell of SiC, you should enter the following configuration
+file::
 
   [geometry] 
   lattice_vectors: 
@@ -447,7 +448,7 @@ cubic conventional cell of SiC, you can enter the following configuration file::
   [periodic_3D_supercell:bravais]
   
 
-As a result, Nanocut would print the transformation matrix::
+In the output of Nanocut you would see the transformation matrix::
 
   Axis with respect to primitive lattice:
      -1   1   1

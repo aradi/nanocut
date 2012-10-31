@@ -30,6 +30,13 @@ Command line options
 ``-a``, ``--append``
   Append the resulting structure to the result file instead of overwriting it.
 
+``-g``, ``--gen-format``
+  Creates the result file in GEN format (suitable for the `DFTB+ program
+  <http://www.dftb-plus.info>`_) instead  of XYZ.
+
+``-h``, ``--help``
+  Prints a short help about the usage of the program and exits.
+
 ``-o``, ``--orthogonal-latvecs``
   As most programs expect three dimensional periodic structures as input,
   Nanocut allows you to extend the periodicity of your resulting 0D, 1D or 2D

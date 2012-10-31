@@ -30,7 +30,7 @@ prefix. For example to install it somewhere in your HOME-directory::
 
 In this case make sure, your ``PYTHONPATH`` environment variable contains the
 appropriate ``site-packages`` folder with the Nanocut packages. When using the
-BASH shell, you could issue::
+BASH shell, you should issue::
 
   export PYTHONPATH=$PYTHONPATH:~/opt/nanocut/lib/python3.2/site-packages
 
