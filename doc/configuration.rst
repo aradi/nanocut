@@ -11,8 +11,8 @@ Nanocut
 * the shape of the resulting object.
 
 Each of them corresponds to a section in the file with additional options
-within. For example, in order to cut out a spherical diamond cluster with radius
-10 Angstrom, the configuration file would look as follows::
+within. For example, in order to cut out a spherical diamond cluster with a
+radius of 10 Angstrom, the configuration file would look as follows::
 
   [geometry]
   # Diamond lattice vectors in Angstrom
@@ -33,10 +33,10 @@ within. For example, in order to cut out a spherical diamond cluster with radius
 
 Please note, that option values going over more than one line require that the
 continuation lines are indented by at least one whitespace character (like for
-`lattice_vectors` and `basis` above).  Lines starting with hashmark (``#``)
-are treated as comments.
+the options `lattice_vectors` and `basis` above).  Lines starting with hashmark
+(``#``) are treated as comments.
 
-Below you find the formal description of the different options. For more
+Below you find the detailed description of all the options. For complete
 examples see the chapter :ref:`sec-examples`.
 
 
@@ -46,7 +46,7 @@ Geometry
 ********
 
 The `[geometry]` section contains all information regarding the crystal
-structure. Following options can be specified:
+structure. Following options should be specified:
 
 `lattice_vectors`
   Defines the three lattice vectors of the crystal structure in Cartesian
@@ -128,7 +128,7 @@ of the translations. Following options can be specified:
 `axis` (mandatory for 1D, optional for 2D and 3D)
   Defines the axis/axes alongside which the supercell is periodic for the
   ``1D``, ``2D`` and ``3D`` cases. You must specifiy one vector (3 elements) for
-  1D, two vectors (6 elements) for 2D and 3 vectors (9 elements) for 3D,
+  1D, two vectors (6 elements) for 2D and three vectors (9 elements) for 3D,
   respectively. Depending on the settings in the `[geometry]` section
   (:ref:`sec-geometry`), the numbers are interpreted as fractional coordinates
   of either the primitive lattice or the conventional Bravais
@@ -163,7 +163,7 @@ of the translations. Following options can be specified:
   Integer scaling factors for the translational vectors. Nanocut creates per
   default the smallest possible unit cell along the specified periodicity axes,
   which can be repeated by using this option. It requires one (1D), two (2D) or
-  three (3D) integer numbers, respectively. Default value is one for all axis
+  three (3D) integer numbers. Default value is one for all axis
   (no enlargment of the cell).
 
   In order to enlarge a 3D supercell by a factor of 2 along every direction,
@@ -191,8 +191,8 @@ of the translations. Following options can be specified:
   numbers (components of the three superlattice vectors). Nanocut will try to
   build an integer linear combination of the lattice vectors of the primitive
   lattice (or the Bravais lattice, if specified) to create a superlattice
-  similar to the specified one. The absolute size of the superlattice vectors is
-  irrelevant, but their relative size and their angles must yield a lattice
+  similar to the specified one. The absolute sizes of the superlattice vectors
+  are irrelevant, but their relative sizes and their angles must yield a lattice
   which is compatible with the original one. Nanocut will create the smallest
   possible 3D cell, which can be enlarged using the `axis_repetition` keyword if
   necessary.
@@ -253,7 +253,7 @@ Specified as `[sphere: NAME]` with following options:
 `radius`
   Radius of the sphere.
 
-In order to cut a sphere with a radius of 10 Angstrom::
+To cut a sphere with a radius of 10 Angstrom, enter::
 
   [sphere: 1]
   radius = 10
@@ -264,7 +264,7 @@ Cylinder
 ^^^^^^^^
 
 Specified as `[cylinder: NAME]`. It creates a body with circular base and top
-areas which are orthogonal to the difference vector of their centers. The
+areas being orthogonal to the difference vector of their centers. The
 circumference of the circles at the top and the bottom are connected by the
 smallest lateral area possible. As the radius of the circles can be different,
 you can also create truncated cones.
@@ -273,7 +273,8 @@ you can also create truncated cones.
   Position vectors to the center of the first and second circular area.
 
 `point1_coordsys`, `point2_coordsys` (optional)
-  Coordinate system for the position vectors (``lattice`` or ``cartesian``).
+  Coordinate system for the position vectors: ``lattice`` (default) or
+  ``cartesian``.
 
 `radius1`, `radius2`
   Radius of the circular areas.
@@ -308,8 +309,8 @@ normal vectors.
   normalized.
 
 `planes_normal_coordsys`
-  Coordinate system for the normal vectors of the planes (``lattice`` or
-  ``cartesian``). 
+  Coordinate system for the normal vectors of the planes: ``lattice`` (default)
+  or ``cartesian``. 
 
 Example for an octahedron defined via the Miller indices of eight planes, each
 of them being displaced by 5 Angstrom from the origin::
@@ -337,7 +338,7 @@ the origin and its normal vector is parallel to the axis specified in the
 `radius`
   Cylinder radius.
 
-A cylindrical nanowire of the radius 5 Angstrom can be defined as::
+A cylindrical nanowire with a radius of 5 Angstrom can be defined as::
 
   [periodic_1D_cylinder:1]
   radius: 5
@@ -363,8 +364,8 @@ vector. The planes must be parallel to the periodicity axis specified in the
   followed by the distance of the plane from the origin. 
 
 `planes_normal_coordsys`
-  Coordinate system for the normal vectors of the planes (``lattice`` or
-  ``cartesian``).
+  Coordinate system for the normal vectors of the planes: ``lattice`` (default)
+  or ``cartesian``.
 
 Example for a 001 wire with quadratic cross section::
 

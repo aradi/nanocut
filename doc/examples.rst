@@ -109,7 +109,8 @@ option in the ``[geometry]`` section::
   radius: 10
 
 This results in a spherical, Td-centered cluster as shown in Figure
-:ref:`fig-spherical-diamond-td` (the radius had been decreased to 10 Angstrom).
+:ref:`fig-spherical-diamond-td` (the cluster radius had been decreased to 10
+Angstrom).
 
   .. _fig-spherical-diamond-td:
   .. figure:: _figures/examples/sphere2.png
@@ -166,7 +167,7 @@ Nanowires (1D)
 Cylindrical sodium chloride [111] wire
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-An input for a salty wire might look as follows::
+An input for a salty wire might look as ::
 
   [geometry]
   lattice_vectors:
@@ -198,7 +199,7 @@ and should result in the structure in Figure :ref:`fig-nacl-wire`.
 
 Every geometrical object allows the flag ``additive``, which you can set to
 ``false`` in order to substract something from the previous structure. In the
-case of the NaCl wire, one can use that to create wire being empty in the
+case of the NaCl wire, one can use that to create a wire being empty in the
 middle::
 
   [geometry]
@@ -316,7 +317,7 @@ cell would require an input like this::
   thickness: 12
 
 Please note, that Nanocut always gives the smallest possible unit cell, so that
-the ``axis_repetition`` opion must be use to enlarge it. As result, you would
+the ``axis_repetition`` opion had to be used to enlarge it. As result, you would
 obtain the slab in Figure :ref:`fig-diamond-slab`.
 
   .. _fig-diamond-slab:
@@ -331,12 +332,13 @@ obtain the slab in Figure :ref:`fig-diamond-slab`.
 Diamond (211) surface
 ^^^^^^^^^^^^^^^^^^^^^
 
-An alternative way to specify the surface plane a slab is to specify its Miller
-index. Since the Miller indices are usually given with respect to the
-conventional Bravais lattice, the ``bravais_cell`` option in the ``[geometry]``
-should be used. (The appropriate transformation matrix can be also determined
-via Nanocut, see the section :ref:`sec-auto-bravais-cell`). For the 211 diamond
-surface the input would look as the following::
+An alternative way of determining the surface plane of a slab is to specify its
+Miller indices. Since the Miller indices are usually given with respect to the
+conventional Bravais lattice, you should consider the usage of the
+``bravais_cell`` option in the ``[geometry]`` section for non-conventional
+lattices. (The appropriate transformation matrix can be determined via Nanocut,
+see the section :ref:`sec-auto-bravais-cell`). For the 211 diamond surface the
+input would look as the following::
 
   [geometry] 
   lattice_vectors: 
@@ -448,12 +450,12 @@ file::
   [periodic_3D_supercell:bravais]
   
 
-In the output of Nanocut you would see the transformation matrix::
+In the output of Nanocut you should see the transformation matrix::
 
   Axis with respect to primitive lattice:
      -1   1   1
       1  -1   1
       1   1  -1
 
-Additionally the resulting geometry file would contain the 8 atom cubic
-conventional cell.
+Additionally the resulting geometry file would contain the simple cubic 8 atom
+unit cell.

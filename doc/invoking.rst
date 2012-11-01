@@ -43,7 +43,7 @@ Command line options
   structure to 3D using this option. You have to specify the length of the
   additional lattice vectors.
 
-  For example after executing::
+  For example after executing ::
 
     nanocut -o 30 mycut.ini mycut.xyz mycut.latvecs
 
