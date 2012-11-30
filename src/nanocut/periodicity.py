@@ -174,11 +174,11 @@ class Periodicity:
         # If 2D rotate first lattice vector to the x-axis
         axis = np.dot(self.axis_cart, rotation_matrix)
         if self.period_type == "2D":
-            cos2 = self.axis_cart[0,0] / np.linalg.norm(self.axis_cart[0])
-            sin2 = -np.sqrt(1.0 - cos2**2)
-            rot2 = np.array([[ cos2, sin2, 0.0 ],
-                             [ -sin2, cos2, 0.0 ],
-                             [ 0.0, 0.0, 1.0 ]])
+            cos2 = axis[0,0] / np.linalg.norm(axis[0])
+            sin2 = axis[0,1] / np.linalg.norm(axis[0])
+            rot2 = np.array([[ cos2, -sin2, 0.0 ],
+                             [ sin2, cos2, 0.0 ],
+                             [ 0.0, 0.0, 1.0 ]], dtype=float)
             axis = np.dot(axis, rot2)
             rotation_matrix = np.dot(rotation_matrix, rot2)
         
