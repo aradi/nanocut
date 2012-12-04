@@ -13,7 +13,7 @@ atomistic simulations. Currently it can create following objects:
 * Plain slab (2D periodic)
 * Supercells (3D periodic)
 
-See [the documentation](http://aradi.bitbucket.org/nanocut/) for more details.
+See the [DOCUMENTATION](http://aradi.bitbucket.org/nanocut/) for more details.
 
 The program is available under the 2-clause BSD license. It is an open
 source project, so feel free to [join
