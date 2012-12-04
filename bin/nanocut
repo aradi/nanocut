@@ -4,7 +4,7 @@ import numpy as np
 import configparser
 from nanocut import *
 
-VERSION = "12.11"
+VERSION = "12.12"
 HOMEURL = "http://aradi.bitbucket.org/nanocut"
 
 BODYOBJECTS = {

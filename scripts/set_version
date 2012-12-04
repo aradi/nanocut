@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+# Set the new version number in the various files
+import sys
+import re
+from collections import OrderedDict
+
+VERSION = sys.argv[1]
+
+REPLACE_PATTERNS = OrderedDict([ 
+        ("bin/nanocut",  [ (r'VERSION\s*=\s*["\']([0-9]+\.[0-9]+)["\']',
+                            r'VERSION = "' + VERSION + r'"')
+                           ],
+         ),
+        ("doc/conf.py", [ (r'version\s*=\s*["\']([0-9]+\.[0-9]+)["\']',
+                           r"version = '" + VERSION + r"'"),
+                          (r'release\s*=\s*["\']([0-9]+\.[0-9]+)["\']',
+                           r"release = '" + VERSION + r"'"),
+                          ],
+         ),
+        ("setup.py", [ (r'version\s*=\s*["\']([0-9]+\.[0-9]+)["\']',
+                        r'version="' + VERSION + r'"'),
+                       ],
+         ),
+        ])
+
+
+def main():
+
+    for fname, reppats in REPLACE_PATTERNS.items():
+        print("File:", fname)
+        fp = open(fname, "r")
+        txt = fp.read()
+        fp.close()
+        for oldpat, newpat in reppats:
+            newtxt, nsub = re.subn(oldpat, newpat, txt)
+            if not nsub:
+                print("  NOT FOUND:\t{})".format(oldpat))
+            else:
+                print("  replaced\t{})".format(oldpat))
+            txt = newtxt
+        fp = open(fname, "w")
+        fp.write(txt)
+        fp.close()
+        print("  written")
+            
+
+if __name__ == "__main__":
+    main()
+
