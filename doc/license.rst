@@ -3,7 +3,7 @@
 License
 =======
 
-Copyright (c) 2009, Florian Uekerman, Sebastian Fiedel, Bálint Aradi
+Copyright (c) 2009, Florian Uekermann, Sebastian Fiedler, Bálint Aradi
 
 Copyright (c) 2010-2012, Bálint Aradi
 
