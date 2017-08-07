@@ -392,7 +392,7 @@ class Periodicity:
         # Get smallest possible unit cell
         for ii in range(len(axis)):
             divisor = gcd(abs(axis[ii]))
-            axis[ii] /= divisor
+            axis[ii] = axis[ii] // divisor
                     
         printstatus("Axis with respect to primitive lattice:")
         for vec in axis:
@@ -407,7 +407,7 @@ class Periodicity:
                 cellrep.shape = (int(period_type[0]), )
             except ValueError:
                 error("Invalid axis repetition specification.")
-            axis *= cellrep[:,np.newaxis]
+            axis = np.array(axis * cellrep[:,np.newaxis], int)
             printstatus("Axis repetition:"
                 + " ".join([ "{:3d}".format(int(s)) for s in cellrep ]))
 
