@@ -9,25 +9,25 @@ class Polyhedron(Body):
 
     # (type, shape, optional, has_coordsys_version)
     arguments = {
-                 "shift_vector": ( "floatarray", (3,), True, True ),    
+                 "shift_vector": ( "floatarray", (3,), True, True ),
                  "planes_normal": ( "floatarray", (-1,4), True, True ),
-                 "planes_miller": ( "floatarray", (-1,4), True, False ),    
+                 "planes_miller": ( "floatarray", (-1,4), True, False ),
     }
-    
+
     def __init__(self, geometry, period, **kwargs):
         """Constructs Polyhedron instance.
-        
+
         Keyword args:
             shift_vector: Origin of the body.
             planes_normal: Plane definitions with normal vectors and distances.
             planes_miller: Plane definitions with miller indices and distances.
         """
         Body.__init__(self, geometry, period, **kwargs)
-        
+
         # Norm normal vectors
         planes_normal = self.pop_planes(geometry, kwargs)
         norms = np.sqrt(np.sum(planes_normal[:,0:3]**2, axis=1))
-        planes_normal[:,0:3] /= norms[:,np.newaxis] 
+        planes_normal[:,0:3] /= norms[:,np.newaxis]
 
         # Remove identical planes (identical = parallel, but not antiparallel,
         # with similar distance from origin)
@@ -41,7 +41,7 @@ class Polyhedron(Body):
                 ddiff = planes_normal[i1, 3] - planes_normal[i2, 3]
                 cross = np.cross(planes_normal[i1, 0:3], planes_normal[i2, 0:3])
                 vsum = planes_normal[i1, 0:3] + planes_normal[i2, 0:3]
-                unique[i2] = (abs(ddiff) > EPSILON 
+                unique[i2] = (abs(ddiff) > EPSILON
                               or np.any(abs(cross)) > EPSILON
                               or np.all(abs(vsum) < EPSILON))
         self.planes_normal = planes_normal[unique]
@@ -66,8 +66,8 @@ class Polyhedron(Body):
                     corner = np.dot(np.linalg.inv(coeffs), rhs)
                     self.corners.append(corner.flatten())
         self.corners = np.array(self.corners)
-        
-        if np.all(len(self.corners) < 6 or abs(self.corners) < EPSILON):
+
+        if np.all(len(self.corners) < 4 or abs(self.corners) < EPSILON):
             exit('Error:\nNo or insufficient corners found.\nExiting...\n')
         self.corners += self.shift_vector
 
@@ -84,7 +84,7 @@ class Polyhedron(Body):
                 miller_defs[:,0:3])
         else:
             miller_defs = np.zeros((0, 4), dtype=float)
-            
+
         # Convert plane normal vector specifications into cartesian coords.
         normal_defs = kwargs.pop("planes_normal", None)
         if normal_defs is not None:
@@ -106,11 +106,11 @@ class Polyhedron(Body):
         return np.vstack(( self.corners.min(axis=0),
                            self.corners.max(axis=0) ))
 
-          
+
     def atoms_inside(self, atoms):
         """Decides which atoms are inside the body (see Body class)."""
         # An atom is inside, if projections along all plane normals have the
-        # same sign as an arbitrary point (center of mass) in the polyhedron. 
+        # same sign as an arbitrary point (center of mass) in the polyhedron.
         point_inside = (np.sum(self.corners, axis=0) / float(len(self.corners))
                         - self.shift_vector)
         atoms_relative = atoms[:,:3] - self.shift_vector
@@ -125,11 +125,11 @@ class Polyhedron(Body):
 
 def miller_to_normal(latvecs, miller_indices):
     """Calculates the normal form of a plane defined by Miller indices.
-    
+
     Args:
        latvecs: Lattice vectors.
        miller_indices: Miller indices.
-       
+
     Returns:
         Cartesian normal vector(s) of the plane(s).
     """
