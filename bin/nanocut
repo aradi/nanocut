@@ -151,7 +151,7 @@ def getatomsinside(bodies, geo):
         
         # Add or substract them respectively
         if additive:
-            atoms_inside_bodies = np.add(atoms_inside_bodies + tmp_atoms_inside_bodies)
+            atoms_inside_bodies = np.add(atoms_inside_bodies, tmp_atoms_inside_bodies)
         else:
             atoms_inside_bodies = np.logical_xor(atoms_inside_bodies 
                                    + tmp_atoms_inside_bodies,
